@@ -335,6 +335,7 @@ function buildFilters(){
       row.onclick=function(){
         const s=state[f.key];
         if(s.has(val)) s.delete(val); else s.add(val);
+        soltarAnio();
         render();
       };
       g.appendChild(row);
@@ -343,7 +344,7 @@ function buildFilters(){
   });
 }
 document.getElementById("all").onclick=function(){
-  FILTERS.forEach(function(f){ state[f.key].clear(); }); render();
+  FILTERS.forEach(function(f){ state[f.key].clear(); }); soltarAnio(); render();
 };
 
 function buildLegend(){
