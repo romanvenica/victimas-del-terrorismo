@@ -89,6 +89,7 @@
     background:rgba(20,16,12,.93);border:1px solid var(--line);border-radius:3px;
     padding:11px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
     color:var(--dim);font-size:12.5px;font-weight:600}
+  .cerrarpanel{display:none}
   .lgtit{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;font-weight:700}
   .lg{display:inline-flex;align-items:center;gap:8px}
   .lg svg{width:17px;height:17px}
@@ -147,31 +148,34 @@
     .cruzblanca{display:inline-block;width:13px;height:20px;vertical-align:-3px;margin-left:7px}
     main{flex-direction:column;overflow:visible}
 
-    /* barra de pestañas + chips (solo móvil) */
-    .mobilebar{display:block;position:sticky;top:0;z-index:6;background:var(--bg);border-bottom:1px solid var(--line)}
-    .tabs{display:flex}
-    .tabs button{flex:1;background:none;border:none;color:var(--dim);font-family:var(--sans);
-      font-size:14px;font-weight:600;padding:12px 0;cursor:pointer;border-bottom:2px solid transparent}
-    .tabs button.on{color:var(--ink);border-bottom-color:var(--hi)}
-    .chips{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;-webkit-overflow-scrolling:touch;touch-action:pan-x}
-    .chips::-webkit-scrollbar{display:none}
-    .chip{flex:none;background:#1c1712;border:1px solid var(--line);color:var(--ink);
-      font-size:12.5px;padding:7px 13px;border-radius:16px;white-space:nowrap;cursor:pointer}
-    .chip.on{background:var(--hi);border-color:var(--hi);color:#fff}
-    .chip.all{background:none;border-color:var(--dim);color:var(--dim)}
+    /* dos botones bajo el título: abren los paneles laterales */
+    .mobilebar{display:flex;justify-content:space-between;align-items:center;
+      padding:9px 14px;background:var(--bg);border-bottom:1px solid var(--line)}
+    .mobilebar button{width:25%;background:#1c1712;border:1px solid var(--line);
+      color:var(--ink);font-family:var(--sans);font-size:13px;font-weight:600;
+      padding:9px 0;border-radius:4px;cursor:pointer}
+    .mobilebar button:active{background:#241d16;border-color:#5c4d3f}
 
-    /* la barra lateral de filtros de escritorio se oculta; en móvil se usan los chips */
-    aside.filters{display:none}
+    /* paneles laterales: entran desde cada borde */
+    aside.filters,aside.list{position:fixed;top:0;bottom:0;z-index:11;
+      width:86%;max-width:330px;background:var(--panel);
+      transition:transform .22s ease;box-shadow:0 0 30px rgba(0,0,0,.5)}
+    aside.filters{display:block;left:0;right:auto;border-right:1px solid var(--line);
+      overflow-y:auto;padding:18px 16px;transform:translateX(-101%)}
+    aside.list{display:flex;flex-direction:column;right:0;left:auto;
+      border-left:1px solid var(--line);overflow:hidden;transform:translateX(101%)}
+    aside.filters.abierto,aside.list.abierto{transform:none}
+    .listscroll{max-height:none;overflow-y:auto}
+    .cerrarpanel{display:block;flex:none;width:34px;height:34px;margin:0 0 10px auto;
+      background:none;border:1px solid var(--line);border-radius:4px;
+      color:var(--dim);font-size:20px;line-height:1;cursor:pointer}
+    aside.list .cerrarpanel{margin:14px 14px 4px auto}
+    aside.list h2{padding:0 20px 8px}
 
-    /* panel: gráfico o lista según pestaña */
-    section.stage{display:none}
-    section.stage.show{display:flex;flex:none}
+    /* el gráfico queda siempre a la vista, debajo de los botones */
+    section.stage{display:flex;flex:none}
     .stage{min-height:auto}
     .plot{flex:none;height:62vh;overflow:auto;padding:10px 8px}
-
-    aside.list{display:none;width:auto;border-left:none}
-    aside.list.show{display:flex;height:auto}
-    .listscroll{max-height:none;overflow:visible}
 
     footer#legend{position:static;background:var(--bg);
       flex-direction:row;flex-wrap:wrap;gap:5px 12px;border:none;border-top:1px solid var(--line);
@@ -180,9 +184,10 @@
     .lg{gap:5px}
     .lg svg{width:13px;height:13px}
 
-    /* ficha: sube desde abajo */
+    /* ficha: sube desde abajo y se cierra tocándola */
     .card{width:100%;max-width:100%;height:82vh;top:auto;bottom:0;left:0;border-left:none;
-      border-top:1px solid var(--line);border-radius:14px 14px 0 0;transform:translateY(100%)}
+      border-top:1px solid var(--line);border-radius:14px 14px 0 0;transform:translateY(100%);
+      z-index:13;cursor:pointer}
     .card.show{transform:none}
     .card .grip{display:block;width:38px;height:4px;background:var(--dim);border-radius:2px;margin:2px auto 12px}
   }
@@ -201,13 +206,11 @@
 </header>
 <main>
   <div class="mobilebar">
-    <div class="tabs">
-      <button id="tabGraf" class="on">Gráfico</button>
-      <button id="tabList">Lista</button>
-    </div>
-    <div class="chips" id="chips"></div>
+    <button type="button" id="btnFiltro">Filtro</button>
+    <button type="button" id="btnListado">Listado</button>
   </div>
   <aside class="filters" id="side">
+    <button type="button" class="cerrarpanel">&times;</button>
     <button class="allbtn" id="all">Ver todos</button>
     <div id="filters"></div>
   </aside>
@@ -230,6 +233,7 @@
     <footer id="legend"></footer>
   </section>
   <aside class="list">
+    <button type="button" class="cerrarpanel">&times;</button>
     <h2 id="listhead">Personas</h2>
     <div class="lsearch">
     <input id="lq" type="text" placeholder="Buscar por nombre…" autocomplete="off">
@@ -878,6 +882,7 @@ function markPerson(d){
 }
 function openCard(d){
   hideTip();          // con el dedo no llega el mouseleave que lo cerraria
+  cerrarPaneles();    // que la ficha no quede tapada por el panel
   markPerson(d);
   const lugar=[d.l,d.p].filter(Boolean).join(", ");
   const meta=[];
@@ -916,7 +921,11 @@ function openCard(d){
 function closeCard(){
   card.classList.remove("show"); scrim.classList.remove("show");
 }
-scrim.onclick=closeCard;
+scrim.onclick=function(){ cerrarPaneles(); closeCard(); };
+// en celular la ficha se cierra tocándola en cualquier parte, sin buscar la ×
+card.addEventListener("click",function(){
+  if(window.matchMedia("(max-width:760px)").matches) closeCard();
+});
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeCard(); });
 document.getElementById("fab").onclick=function(){ document.getElementById("side").classList.toggle("open"); };
 
@@ -946,23 +955,27 @@ function buildChips(){
   });
 }
 
-// pestañas Gráfico / Lista
-const tabGraf=document.getElementById("tabGraf");
-const tabList=document.getElementById("tabList");
-const stageEl=document.getElementById("stage");
-const listEl=document.querySelector("aside.list");
-function showTab(which){
-  if(which==="graf"){
-    tabGraf.classList.add("on"); tabList.classList.remove("on");
-    stageEl.classList.add("show"); listEl.classList.remove("show");
-    drawPlot(DATA.filter(passes));   // recalcular con el ancho visible
-  } else {
-    tabList.classList.add("on"); tabGraf.classList.remove("on");
-    listEl.classList.add("show"); stageEl.classList.remove("show");
-  }
+// paneles laterales de celular
+const panelFiltros=document.querySelector("aside.filters");
+const panelLista=document.querySelector("aside.list");
+function cerrarPaneles(){
+  panelFiltros.classList.remove("abierto");
+  panelLista.classList.remove("abierto");
+  if(!card.classList.contains("show")) scrim.classList.remove("show");
 }
-if(tabGraf) tabGraf.onclick=function(){ showTab("graf"); };
-if(tabList) tabList.onclick=function(){ showTab("list"); };
+function abrirPanel(cual){
+  const destino = (cual==="filtros" ? panelFiltros : panelLista);
+  const yaAbierto = destino.classList.contains("abierto");
+  cerrarPaneles();
+  if(yaAbierto) return;                      // volver a tocar el botón lo cierra
+  destino.classList.add("abierto");
+  scrim.classList.add("show");
+}
+const btnFiltro=document.getElementById("btnFiltro");
+const btnListado=document.getElementById("btnListado");
+if(btnFiltro) btnFiltro.onclick=function(){ abrirPanel("filtros"); };
+if(btnListado) btnListado.onclick=function(){ abrirPanel("lista"); };
+document.querySelectorAll(".cerrarpanel").forEach(function(b){ b.onclick=cerrarPaneles; });
 
 
 // ===================== ARRASTRE CON EL DEDO (scroll por drag) =====================
