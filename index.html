@@ -384,6 +384,8 @@ let anioSel=null;  // año elegido al tocar una columna
 function render(){
   buildFilters();
   buildChips();
+  // en celular el tamaño se reacomoda a lo que quedó filtrado
+  if(window.matchMedia("(max-width:760px)").matches) zoomManual=false;
   const shown=DATA.filter(passes);
   drawPlot(shown);
   listPool=shown;
@@ -445,7 +447,6 @@ const ZOOM_MIN=0.3, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
 const ZOOM_AUTO_MAX=2.75;   // tope del agrandado automatico cuando sobra lugar
 let zoom=0.8;
 let zoomManual=false;      // al tocar las lupas o pellizcar, manda el usuario
-let primerDibujo=true;
 
 function fijarZoom(nuevo){
   zoomManual=true;
@@ -658,10 +659,17 @@ function drawPlot(items){
   plot.appendChild(svg);
   plot.scrollTop=plot.scrollHeight;
   // en móvil, abrir mostrando el año con más víctimas (donde el gráfico se ve lleno)
-  if(isMobile && primerDibujo && centerX[1976]!==undefined){
-    plot.scrollLeft=Math.max(0, centerX[1976]-plot.clientWidth/2);
+  if(isMobile){
+    // columna del medio: aquella donde cae la persona número total/2
+    let total=0;
+    years.forEach(function(y){ total+=cntY[y]; });
+    let acum=0, medio=null;
+    for(let i=0;i<years.length;i++){
+      acum+=cntY[years[i]];
+      if(cntY[years[i]] && acum>=total/2){ medio=years[i]; break; }
+    }
+    if(medio!==null) plot.scrollLeft=Math.max(0, centerX[medio]-plot.clientWidth/2);
   }
-  primerDibujo=false;
 }
 
 // ---- tooltip ----
@@ -990,7 +998,6 @@ function init(){
   buildChips();
   if(window.matchMedia("(max-width:760px)").matches){
     zoom=ZOOM_MIN;        // el celular abre lo más alejado posible
-    zoomManual=true;      // si no, el agrandado automático lo deshace
   }
   actualizarLupas();
   render();
