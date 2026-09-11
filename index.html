@@ -395,6 +395,7 @@ document.getElementById("lq").addEventListener("input",drawList);
 
 const S_BASE=15;       // tamaño del ícono al 100%
 const SEP_BASE=3;      // separación entre íconos
+const MAXCOLS=3;       // máximo de íconos de ancho por año
 const GAP_BASE=10;     // separación entre columnas
 const EMPTYW_BASE=3;   // ancho de un año sin víctimas
 const ZOOM_MIN=0.6, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
@@ -444,6 +445,10 @@ function stackRank(d){
   return 3;                       // policía / seguridad arriba de todo
 }
 function drawPlot(items){
+  const S=Math.max(6,Math.round(S_BASE*zoom));
+  const CELL=S+Math.max(2,Math.round(SEP_BASE*zoom));
+  const GAP=Math.max(4,Math.round(GAP_BASE*zoom));
+  const EMPTYW=Math.max(2,Math.round(EMPTYW_BASE*zoom));
   plot.innerHTML="";
   if(items.length===0){
     const e=document.createElement("div"); e.className="empty";
@@ -453,45 +458,18 @@ function drawPlot(items){
   const byYear={};
   items.forEach(function(d){ (byYear[d.y]=byYear[d.y]||[]).push(d); });
   const years=[]; for(let y=MINY;y<=MAXY;y++) years.push(y);
-  const cntY={};
-  years.forEach(function(y){ cntY[y]=(byYear[y]||[]).length; });
 
-  const isMobile=window.matchMedia("(max-width:760px)").matches;
+  const perRowY={}, colWY={}, cntY={};
+  years.forEach(function(y){
+    const c=(byYear[y]||[]).length; cntY[y]=c;
+    if(c===0){ perRowY[y]=1; colWY[y]=EMPTYW; }
+    else { const pr=Math.min(MAXCOLS,c); perRowY[y]=pr; colWY[y]=pr*CELL; }
+  });
+
+  let maxRows=1;
+  years.forEach(function(y){ if(cntY[y]) maxRows=Math.max(maxRows,Math.ceil(cntY[y]/perRowY[y])); });
+
   const pad=30;
-  const cajaW=Math.max(320, plot.clientWidth-40);
-  const cajaH=Math.max(120,
-    (isMobile ? Math.round(window.innerHeight*0.62) : Math.max(220,plot.clientHeight))-46);
-
-  // Cada año usa tantas columnas como necesite para que su pila entre en el alto:
-  // los años flacos quedan en una sola y los picos se ensanchan. Después se busca
-  // la figura más grande con la que, además, todo entre en el ancho.
-  function planificar(cell){
-    const prop=cell/(S_BASE+SEP_BASE);
-    const gap=Math.max(4,Math.round(GAP_BASE*prop));
-    const vacio=Math.max(2,Math.round(EMPTYW_BASE*prop));
-    const filas=Math.max(1,Math.floor(cajaH/cell));
-    const perRow={}, colW={};
-    let ancho=pad, usadas=1;
-    years.forEach(function(y){
-      const c=cntY[y];
-      if(!c){ perRow[y]=1; colW[y]=vacio; ancho+=vacio+2; return; }
-      const n=Math.max(1,Math.ceil(c/filas));
-      perRow[y]=n; colW[y]=n*cell; ancho+=n*cell+gap;
-      usadas=Math.max(usadas,Math.ceil(c/n));
-    });
-    return {cell:cell,gap:gap,perRow:perRow,colW:colW,ancho:ancho-gap+pad,filas:usadas};
-  }
-
-  let ajuste=7;
-  for(let c=30;c>=7;c--){ if(planificar(c).ancho<=cajaW){ ajuste=c; break; } }
-  const plan=planificar(Math.max(7,Math.round(ajuste*zoom)));
-
-  const CELL=plan.cell;
-  const S=Math.max(5,Math.round(CELL*S_BASE/(S_BASE+SEP_BASE)));
-  const GAP=plan.gap;
-  const perRowY=plan.perRow, colWY=plan.colW;
-  const maxRows=plan.filas;
-
   let xcur=pad;
   const centerX={};
   years.forEach(function(y){
@@ -504,9 +482,12 @@ function drawPlot(items){
   // si el dibujo no llena el ancho, centrarlo en vez de dejarlo pegado a la izquierda
   const offX=Math.max(0,(W-contentW)/2);
   if(offX>0) years.forEach(function(y){ centerX[y]+=offX; });
-
-  const contentH=maxRows*CELL+30;
-  const axisY=isMobile ? contentH : Math.max(plot.clientHeight-40, contentH);
+  const isMobile=window.matchMedia("(max-width:760px)").matches;
+  const contentH=maxRows*CELL+30;               // alto real que ocupan las figuras
+  const capH=isMobile ? Math.round(window.innerHeight*0.62) : 1e9;
+  const axisY=isMobile
+      ? Math.min(contentH, capH)                // móvil: alto = pico real, tope 62vh
+      : Math.max(plot.clientHeight-40, contentH);
   const H=axisY+34;
 
   const svg=document.createElementNS(NS,"svg");
