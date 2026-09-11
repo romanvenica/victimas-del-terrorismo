@@ -832,12 +832,12 @@ function init(){
   render();
 }
 // cargar los datos desde el archivo externo y arrancar
-fetch("fotos/indice.json")
+fetch("fotos/indice.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
   .then(function(j){ FOTOS=new Set(j); setTimeout(precargarMiniaturas,1200); })
   .catch(function(){ /* sin índice: simplemente no se muestran fotos */ });
 
-fetch("victimas.json")
+fetch("victimas.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
   .then(function(j){ DATA=j; init(); })
   .catch(function(e){
