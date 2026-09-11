@@ -44,7 +44,13 @@
   aside.list{width:270px;flex:none;border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
   aside.list h2{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--dim);margin:0;padding:20px 20px 8px}
-  .lsearch{padding:0 16px 12px}
+  .lsearch{padding:0 16px 12px;position:relative}
+  .lsearch .borrar{position:absolute;right:24px;top:calc((100% - 12px)/2);transform:translateY(-50%);
+    width:22px;height:22px;padding:0;display:none;align-items:center;justify-content:center;
+    background:none;border:none;color:var(--dim);font-size:17px;line-height:1;cursor:pointer;
+    border-radius:3px}
+  .lsearch .borrar:hover{color:var(--ink);background:#241d16}
+  .lsearch .borrar.show{display:flex}
   .lsearch input{width:100%;background:#14100c;border:1px solid var(--line);border-radius:4px;
     color:var(--ink);font-family:var(--sans);font-size:13px;padding:8px 10px;outline:none}
   .lsearch input:focus{border-color:var(--hi)}
@@ -208,7 +214,10 @@
   </section>
   <aside class="list">
     <h2 id="listhead">Personas</h2>
-    <div class="lsearch"><input id="lq" type="text" placeholder="Buscar por nombre…" autocomplete="off"></div>
+    <div class="lsearch">
+    <input id="lq" type="text" placeholder="Buscar por nombre…" autocomplete="off">
+    <button type="button" class="borrar" id="lqx" aria-label="Borrar la búsqueda">&times;</button>
+  </div>
     <div class="listscroll" id="listscroll"></div>
   </aside>
 </main>
@@ -401,7 +410,10 @@ function drawList(){
   box.appendChild(frag);
   box.scrollTop=0;
 }
-document.getElementById("lq").addEventListener("input",drawList);
+const lq=document.getElementById("lq"), lqx=document.getElementById("lqx");
+function marcarBorrar(){ lqx.classList.toggle("show", lq.value!==""); }
+lq.addEventListener("input",function(){ marcarBorrar(); drawList(); });
+lqx.addEventListener("click",function(){ lq.value=""; marcarBorrar(); drawList(); lq.focus(); });
 
 const S_BASE=16;       // tamaño del ícono al 100%
 const SEP_BASE=3;      // separación entre íconos
@@ -437,7 +449,7 @@ function pintarAnioSel(){
 }
 function elegirAnio(y){
   anioSel = (anioSel===y) ? null : y;   // volver a tocarla la suelta
-  document.getElementById("lq").value="";   // el buscador estorbaba al elegir una columna
+  lq.value=""; marcarBorrar();   // el buscador estorbaba al elegir una columna
   pintarAnioSel();
   drawList();
 }
