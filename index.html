@@ -842,6 +842,9 @@ function escalaPrevia(){
 }
 plot.addEventListener("pointerdown",function(e){
   if(e.pointerType==="mouse") return;
+  // si un dedo se levantó fuera del gráfico quedó anotado de gusto: el primer
+  // dedo de un toque nuevo limpia esos fantasmas, si no un solo dedo hacía zoom
+  if(e.isPrimary){ punteros.clear(); pellizco=null; }
   punteros.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(punteros.size===2){
     dragging=false; dragMoved=true;      // cortar el arrastre de un dedo
@@ -877,7 +880,7 @@ plot.addEventListener("pointerdown",function(e){
 plot.addEventListener("pointermove",function(e){
   if(!punteros.has(e.pointerId)) return;
   punteros.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(!pellizco || punteros.size<2) return;
+  if(!pellizco || punteros.size!==2) return;
   e.preventDefault();
   if(pellizco.estatico){
     const p=Array.from(punteros.values());
@@ -900,7 +903,14 @@ function finPellizco(e){
   if(!punteros.has(e.pointerId)) return;
   punteros.delete(e.pointerId);
   if(!pellizco || punteros.size>=2) return;
-  if(pellizco.estatico){ pellizco=null; return; }   // nada que rehacer: ya está dibujado
+  if(pellizco.estatico){
+    pellizco=null;                       // nada que rehacer: ya está dibujado
+    // el dedo que queda sigue arrastrando desde donde está ahora, sin pegar un tirón
+    const q=Array.from(punteros.values())[0];
+    if(q){ dsx=q.x; dsy=q.y; dsl=plot.scrollLeft; dst=plot.scrollTop; dragging=true; dragMoved=true; }
+    else dragging=false;
+    return;
+  }
   const k=escalaPrevia();
   const svg=plot.querySelector("svg");
   if(svg){ svg.style.transform=""; svg.style.transformOrigin=""; }
@@ -909,8 +919,9 @@ function finPellizco(e){
   pellizco=null;
   fijarZoom(ancla.zoom*k, ancla);        // ahora sí, redibujo nítido
 }
-plot.addEventListener("pointerup",finPellizco);
-plot.addEventListener("pointercancel",finPellizco);
+// en window: si el dedo se levanta fuera del gráfico igual queda registrado
+window.addEventListener("pointerup",finPellizco);
+window.addEventListener("pointercancel",finPellizco);
 
 // ---- arrastrar para desplazar ----
 let dragging=false, dragMoved=false, dsx=0, dsy=0, dsl=0, dst=0;
