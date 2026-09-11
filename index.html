@@ -406,6 +406,9 @@ function drawList(){
       '<svg viewBox="0 0 16 16" fill="'+personColor(t)+'">'+iconPaths(t)+'</svg>'+
       '<span>'+esc(d.n)+'</span><span class="ly">'+d.y+'</span>';
     row.addEventListener("click",function(){ openCard(d); });
+    row.addEventListener("mouseenter",function(e){ showTip(e,d); });
+    row.addEventListener("mousemove",function(e){ moveTip(e); });
+    row.addEventListener("mouseleave",hideTip);
     frag.appendChild(row);
   });
   box.appendChild(frag);
