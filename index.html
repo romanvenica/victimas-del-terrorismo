@@ -653,8 +653,8 @@ function drawPlot(items){
   plot.appendChild(svg);
   plot.scrollTop=plot.scrollHeight;
   // en móvil, abrir mostrando el año con más víctimas (donde el gráfico se ve lleno)
-  if(isMobile && primerDibujo && centerX[1975]!==undefined){
-    plot.scrollLeft=Math.max(0, centerX[1975]-plot.clientWidth/2);
+  if(isMobile && primerDibujo && centerX[1976]!==undefined){
+    plot.scrollLeft=Math.max(0, centerX[1976]-plot.clientWidth/2);
   }
   primerDibujo=false;
 }
@@ -983,6 +983,10 @@ habilitarArrastre(document.getElementById("listscroll"), "y");
 function init(){
   buildLegend();
   buildChips();
+  if(window.matchMedia("(max-width:760px)").matches){
+    zoom=ZOOM_MIN;        // el celular abre lo más alejado posible
+    zoomManual=true;      // si no, el agrandado automático lo deshace
+  }
   actualizarLupas();
   render();
 }
