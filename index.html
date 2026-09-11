@@ -462,6 +462,9 @@ function drawPlot(items){
   const contentW=xcur-GAP+pad;
 
   const W=Math.max(plot.clientWidth-40, contentW);
+  // si el dibujo no llena el ancho, centrarlo en vez de dejarlo pegado a la izquierda
+  const offX=Math.max(0,(W-contentW)/2);
+  if(offX>0) years.forEach(function(y){ centerX[y]+=offX; });
   const isMobile=window.matchMedia("(max-width:760px)").matches;
   const contentH=maxRows*CELL+30;               // alto real que ocupan las figuras
   const capH=isMobile ? Math.round(window.innerHeight*0.62) : 1e9;
@@ -491,7 +494,7 @@ function drawPlot(items){
     }
   });
   const base=document.createElementNS(NS,"line");
-  base.setAttribute("x1",pad);base.setAttribute("x2",contentW-pad);base.setAttribute("y1",axisY);base.setAttribute("y2",axisY);
+  base.setAttribute("x1",pad+offX);base.setAttribute("x2",contentW-pad+offX);base.setAttribute("y1",axisY);base.setAttribute("y2",axisY);
   base.setAttribute("stroke","#2e2822");
   g.appendChild(base); svg.appendChild(g);
 
