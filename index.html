@@ -141,12 +141,12 @@
   /* ===================== MÓVIL ===================== */
   .mobilebar{display:none}
   @media(max-width:760px){
-    body{overflow:auto}
+    body{overflow:hidden;height:100dvh}
     header{padding:10px 14px}
     .titulo{display:block}
     h1{display:inline;font-size:16.5px}
     .cruzblanca{display:inline-block;width:13px;height:20px;vertical-align:-3px;margin-left:7px}
-    main{flex-direction:column;overflow:visible}
+    main{flex-direction:column;overflow:hidden;flex:1;min-height:0}
 
     /* dos botones bajo el título: abren los paneles laterales */
     .mobilebar{display:flex;justify-content:space-between;align-items:center;
@@ -158,7 +158,7 @@
 
     /* paneles laterales: entran desde cada borde */
     aside.filters,aside.list{position:fixed;top:0;bottom:0;z-index:11;
-      width:86%;max-width:330px;background:var(--panel);
+      width:74%;max-width:280px;background:var(--panel);
       transition:transform .22s ease;box-shadow:0 0 30px rgba(0,0,0,.5)}
     aside.filters{display:block;left:0;right:auto;border-right:1px solid var(--line);
       overflow-y:auto;padding:18px 16px;transform:translateX(-101%)}
@@ -172,10 +172,10 @@
     aside.list .cerrarpanel{margin:14px 14px 4px auto}
     aside.list h2{padding:0 20px 8px}
 
-    /* el gráfico queda siempre a la vista, debajo de los botones */
-    section.stage{display:flex;flex:none}
-    .stage{min-height:auto}
-    .plot{flex:none;height:62vh;overflow:auto;padding:10px 8px}
+    /* el gráfico queda siempre a la vista y se come todo el alto que sobra */
+    section.stage{display:flex;flex:1;min-height:0}
+    .stage{min-height:0}
+    .plot{flex:1;min-height:0;height:auto;overflow:auto;padding:10px 8px}
 
     footer#legend{position:static;background:var(--bg);
       flex-direction:row;flex-wrap:wrap;gap:5px 12px;border:none;border-top:1px solid var(--line);
@@ -543,10 +543,11 @@ function drawPlot(items){
   // con pocas personas sobra lugar: agrandar hasta llenar el ancho, sin
   // pasarse de alto ni de un tamaño de figura razonable
   let plan=medidas(zoom);
-  if(!zoomManual && plan.ancho<cajaW && plan.alto<cajaH){
+  if(!zoomManual){
+    // en celular el ancho no frena, porque se arrastra de costado: manda el alto
     for(let e=zoom+0.05; e<=ZOOM_AUTO_MAX; e+=0.05){
       const t=medidas(e);
-      if(t.ancho>cajaW || t.alto>cajaH) break;
+      if(t.alto>cajaH || (!isMobile && t.ancho>cajaW)) break;
       plan=t;
     }
   }
