@@ -221,6 +221,14 @@ let FOTOS = new Set();   // claves que efectivamente tienen retrato
 
 const NS="http://www.w3.org/2000/svg";
 const MINY=1960, MAXY=1989;
+const GRUPO_FIN=1968;   // del 60 al 68 van todos juntos en una columna
+function grupoDe(y){ return y<=GRUPO_FIN ? MINY : y; }
+function etiquetaGrupo(g){
+  return g===MINY ? "'60-'68" : "'"+String(g).slice(2);
+}
+function nombreGrupo(g){
+  return g===MINY ? MINY+"-"+GRUPO_FIN : String(g);
+}
 const COL={mil:"#5fae5a", pol:"#5f9fd6", civ:"#e0b93f", nino:"#f2ede4", mujer:"#e58fc0"};
 
 const RAMAS_FFAA = ["Ejército","Armada","Fuerza Aérea","Gendarmería / Prefectura"];
@@ -361,7 +369,7 @@ function drawList(){
   const box=document.getElementById("listscroll");
   const q=norm(document.getElementById("lq").value.trim());
   let items=listPool;
-  if(anioSel!==null) items=items.filter(function(d){ return d.y===anioSel; });
+  if(anioSel!==null) items=items.filter(function(d){ return grupoDe(d.y)===anioSel; });
   if(q){
     // cada palabra de la búsqueda debe aparecer en el nombre, en cualquier orden
     const términos=q.split(/\s+/).filter(Boolean);
@@ -370,7 +378,7 @@ function drawList(){
       return términos.every(function(t){ return n.indexOf(t)!==-1; });
     });
   }
-  head.textContent = (anioSel!==null ? anioSel+" · " : "") +
+  head.textContent = (anioSel!==null ? nombreGrupo(anioSel)+" · " : "") +
                      items.length + (items.length===1?" persona":" personas");
   const sorted=items.slice().sort(function(a,b){
     return a.n.localeCompare(b.n,"es",{sensitivity:"base"});
@@ -456,8 +464,8 @@ function drawPlot(items){
     plot.appendChild(e); return;
   }
   const byYear={};
-  items.forEach(function(d){ (byYear[d.y]=byYear[d.y]||[]).push(d); });
-  const years=[]; for(let y=MINY;y<=MAXY;y++) years.push(y);
+  items.forEach(function(d){ const g=grupoDe(d.y); (byYear[g]=byYear[g]||[]).push(d); });
+  const years=[MINY]; for(let y=GRUPO_FIN+1;y<=MAXY;y++) years.push(y);
 
   const perRowY={}, colWY={}, cntY={};
   years.forEach(function(y){
@@ -502,10 +510,10 @@ function drawPlot(items){
       const tick=document.createElementNS(NS,"line");
       tick.setAttribute("x1",cx);tick.setAttribute("x2",cx);tick.setAttribute("y1",axisY);tick.setAttribute("y2",axisY+5);
       g.appendChild(tick);
-      if(cx-lastLabelX>=30){
+      if(cx-lastLabelX>=(y===MINY?46:30)){
         const t=document.createElementNS(NS,"text");
         t.setAttribute("x",cx);t.setAttribute("y",axisY+19);t.setAttribute("text-anchor","middle");
-        t.textContent="'"+String(y).slice(2);
+        t.textContent=etiquetaGrupo(y);
         g.appendChild(t); lastLabelX=cx;
       }
     }
