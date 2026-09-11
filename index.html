@@ -435,6 +435,7 @@ function pintarAnioSel(){
 }
 function elegirAnio(y){
   anioSel = (anioSel===y) ? null : y;   // volver a tocarla la suelta
+  document.getElementById("lq").value="";   // el buscador estorbaba al elegir una columna
   pintarAnioSel();
   drawList();
 }
@@ -768,6 +769,7 @@ function openCard(d){
   if(partes.caso)      html+='<div class="rel">'+esc(partes.caso)+'</div>';
   html+='<div class="src">Un aporte a la verdad, vol. '+ROM[d.vol]+', pág. '+d.pg+'.</div>';
   card.innerHTML=html;
+  card.scrollTop=0;   // siempre desde arriba, no donde quedo la ficha anterior
   document.getElementById("cx").onclick=closeCard;
   card.classList.add("show"); scrim.classList.add("show");
 }
