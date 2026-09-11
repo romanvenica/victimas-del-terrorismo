@@ -468,24 +468,39 @@ function vzMinimo(){
 }
 let vz=1, lienW=0, lienH=0;
 function lienzo(){ return plot.querySelector(".lienzo"); }
+function hueco(){   // el espacio visible del contenedor, sin contar sus márgenes
+  const cs=getComputedStyle(plot);
+  return {w: plot.clientWidth  - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
+          h: plot.clientHeight - parseFloat(cs.paddingTop)  - parseFloat(cs.paddingBottom)};
+}
 function aplicarVZ(){
   const lien=lienzo(); if(!lien) return;
   const wrap=lien.parentNode;
-  wrap.style.width =(lienW*vz)+"px";
-  wrap.style.height=(lienH*vz)+"px";
-  lien.style.width =lienW+"px";
-  lien.style.height=lienH+"px";
-  lien.style.transform="scale("+vz+")";
+  const w=lienW*vz, h=lienH*vz, hu=hueco();
+  // si el dibujo achicado no llena la pantalla, queda centrado y apoyado abajo,
+  // no flotando arriba a la izquierda con un vacío debajo
+  const anchoW=Math.max(w,hu.w), altoW=Math.max(h,hu.h);
+  wrap.style.width=anchoW+"px"; wrap.style.height=altoW+"px";
+  lien.style.width=lienW+"px";  lien.style.height=lienH+"px";
+  lien.style.transform="translate("+((anchoW-w)/2)+"px,"+(altoW-h)+"px) scale("+vz+")";
+}
+// cambia el zoom dejando quieto en pantalla el punto (cx,cy) del dibujo,
+// que tiene que quedar bajo el punto de pantalla (px,py)
+function reencuadrar(nuevo, cx, cy, px, py){
+  const lien=lienzo(); if(!lien) return;
+  vz=nuevo; aplicarVZ();
+  const r=lien.getBoundingClientRect();
+  plot.scrollLeft += (r.left+cx*vz)-px;
+  plot.scrollTop  += (r.top +cy*vz)-py;
+  actualizarLupas();
 }
 function zoomVisual(f){
+  const lien=lienzo(); if(!lien) return;
   const nuevo=Math.min(VZ_MAX,Math.max(vzMinimo(),vz*f));
   if(Math.abs(nuevo-vz)<0.001) return;
-  const cx=(plot.scrollLeft+plot.clientWidth /2)/vz;
-  const cy=(plot.scrollTop +plot.clientHeight/2)/vz;
-  vz=nuevo; aplicarVZ();
-  plot.scrollLeft=Math.max(0,cx*vz-plot.clientWidth /2);
-  plot.scrollTop =Math.max(0,cy*vz-plot.clientHeight/2);
-  actualizarLupas();
+  const caja=plot.getBoundingClientRect(), r=lien.getBoundingClientRect();
+  const px=caja.left+caja.width/2, py=caja.top+caja.height/2;
+  reencuadrar(nuevo,(px-r.left)/vz,(py-r.top)/vz,px,py);
 }
 
 function fijarZoom(nuevo, ancla){
@@ -862,12 +877,12 @@ plot.addEventListener("pointerdown",function(e){
     const p=Array.from(punteros.values());
     const mx=(p[0].x+p[1].x)/2, my=(p[0].y+p[1].y)/2;
     const caja=plot.getBoundingClientRect();
-    if(lienzo()){
+    const lien=lienzo();
+    if(lien){
       // el punto del dibujo que está bajo los dedos, para no soltarlo nunca
-      pellizco={estatico:true, dist:distDedos(),
-                cx:(plot.scrollLeft+(mx-caja.left))/vz,
-                cy:(plot.scrollTop +(my-caja.top ))/vz,
-                vz:vz};
+      const r=lien.getBoundingClientRect();
+      pellizco={estatico:true, dist:distDedos(), vz:vz,
+                cx:(mx-r.left)/vz, cy:(my-r.top)/vz};
       return;
     }
     pellizco={
@@ -893,13 +908,8 @@ plot.addEventListener("pointermove",function(e){
   e.preventDefault();
   if(pellizco.estatico){
     const p=Array.from(punteros.values());
-    const caja=plot.getBoundingClientRect();
-    const mx=(p[0].x+p[1].x)/2-caja.left, my=(p[0].y+p[1].y)/2-caja.top;
-    vz=Math.min(VZ_MAX,Math.max(vzMinimo(), pellizco.vz*(distDedos()/pellizco.dist)));
-    aplicarVZ();
-    plot.scrollLeft=Math.max(0, pellizco.cx*vz-mx);
-    plot.scrollTop =Math.max(0, pellizco.cy*vz-my);
-    actualizarLupas();
+    const nuevo=Math.min(VZ_MAX,Math.max(vzMinimo(), pellizco.vz*(distDedos()/pellizco.dist)));
+    reencuadrar(nuevo, pellizco.cx, pellizco.cy, (p[0].x+p[1].x)/2, (p[0].y+p[1].y)/2);
     return;
   }
   // vista previa barata: escalar el dibujo ya hecho, sin volver a armarlo
