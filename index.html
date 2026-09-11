@@ -562,7 +562,12 @@ function drawPlot(items){
   const offX=Math.max(0,(W-contentW)/2);
   if(offX>0) years.forEach(function(y){ centerX[y]+=offX; });
   const contentH=maxRows*CELL+30;               // alto real que ocupan las figuras
-  const axisY=Math.max(plot.clientHeight-40, contentH);
+  // en celular el alto se calcula contra el hueco real de la caja (sin el padding),
+  // asi cuando el dibujo entra no queda un scroll vertical hacia arriba sobre el vacio
+  const disponible=plot.clientHeight-20;
+  const axisY=isMobile
+      ? Math.max(disponible-34, contentH)
+      : Math.max(plot.clientHeight-40, contentH);
   const H=axisY+34;
 
   const svg=document.createElementNS(NS,"svg");
