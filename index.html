@@ -56,9 +56,10 @@
   .listscroll::-webkit-scrollbar-thumb{background:#4a3f34;border-radius:5px;
     border:2px solid var(--bg);background-clip:padding-box}
   .listscroll::-webkit-scrollbar-thumb:hover{background:#5f5142;background-clip:padding-box}
-  .lrow{display:flex;align-items:center;gap:9px;padding:6px 10px;cursor:pointer;border-radius:3px;font-size:13px;line-height:1.25}
+  .lrow{display:flex;align-items:center;gap:10px;padding:5px 10px;cursor:pointer;border-radius:3px;font-size:13px;line-height:1.25}
   .lrow:hover{background:#241d16}
-  .lrow svg{width:15px;height:15px;flex:none}
+  .lrow .lfoto{width:34px;height:34px;flex:none;border-radius:3px;object-fit:cover;background:#0d0a07}
+  .lrow .lhueco{width:34px;flex:none}
   .lrow .ly{margin-left:auto;color:var(--dim);font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums}
   .plot{flex:1;min-height:0;overflow:auto;padding:14px 30px;cursor:grab;touch-action:none}
   .plot.drag{cursor:grabbing}
@@ -386,14 +387,12 @@ function drawList(){
   box.innerHTML="";
   const frag=document.createDocumentFragment();
   sorted.forEach(function(d){
-    const t=personType(d);
     const row=document.createElement("div"); row.className="lrow";
-    row.innerHTML='<svg viewBox="0 0 16 16" fill="'+personColor(t)+'">'+iconPaths(t)+'</svg>'+
-                  '<span>'+esc(d.n)+'</span><span class="ly">'+d.y+'</span>';
+    row.innerHTML=(tieneFoto(d)
+        ? '<img class="lfoto" src="'+fotoThumb(d)+'" alt="" loading="lazy">'
+        : '<span class="lhueco"></span>')+
+      '<span>'+esc(d.n)+'</span><span class="ly">'+d.y+'</span>';
     row.addEventListener("click",function(){ openCard(d); });
-    row.addEventListener("mouseenter",function(e){ showTip(e,d); });
-    row.addEventListener("mousemove",function(e){ moveTip(e); });
-    row.addEventListener("mouseleave",hideTip);
     frag.appendChild(row);
   });
   box.appendChild(frag);
@@ -862,7 +861,11 @@ function init(){
 // cargar los datos desde el archivo externo y arrancar
 fetch("fotos/indice.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
-  .then(function(j){ FOTOS=new Set(j); setTimeout(precargarMiniaturas,1200); })
+  .then(function(j){
+    FOTOS=new Set(j);
+    if(DATA.length) drawList();
+    setTimeout(precargarMiniaturas,1200);
+  })
   .catch(function(){ /* sin índice: simplemente no se muestran fotos */ });
 
 fetch("victimas.json",{cache:"no-cache"})
