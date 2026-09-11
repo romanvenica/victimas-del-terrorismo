@@ -12,6 +12,11 @@
     --sans:"Inter","Helvetica Neue",Arial,sans-serif;
   }
   *{box-sizing:border-box}
+  /* barras de desplazamiento invisibles (se sigue pudiendo scrollear y arrastrar) */
+  html,body,.plot,.listscroll,aside.filters,.card,.chips{scrollbar-width:none;-ms-overflow-style:none}
+  html::-webkit-scrollbar,body::-webkit-scrollbar,.plot::-webkit-scrollbar,
+  .listscroll::-webkit-scrollbar,aside.filters::-webkit-scrollbar,
+  .card::-webkit-scrollbar,.chips::-webkit-scrollbar{width:0;height:0;display:none}
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
   body{display:flex;height:100vh;flex-direction:column;overflow:hidden}
   header{padding:14px 40px;border-bottom:1px solid var(--line);text-align:center}
