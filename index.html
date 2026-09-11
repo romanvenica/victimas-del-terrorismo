@@ -452,6 +452,7 @@ const ZOOM_AUTO_MAX=2.75;   // tope del agrandado automatico cuando sobra lugar
 let zoom=0.8;
 let zoomManual=false;      // al tocar las lupas o pellizcar, manda el usuario
 let zoomRender=1;          // escala con la que se dibujó de verdad
+let baseY=0;               // y del eje dentro del svg: las figuras se apoyan ahí
 
 function fijarZoom(nuevo, ancla){
   zoomManual=true;
@@ -465,7 +466,8 @@ function fijarZoom(nuevo, ancla){
   if(ancla){
     // dejar bajo los dedos el mismo punto del dibujo que estaba antes del pellizco
     plot.scrollLeft=Math.max(0, ancla.fx*plot.scrollWidth  - ancla.offX);
-    plot.scrollTop =Math.max(0, ancla.fy*plot.scrollHeight - ancla.offY);
+    // el eje queda donde estaba en pantalla: el dibujo no se despega ni se pega al piso
+    plot.scrollTop =Math.max(0, baseY - ancla.baseTop);
   } else {
     plot.scrollLeft=Math.max(0, centro*nuevo - plot.clientWidth/2);
   }
@@ -583,6 +585,7 @@ function drawPlot(items){
       ? Math.max(disponible-34, contentH)
       : Math.max(plot.clientHeight-40, contentH);
   const H=axisY+34;
+  baseY=axisY;                  // el eje es el piso del dibujo, se usa al pellizcar
 
   const svg=document.createElementNS(NS,"svg");
   svg.setAttribute("width",W); svg.setAttribute("height",H);
@@ -800,14 +803,16 @@ plot.addEventListener("pointerdown",function(e){
     pellizco={
       dist:distDedos(),
       zoom:zoomRender,                   // la escala que se ve, no la nominal
-      offX:mx-caja.left, offY:my-caja.top,
-      fx: plot.scrollWidth  ? (plot.scrollLeft+(mx-caja.left))/plot.scrollWidth  : 0,
-      fy: plot.scrollHeight ? (plot.scrollTop +(my-caja.top ))/plot.scrollHeight : 0
+      offX:mx-caja.left,
+      baseTop: baseY-plot.scrollTop,     // a qué altura de la caja está el eje ahora
+      fx: plot.scrollWidth  ? (plot.scrollLeft+(mx-caja.left))/plot.scrollWidth  : 0
     };
     const svg=plot.querySelector("svg");
     if(svg){
       const r=svg.getBoundingClientRect();
-      svg.style.transformOrigin=(mx-r.left)+"px "+(my-r.top)+"px";   // crecer desde los dedos
+      // horizontal: desde los dedos. vertical: desde el eje, que es donde se
+      // apoyan las figuras y adonde va a volver el dibujo al soltar
+      svg.style.transformOrigin=(mx-r.left)+"px "+baseY+"px";
     }
   }
 });
