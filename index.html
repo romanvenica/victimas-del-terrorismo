@@ -167,16 +167,18 @@
     section.stage{display:none}
     section.stage.show{display:flex;flex:none}
     .stage{min-height:auto}
-    .plot{overflow:auto;padding:10px 8px}
+    .plot{height:62vh;overflow:auto;padding:10px 8px}
 
     aside.list{display:none;width:auto;border-left:none}
     aside.list.show{display:flex;height:auto}
     .listscroll{max-height:none;overflow:visible}
 
-    footer#legend{position:sticky;top:auto;left:auto;bottom:0;background:var(--bg);
-      flex-direction:row;flex-wrap:wrap;gap:10px 16px;border:none;border-top:1px solid var(--line);
-      border-radius:0;padding:9px 14px;font-size:11.5px}
+    footer#legend{position:static;background:var(--bg);
+      flex-direction:row;flex-wrap:wrap;gap:5px 12px;border:none;border-top:1px solid var(--line);
+      border-radius:0;padding:6px 12px;font-size:10.5px}
     .lgtit{display:none}
+    .lg{gap:5px}
+    .lg svg{width:13px;height:13px}
 
     /* ficha: sube desde abajo */
     .card{width:100%;max-width:100%;height:82vh;top:auto;bottom:0;left:0;border-left:none;
@@ -508,8 +510,7 @@ function drawPlot(items){
   const pad=30;
   const isMobile=window.matchMedia("(max-width:760px)").matches;
   const cajaW=Math.max(280, plot.clientWidth-40);
-  const cajaH=Math.max(120,
-    (isMobile ? Math.round(window.innerHeight*0.62) : Math.max(220,plot.clientHeight))-44);
+  const cajaH=Math.max(120, Math.max(220, plot.clientHeight)-44);
 
   // medidas completas del dibujo para una escala dada
   function medidas(escala){
@@ -557,10 +558,7 @@ function drawPlot(items){
   const offX=Math.max(0,(W-contentW)/2);
   if(offX>0) years.forEach(function(y){ centerX[y]+=offX; });
   const contentH=maxRows*CELL+30;               // alto real que ocupan las figuras
-  const capH=isMobile ? Math.round(window.innerHeight*0.62) : 1e9;
-  const axisY=isMobile
-      ? Math.min(contentH, capH)                // móvil: alto = pico real, tope 62vh
-      : Math.max(plot.clientHeight-40, contentH);
+  const axisY=Math.max(plot.clientHeight-40, contentH);
   const H=axisY+34;
 
   const svg=document.createElementNS(NS,"svg");
