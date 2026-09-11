@@ -57,13 +57,22 @@
   .person:hover{opacity:.6}
   rect.selbox{fill:none;stroke:var(--hi);stroke-width:2;rx:3;pointer-events:none}
   /* leyenda: cuadro flotante arriba a la derecha del gráfico */
-  footer#legend{position:absolute;top:14px;right:18px;z-index:4;pointer-events:none;
+  footer#legend{position:absolute;top:14px;left:18px;z-index:4;pointer-events:none;
     background:rgba(20,16,12,.93);border:1px solid var(--line);border-radius:3px;
     padding:11px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
     color:var(--dim);font-size:12.5px;font-weight:600}
   .lgtit{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;font-weight:700}
   .lg{display:inline-flex;align-items:center;gap:8px}
   .lg svg{width:17px;height:17px}
+  /* lupas para agrandar y achicar el gráfico */
+  .zoombar{position:absolute;top:14px;right:18px;z-index:5;display:flex;flex-direction:column;gap:6px}
+  .zoombar button{width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(20,16,12,.93);border:1px solid var(--line);border-radius:3px;
+    color:var(--ink);cursor:pointer}
+  .zoombar button:hover:not(:disabled){border-color:#5c4d3f;background:#241d16}
+  .zoombar button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+  .zoombar button:disabled{opacity:.35;cursor:default}
+  .zoombar svg{width:19px;height:19px}
   /* columna de año: se sombrea al elegirla */
   rect.yearbg{fill:transparent;cursor:pointer}
   rect.yearbg:hover{fill:rgba(232,224,212,.05)}
@@ -132,7 +141,7 @@
     aside.list.show{display:flex;height:auto}
     .listscroll{max-height:none;overflow:visible}
 
-    footer#legend{position:sticky;top:auto;right:auto;bottom:0;background:var(--bg);
+    footer#legend{position:sticky;top:auto;left:auto;bottom:0;background:var(--bg);
       flex-direction:row;flex-wrap:wrap;gap:10px 16px;border:none;border-top:1px solid var(--line);
       border-radius:0;padding:9px 14px;font-size:11.5px}
     .lgtit{display:none}
@@ -164,6 +173,20 @@
   </aside>
   <section class="stage show" id="stage">
     <div class="plot" id="plot"></div>
+    <div class="zoombar" id="zoombar">
+      <button type="button" id="zmas" title="Agrandar" aria-label="Agrandar el gráfico">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="8.6" cy="8.6" r="5.4"></circle><line x1="12.7" y1="12.7" x2="17.2" y2="17.2"></line>
+          <line x1="6.1" y1="8.6" x2="11.1" y2="8.6"></line><line x1="8.6" y1="6.1" x2="8.6" y2="11.1"></line>
+        </svg>
+      </button>
+      <button type="button" id="zmenos" title="Achicar" aria-label="Achicar el gráfico">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="8.6" cy="8.6" r="5.4"></circle><line x1="12.7" y1="12.7" x2="17.2" y2="17.2"></line>
+          <line x1="6.1" y1="8.6" x2="11.1" y2="8.6"></line>
+        </svg>
+      </button>
+    </div>
     <footer id="legend"></footer>
   </section>
   <aside class="list">
@@ -351,11 +374,31 @@ function drawList(){
 }
 document.getElementById("lq").addEventListener("input",drawList);
 
-const S=15;            // tamaño del ícono
-const CELL=S+3;        // separación entre íconos
+const S_BASE=15;       // tamaño del ícono al 100%
+const SEP_BASE=3;      // separación entre íconos
 const MAXCOLS=3;       // máximo de íconos de ancho por año
-const GAP=10;          // separación entre columnas
-const EMPTYW=3;        // ancho de un año sin víctimas
+const GAP_BASE=10;     // separación entre columnas
+const EMPTYW_BASE=3;   // ancho de un año sin víctimas
+const ZOOM_MIN=0.6, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
+let zoom=1;
+
+function cambiarZoom(factor){
+  const previo=zoom;
+  const nuevo=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN, zoom*factor));
+  if(Math.abs(nuevo-previo)<0.001) return;
+  // guardar qué punto del contenido está al centro, para no perder de vista dónde estabas
+  const centro=(plot.scrollLeft+plot.clientWidth/2)/previo;
+  zoom=nuevo;
+  drawPlot(DATA.filter(passes));
+  plot.scrollLeft=Math.max(0, centro*nuevo - plot.clientWidth/2);
+  actualizarLupas();
+}
+function actualizarLupas(){
+  document.getElementById("zmas").disabled   = zoom>=ZOOM_MAX-0.001;
+  document.getElementById("zmenos").disabled = zoom<=ZOOM_MIN+0.001;
+}
+document.getElementById("zmas").onclick=function(){ cambiarZoom(ZOOM_PASO); };
+document.getElementById("zmenos").onclick=function(){ cambiarZoom(1/ZOOM_PASO); };
 
 function pintarAnioSel(){
   const rects=plot.querySelectorAll("rect.yearbg");
@@ -383,6 +426,10 @@ function stackRank(d){
   return 3;                       // policía / seguridad arriba de todo
 }
 function drawPlot(items){
+  const S=Math.max(6,Math.round(S_BASE*zoom));
+  const CELL=S+Math.max(2,Math.round(SEP_BASE*zoom));
+  const GAP=Math.max(4,Math.round(GAP_BASE*zoom));
+  const EMPTYW=Math.max(2,Math.round(EMPTYW_BASE*zoom));
   plot.innerHTML="";
   if(items.length===0){
     const e=document.createElement("div"); e.className="empty";
@@ -738,6 +785,7 @@ habilitarArrastre(document.getElementById("listscroll"), "y");
 function init(){
   buildLegend();
   buildChips();
+  actualizarLupas();
   render();
 }
 // cargar los datos desde el archivo externo y arrancar
