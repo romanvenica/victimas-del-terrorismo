@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Víctimas del terrorismo marxista en Argentina</title>
+<style>
+  :root{
+    --bg:#14100c; --panel:#1c1712; --ink:#e8e0d4; --dim:#8a7f70;
+    --line:#2e2822; --mil:#5fae5a; --pol:#5f9fd6; --civ:#e0b93f; --hombre:#5f9fd6; --hi:#d94f38;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:"Inter","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  body{display:flex;height:100vh;flex-direction:column;overflow:hidden}
+  header{padding:14px 40px;border-bottom:1px solid var(--line);text-align:center}
+  h1{font-family:var(--serif);font-weight:500;font-size:24px;letter-spacing:.2px;margin:0;line-height:1.2}
+  .sub{color:var(--dim);font-size:13.5px;margin-top:8px;max-width:70ch;line-height:1.5}
+  main{display:flex;flex:1;min-height:0;overflow:hidden}
+  aside.filters{width:250px;flex:none;border-right:1px solid var(--line);padding:22px 20px;overflow-y:auto}
+  .allbtn{width:100%;text-align:left;background:var(--hi);color:#fff;border:none;padding:11px 14px;
+    font-family:var(--serif);font-size:16px;border-radius:2px;cursor:pointer;margin-bottom:22px}
+  .allbtn:hover{filter:brightness(1.08)}
+  .grp{margin-bottom:20px}
+  .grp h2{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--dim);margin:0 0 9px}
+  .opt{display:flex;align-items:center;gap:9px;padding:5px 6px;cursor:pointer;border-radius:2px;
+    font-size:13.5px;color:var(--ink);user-select:none}
+  .opt:hover{background:#241d16}
+  .opt .box{width:13px;height:13px;border:1.5px solid var(--dim);border-radius:2px;flex:none;position:relative}
+  .opt.on .box{background:var(--hi);border-color:var(--hi)}
+  .opt.on .box::after{content:"";position:absolute;left:3px;top:0px;width:4px;height:8px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .opt .ct{margin-left:auto;color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+  section.stage{flex:1;min-width:0;display:flex;flex-direction:column}
+  aside.list{width:270px;flex:none;border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+  aside.list h2{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dim);margin:0;padding:20px 20px 8px}
+  .lsearch{padding:0 16px 12px}
+  .lsearch input{width:100%;background:#14100c;border:1px solid var(--line);border-radius:4px;
+    color:var(--ink);font-family:var(--sans);font-size:13px;padding:8px 10px;outline:none}
+  .lsearch input:focus{border-color:var(--hi)}
+  .lsearch input::placeholder{color:var(--dim)}
+  .listscroll{flex:1;overflow-y:auto;padding:0 8px 14px}
+  .lrow{display:flex;align-items:center;gap:9px;padding:6px 10px;cursor:pointer;border-radius:3px;font-size:13px;line-height:1.25}
+  .lrow:hover{background:#241d16}
+  .lrow svg{width:15px;height:15px;flex:none}
+  .lrow .ly{margin-left:auto;color:var(--dim);font-size:11px;font-variant-numeric:tabular-nums}
+  .plot{flex:1;min-height:0;overflow:auto;padding:14px 30px;cursor:grab;touch-action:none}
+  .plot.drag{cursor:grabbing}
+  .plot.drag *{cursor:grabbing}
+  svg{display:block}
+  .yr text{fill:var(--dim);font-size:12px;font-family:var(--sans)}
+  .yr line{stroke:var(--line)}
+  .person{cursor:pointer}
+  .person:hover{opacity:.6}
+  rect.selbox{fill:none;stroke:var(--hi);stroke-width:2;rx:3;pointer-events:none}
+  footer{border-top:1px solid var(--line);padding:10px 40px;color:var(--dim);font-size:12px;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .lg{display:inline-flex;align-items:center;gap:7px}
+  .lg svg{width:17px;height:17px}
+  .scrim{position:fixed;inset:0;background:rgba(6,4,2,.62);display:none;z-index:9}
+  .scrim.show{display:block}
+  .card{position:fixed;top:0;right:0;height:100%;width:400px;max-width:92vw;background:var(--panel);
+    border-left:1px solid var(--line);transform:translateX(100%);transition:transform .22s ease;z-index:10;
+    padding:26px 28px;overflow-y:auto}
+  .card.show{transform:none}
+  .card .x{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--dim);font-size:22px;cursor:pointer;line-height:1}
+  .card .nmrow{display:flex;align-items:center;gap:13px;margin:6px 40px 14px 0}
+  .card .nmico{width:34px;height:34px;flex:none}
+  .card .nmcat{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:2px}
+  .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
+  .card .meta{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:18px 0;font-size:13.5px}
+  .card .meta dt{color:var(--dim)}
+  .card .meta dd{margin:0}
+  .card .foto{display:none;width:100%;max-width:260px;border-radius:8px;margin:2px 0 16px;border:1px solid var(--line)}
+  .card .foto.show{display:block}
+  .card .rel{border-top:1px solid var(--line);padding-top:15px;margin-top:6px;font-family:var(--serif);
+    font-size:14.5px;line-height:1.62;color:#d8cfc0;white-space:pre-wrap}
+  .card .src{margin-top:18px;color:var(--dim);font-size:11.5px}
+  .empty{color:var(--dim);text-align:center;margin-top:26vh;font-family:var(--serif);font-size:16px}
+  #tip .cruz{font-weight:800;font-size:14px}
+  #tip .tcat{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:2px}
+  #tip .tnom{display:block;font-size:13px}
+  #tip .trow{display:flex;align-items:center;gap:9px}
+  #tip .tico{width:22px;height:22px;flex:none}
+  #tip .tthumb{width:38px;height:38px;border-radius:4px;object-fit:cover;flex:none;display:none;margin-right:2px}
+  #tip{position:fixed;pointer-events:none;z-index:20;background:#000;border:1px solid var(--line);
+    color:var(--ink);font-family:var(--sans);font-size:12.5px;padding:5px 9px;border-radius:4px;
+    white-space:nowrap;display:none;transform:translate(-50%,-140%)}
+  .fabf{display:none}
+  /* ===================== MÓVIL ===================== */
+  .mobilebar{display:none}
+  @media(max-width:760px){
+    body{overflow:auto}
+    header{padding:12px 16px}
+    h1{font-size:19px}
+    main{flex-direction:column;overflow:visible}
+
+    /* barra de pestañas + chips (solo móvil) */
+    .mobilebar{display:block;position:sticky;top:0;z-index:6;background:var(--bg);border-bottom:1px solid var(--line)}
+    .tabs{display:flex}
+    .tabs button{flex:1;background:none;border:none;color:var(--dim);font-family:var(--sans);
+      font-size:14px;font-weight:600;padding:12px 0;cursor:pointer;border-bottom:2px solid transparent}
+    .tabs button.on{color:var(--ink);border-bottom-color:var(--hi)}
+    .chips{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;-webkit-overflow-scrolling:touch;touch-action:pan-x}
+    .chips::-webkit-scrollbar{display:none}
+    .chip{flex:none;background:#1c1712;border:1px solid var(--line);color:var(--ink);
+      font-size:12.5px;padding:7px 13px;border-radius:16px;white-space:nowrap;cursor:pointer}
+    .chip.on{background:var(--hi);border-color:var(--hi);color:#fff}
+    .chip.all{background:none;border-color:var(--dim);color:var(--dim)}
+
+    /* la barra lateral de filtros de escritorio se oculta; en móvil se usan los chips */
+    aside.filters{display:none}
+
+    /* panel: gráfico o lista según pestaña */
+    section.stage{display:none}
+    section.stage.show{display:flex;flex:none}
+    .stage{min-height:auto}
+    .plot{overflow:auto;padding:10px 8px}
+
+    aside.list{display:none;width:auto;border-left:none}
+    aside.list.show{display:flex;height:auto}
+    .listscroll{max-height:none;overflow:visible}
+
+    footer#legend{position:sticky;bottom:0;background:var(--bg);flex-wrap:wrap;gap:12px 16px;
+      padding:8px 14px;font-size:11px}
+
+    /* ficha: sube desde abajo */
+    .card{width:100%;max-width:100%;height:82vh;top:auto;bottom:0;left:0;border-left:none;
+      border-top:1px solid var(--line);border-radius:14px 14px 0 0;transform:translateY(100%)}
+    .card.show{transform:none}
+    .card .grip{display:block;width:38px;height:4px;background:var(--dim);border-radius:2px;margin:2px auto 12px}
+  }
+  .card .grip{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>Víctimas del terrorismo marxista en Argentina</h1>
+</header>
+<main>
+  <div class="mobilebar">
+    <div class="tabs">
+      <button id="tabGraf" class="on">Gráfico</button>
+      <button id="tabList">Lista</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <aside class="filters" id="side">
+    <button class="allbtn" id="all">Ver todos</button>
+    <div id="filters"></div>
+  </aside>
+  <section class="stage show" id="stage">
+    <div class="plot" id="plot"></div>
+    <footer id="legend"></footer>
+  </section>
+  <aside class="list">
+    <h2 id="listhead">Personas</h2>
+    <div class="lsearch"><input id="lq" type="text" placeholder="Buscar por nombre…" autocomplete="off"></div>
+    <div class="listscroll" id="listscroll"></div>
+  </aside>
+</main>
+<button class="fabf" id="fab">Filtros</button>
+<div id="tip"></div>
+<div class="scrim" id="scrim"></div>
+<aside class="card" id="card"></aside>
+
+<script>
+let DATA = [];
+
+const NS="http://www.w3.org/2000/svg";
+const MINY=1960, MAXY=1989;
+const COL={mil:"#5fae5a", pol:"#5f9fd6", civ:"#e0b93f", nino:"#f2ede4", mujer:"#e58fc0"};
+
+const FILTERS = [
+  {key:"g",  title:"Militares / Civiles", opts:[["Militar","Militares"],["Civil","Civiles"]]},
+  {key:"rama", title:"Fuerza", opts:[["Ejército","Ejército"],["Armada","Armada"],["Fuerza Aérea","Fuerza Aérea"],["Policía Federal","Policía Federal"],["Policía provincial","Policía provincial"],["Otras fuerzas","Gendarmería / Prefectura / otras"]]},
+  {key:"s",  title:"Género", opts:[["M","Hombres"],["F","Mujeres"]]},
+  {key:"nino",title:"Edad", opts:[["si","Niños (menores de 18)"],["no","Adultos"]]},
+  {key:"tg", title:"Tipo de hecho", opts:[["Explosivo","Explosivo / bomba"],["Arma de fuego","Arma de fuego"],["Enfrentamiento","Enfrentamiento"],["Otro","Otro"]]},
+];
+
+const state={};
+FILTERS.forEach(function(f){ state[f.key]=new Set(); });
+
+// ---- clasificación de cada persona en un tipo de ícono + color ----
+function personType(d){
+  if(d.nino) return "nino";
+  if(d.g==="Militar"){
+    if(d.rama==="Ejército"||d.rama==="Armada"||d.rama==="Fuerza Aérea") return "ffaa";
+    return "policia";
+  }
+  return "civil";  // todos los civiles: mismo ícono de persona, amarillo
+}
+function personColor(t){
+  if(t==="ffaa") return COL.mil;    // militares verde
+  if(t==="policia") return COL.pol; // policía azul
+  if(t==="nino") return COL.nino;   // niños blanco
+  return COL.civ;                   // civiles amarillo
+}
+
+// ---- íconos (viewBox 0..16), devuelven markup interno ----
+function iconPaths(t){
+  switch(t){
+    case "ffaa": // casco militar
+      return '<path d="M8 2.4c-3.4 0-5.6 2.4-5.6 6.1H13.6C13.6 4.8 11.4 2.4 8 2.4Z"/>'+
+             '<rect x="1.4" y="8.5" width="13.2" height="2.1" rx="1"/>'+
+             '<rect x="7.2" y="2" width="1.6" height="1.6" rx="0.4"/>';
+    case "policia": // escudo / placa
+      return '<path d="M8 1.8 13 3.6V8.2C13 11 10.9 13.2 8 14.2 5.1 13.2 3 11 3 8.2V3.6Z"/>'+
+             '<path d="M8 5.2l0.9 1.9 2 0.2-1.5 1.4 0.4 2L8 9.7 6.2 10.7l0.4-2L5.1 7.3l2-0.2Z" fill="#14100c"/>';
+    case "mujer": // figura con vestido
+      return '<circle cx="8" cy="4.3" r="2.6"/>'+
+             '<path d="M8 7.2 12.4 14.6H3.6Z"/>';
+    case "nino": // figura chica (cabeza + cuerpo redondeado)
+      return '<circle cx="8" cy="4.6" r="2.3"/>'+
+             '<circle cx="8" cy="10.6" r="3.4"/>';
+    case "civil": // todos los civiles: figura de persona (cabeza + hombros)
+      return '<circle cx="8" cy="4.3" r="2.6"/>'+
+             '<path d="M2.6 14.6C2.6 9.9 13.4 9.9 13.4 14.6Z"/>';
+    default: // hombre: cabeza + hombros
+      return '<circle cx="8" cy="4.3" r="2.6"/>'+
+             '<path d="M2.6 14.6C2.6 9.9 13.4 9.9 13.4 14.6Z"/>';
+  }
+}
+
+function matchVal(d,key,val){
+  if(key==="nino") return val==="si" ? d.nino===true : d.nino!==true;
+  return d[key]===val;
+}
+function passes(d){
+  return FILTERS.every(function(f){
+    const s=state[f.key]; if(s.size===0) return true;
+    return Array.from(s).some(function(v){return matchVal(d,f.key,v);});
+  });
+}
+function countFor(key,val){
+  return DATA.filter(function(d){
+    const ok=FILTERS.every(function(f){
+      if(f.key===key) return true;
+      const s=state[f.key]; if(s.size===0) return true;
+      return Array.from(s).some(function(v){return matchVal(d,f.key,v);});
+    });
+    return ok && matchVal(d,key,val);
+  }).length;
+}
+
+const fbox=document.getElementById("filters");
+function buildFilters(){
+  fbox.innerHTML="";
+  FILTERS.forEach(function(f){
+    const g=document.createElement("div"); g.className="grp";
+    const h=document.createElement("h2"); h.textContent=f.title; g.appendChild(h);
+    f.opts.forEach(function(pair){
+      const val=pair[0], label=pair[1];
+      const row=document.createElement("div");
+      row.className="opt"+(state[f.key].has(val)?" on":"");
+      const b=document.createElement("span"); b.className="box"; row.appendChild(b);
+      const t=document.createElement("span"); t.textContent=label; row.appendChild(t);
+      const n=document.createElement("span"); n.className="ct"; n.textContent=countFor(f.key,val); row.appendChild(n);
+      row.onclick=function(){
+        const s=state[f.key];
+        if(s.has(val)) s.delete(val); else s.add(val);
+        render();
+      };
+      g.appendChild(row);
+    });
+    fbox.appendChild(g);
+  });
+}
+document.getElementById("all").onclick=function(){
+  FILTERS.forEach(function(f){ state[f.key].clear(); }); render();
+};
+
+function buildLegend(){
+  const items=[["ffaa","Fuerzas Armadas"],["policia","Policía / seguridad"],
+               ["civil","Civil"],["nino","Niño"]];
+  const L=document.getElementById("legend"); L.innerHTML="";
+  items.forEach(function(it){
+    const t=it[0], label=it[1];
+    const span=document.createElement("span"); span.className="lg";
+    span.innerHTML='<svg viewBox="0 0 16 16" fill="'+personColor(t)+'">'+iconPaths(t)+'</svg>'+label;
+    L.appendChild(span);
+  });
+}
+
+const plot=document.getElementById("plot");
+let listPool=[];   // subconjunto que pasa los filtros (antes del buscador)
+function render(){
+  buildFilters();
+  buildChips();
+  const shown=DATA.filter(passes);
+  drawPlot(shown);
+  listPool=shown;
+  drawList();
+}
+
+function norm(s){
+  return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+}
+function drawList(){
+  const head=document.getElementById("listhead");
+  const box=document.getElementById("listscroll");
+  const q=norm(document.getElementById("lq").value.trim());
+  let items=listPool;
+  if(q){
+    // cada palabra de la búsqueda debe aparecer en el nombre, en cualquier orden
+    const términos=q.split(/\s+/).filter(Boolean);
+    items=items.filter(function(d){
+      const n=norm(d.n);
+      return términos.every(function(t){ return n.indexOf(t)!==-1; });
+    });
+  }
+  head.textContent = items.length + (items.length===1?" persona":" personas");
+  const sorted=items.slice().sort(function(a,b){
+    return a.n.localeCompare(b.n,"es",{sensitivity:"base"});
+  });
+  box.innerHTML="";
+  const frag=document.createDocumentFragment();
+  sorted.forEach(function(d){
+    const t=personType(d);
+    const row=document.createElement("div"); row.className="lrow";
+    row.innerHTML='<svg viewBox="0 0 16 16" fill="'+personColor(t)+'">'+iconPaths(t)+'</svg>'+
+                  '<span>'+esc(d.n)+'</span><span class="ly">'+d.y+'</span>';
+    row.addEventListener("click",function(){ openCard(d); });
+    frag.appendChild(row);
+  });
+  box.appendChild(frag);
+  box.scrollTop=0;
+}
+document.getElementById("lq").addEventListener("input",drawList);
+
+const S=15;            // tamaño del ícono
+const CELL=S+3;        // separación entre íconos
+const MAXCOLS=3;       // máximo de íconos de ancho por año
+const GAP=10;          // separación entre columnas
+const EMPTYW=3;        // ancho de un año sin víctimas
+
+function stackRank(d){
+  const t=personType(d);
+  if(t==="nino") return 0;        // niños abajo de todo
+  if(t==="civil") return 1;       // civiles
+  if(t==="policia") return 2;     // policías
+  return 3;                       // militares arriba de todo
+}
+function drawPlot(items){
+  plot.innerHTML="";
+  if(items.length===0){
+    const e=document.createElement("div"); e.className="empty";
+    e.textContent="Ninguna víctima coincide con esos filtros.";
+    plot.appendChild(e); return;
+  }
+  const byYear={};
+  items.forEach(function(d){ (byYear[d.y]=byYear[d.y]||[]).push(d); });
+  const years=[]; for(let y=MINY;y<=MAXY;y++) years.push(y);
+
+  const perRowY={}, colWY={}, cntY={};
+  years.forEach(function(y){
+    const c=(byYear[y]||[]).length; cntY[y]=c;
+    if(c===0){ perRowY[y]=1; colWY[y]=EMPTYW; }
+    else { const pr=Math.min(MAXCOLS,c); perRowY[y]=pr; colWY[y]=pr*CELL; }
+  });
+
+  let maxRows=1;
+  years.forEach(function(y){ if(cntY[y]) maxRows=Math.max(maxRows,Math.ceil(cntY[y]/perRowY[y])); });
+
+  const pad=30;
+  let xcur=pad;
+  const centerX={};
+  years.forEach(function(y){
+    centerX[y]=xcur+colWY[y]/2;
+    xcur += colWY[y] + (cntY[y]===0 ? 2 : GAP);   // años vacíos casi sin separación
+  });
+  const contentW=xcur-GAP+pad;
+
+  const W=Math.max(plot.clientWidth-40, contentW);
+  const isMobile=window.matchMedia("(max-width:760px)").matches;
+  const contentH=maxRows*CELL+30;               // alto real que ocupan las figuras
+  const capH=isMobile ? Math.round(window.innerHeight*0.62) : 1e9;
+  const axisY=isMobile
+      ? Math.min(contentH, capH)                // móvil: alto = pico real, tope 62vh
+      : Math.max(plot.clientHeight-40, contentH);
+  const H=axisY+34;
+
+  const svg=document.createElementNS(NS,"svg");
+  svg.setAttribute("width",W); svg.setAttribute("height",H);
+
+  // eje: ticks/labels solo en años con datos, evitando solapamiento
+  const g=document.createElementNS(NS,"g"); g.setAttribute("class","yr");
+  let lastLabelX=-999;
+  years.forEach(function(y){
+    const cx=centerX[y];
+    if(cntY[y]>0){
+      const tick=document.createElementNS(NS,"line");
+      tick.setAttribute("x1",cx);tick.setAttribute("x2",cx);tick.setAttribute("y1",axisY);tick.setAttribute("y2",axisY+5);
+      g.appendChild(tick);
+      if(cx-lastLabelX>=30){
+        const t=document.createElementNS(NS,"text");
+        t.setAttribute("x",cx);t.setAttribute("y",axisY+19);t.setAttribute("text-anchor","middle");
+        t.textContent="'"+String(y).slice(2);
+        g.appendChild(t); lastLabelX=cx;
+      }
+    }
+  });
+  const base=document.createElementNS(NS,"line");
+  base.setAttribute("x1",pad);base.setAttribute("x2",contentW-pad);base.setAttribute("y1",axisY);base.setAttribute("y2",axisY);
+  base.setAttribute("stroke","#2e2822");
+  g.appendChild(base); svg.appendChild(g);
+
+  // personas
+  years.forEach(function(y){
+    const arr=byYear[y]; if(!arr) return;
+    arr.sort(function(a,b){ const ra=stackRank(a),rb=stackRank(b); if(ra!==rb) return ra-rb; return a.f<b.f?-1:1; });
+    const cx=centerX[y];
+    const perRow=perRowY[y];
+    arr.forEach(function(d,i){
+      const rw=Math.floor(i/perRow), cl=i%perRow;
+      const wide=Math.min(perRow,arr.length);
+      const x=cx+(cl-(wide-1)/2)*CELL - S/2;
+      const yy=axisY-6-S-rw*CELL;
+      const t=personType(d);
+      const gp=document.createElementNS(NS,"g");
+      gp.setAttribute("class","person");
+      gp.setAttribute("data-id", DATA.indexOf(d));
+      gp.setAttribute("transform","translate("+x+","+yy+") scale("+(S/16)+")");
+      gp.setAttribute("fill",personColor(t));
+      gp.innerHTML=iconPaths(t);
+      svg.appendChild(gp);
+      // área de captación ampliada (toda la celda) para hover y click fáciles
+      const hit=document.createElementNS(NS,"rect");
+      hit.setAttribute("x",x-(CELL-S)/2); hit.setAttribute("y",yy-(CELL-S)/2);
+      hit.setAttribute("width",CELL); hit.setAttribute("height",CELL);
+      hit.setAttribute("class","hit");
+      hit.setAttribute("fill","transparent");
+      hit.style.cursor="pointer";
+      hit.addEventListener("mouseenter",function(e){ showTip(e,d); });
+      hit.addEventListener("mousemove",function(e){ moveTip(e); });
+      hit.addEventListener("mouseleave",hideTip);
+      hit.addEventListener("click",function(){ if(!dragMoved) openCard(d); });
+      svg.appendChild(hit);
+    });
+  });
+
+  plot.appendChild(svg);
+  plot.scrollTop=plot.scrollHeight;
+  // en móvil, abrir mostrando el año con más víctimas (donde el gráfico se ve lleno)
+  if(window.matchMedia("(max-width:760px)").matches){
+    let peakY=MINY, peakN=-1;
+    years.forEach(function(y){ if(cntY[y]>peakN){ peakN=cntY[y]; peakY=y; } });
+    const target=centerX[peakY]-plot.clientWidth/2;
+    plot.scrollLeft=Math.max(0,target);
+  }
+}
+
+// ---- tooltip ----
+const tip=document.getElementById("tip");
+
+// nombre "APELLIDO, Nombre" -> "Nombre Apellido" con capitalización normal
+function nombreNormal(raw){
+  function cap(w){
+    if(!w) return w;
+    if(w.length<=2 && w===w.toUpperCase() && !/[AEIOU]/.test(w)) return w; // iniciales tipo "A."
+    return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
+  }
+  function capFrase(s){ return s.split(/\s+/).map(cap).join(" "); }
+  const raws=String(raw).trim();
+  if(raws.indexOf(",")>=0){
+    const p=raws.split(",");
+    const ape=p[0].trim(), nom=p.slice(1).join(",").trim();
+    return (capFrase(nom)+" "+capFrase(ape)).trim();
+  }
+  return capFrase(raws); // "TRECE (13) personas..." -> se capitaliza igual
+}
+
+// categoría legible para el encabezado del tooltip / ficha
+function categoriaTexto(d){
+  if(d.nino) return "Niño";
+  if(d.g==="Militar"){
+    if(d.rama==="Ejército") return "Soldado del Ejército";
+    if(d.rama==="Armada") return "Armada";
+    if(d.rama==="Fuerza Aérea") return "Fuerza Aérea";
+    if(d.rama==="Policía Federal") return "Policía Federal";
+    if(d.rama==="Policía provincial") return "Policía provincial";
+    if(d.rama==="Otras fuerzas") return "Gendarmería / Prefectura";
+    return "Fuerzas de seguridad";
+  }
+  return "Civil";
+}
+
+
+// clave de foto a partir del nombre: "fotos/<apellido-nombre>.jpg"
+function claveFoto(nombre){
+  let s=nombre.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  s=s.replace(/\(h\)|\(hijo\)/g,"");
+  s=s.replace(/[^a-z0-9 ]/g,"");
+  s=s.replace(/\s+/g,"-").replace(/^-+|-+$/g,"");
+  return s;
+}
+function fotoGrande(d){ return "fotos/"+claveFoto(d.n)+".jpg"; }
+function fotoThumb(d){ return "fotos/"+claveFoto(d.n)+"_thumb.jpg"; }
+
+function showTip(e,d){
+  const t=personType(d);
+  const ico='<svg class="tico" viewBox="0 0 16 16" fill="'+personColor(t)+'">'+iconPaths(t)+'</svg>';
+  tip.innerHTML='<div class="trow"><img class="tthumb" alt="">'+ico+
+                '<div><span class="tcat">'+esc(categoriaTexto(d))+'</span>'+
+                '<span class="tnom">'+esc(nombreNormal(d.n))+' · '+d.y+' <span class="cruz">\u2020</span></span></div></div>';
+  // cargar la miniatura aparte: si existe se muestra, si no queda oculta
+  const imgEl=tip.querySelector(".tthumb");
+  const probe=new Image();
+  probe.onload=function(){ imgEl.src=probe.src; imgEl.style.display="block"; };
+  probe.onerror=function(){ if(imgEl) imgEl.remove(); };
+  probe.src=fotoThumb(d);
+  tip.style.display="block"; moveTip(e);
+}
+function moveTip(e){ tip.style.left=e.clientX+"px"; tip.style.top=e.clientY+"px"; }
+function hideTip(){ tip.style.display="none"; }
+
+// ---- arrastrar para desplazar ----
+let dragging=false, dragMoved=false, dsx=0, dsy=0, dsl=0, dst=0;
+plot.addEventListener("pointerdown",function(e){
+  if(e.pointerType==="mouse" && e.button!==0) return;
+  dragging=true; dragMoved=false;
+  dsx=e.clientX; dsy=e.clientY; dsl=plot.scrollLeft; dst=plot.scrollTop;
+});
+window.addEventListener("pointermove",function(e){
+  if(!dragging) return;
+  const dx=e.clientX-dsx, dy=e.clientY-dsy;
+  if(Math.abs(dx)>4||Math.abs(dy)>4){ dragMoved=true; plot.classList.add("drag"); hideTip(); }
+  plot.scrollLeft=dsl-dx; plot.scrollTop=dst-dy;
+});
+function finDrag(){ dragging=false; plot.classList.remove("drag"); setTimeout(function(){ dragMoved=false; },0); }
+window.addEventListener("pointerup",finDrag);
+window.addEventListener("pointercancel",finDrag);
+
+// clic en zona negra (no sobre una persona) y sin arrastrar: quitar la selección
+plot.addEventListener("click",function(e){
+  if(dragMoved) return;
+  if(e.target.closest("g.person") || e.target.classList.contains("hit")) return;   // fue sobre alguien
+  const b=document.querySelector("rect.selbox"); if(b) b.remove();
+});
+
+const card=document.getElementById("card"), scrim=document.getElementById("scrim");
+const MES=["","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const ROM=["","I","II","III"];
+function fmtFecha(f){ const p=f.split("-"); return (+p[2])+" de "+MES[+p[1]]+" de "+p[0]; }
+function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}); }
+function markPerson(d){
+  // quitar recuadro anterior
+  const prev=document.querySelector("rect.selbox");
+  if(prev) prev.remove();
+  const id=DATA.indexOf(d);
+  const el=document.querySelector('g.person[data-id="'+id+'"]');
+  if(el){
+    const svg=el.ownerSVGElement;
+    const tr=el.getAttribute("transform");     // translate(x,y) scale(k)
+    const m=/translate\(([-\d.]+),([-\d.]+)\) scale\(([-\d.]+)\)/.exec(tr);
+    if(m){
+      const x=+m[1], y=+m[2], k=+m[3], sz=16*k;
+      const box=document.createElementNS(NS,"rect");
+      box.setAttribute("class","selbox");
+      box.setAttribute("x", x-3);
+      box.setAttribute("y", y-3);
+      box.setAttribute("width", sz+6);
+      box.setAttribute("height", sz+6);
+      box.setAttribute("rx", 3);
+      svg.appendChild(box);
+    }
+  }
+}
+function openCard(d){
+  markPerson(d);
+  const lugar=[d.l,d.p].filter(Boolean).join(", ");
+  const meta=[];
+  if(d.f)  meta.push(["Fecha",fmtFecha(d.f)]);
+  if(lugar) meta.push(["Lugar",lugar]);
+  if(d.fu) meta.push(["Condición",d.fu]);
+  if(d.edad!==null && d.edad!==undefined) meta.push(["Edad",d.edad+" años"]);
+  if(d.t)  meta.push(["Tipo de hecho",d.t]);
+  let html="";
+  html+='<div class="grip"></div>';
+  html+='<button class="x" id="cx">&times;</button>';
+  const _t=personType(d);
+  const _ico='<svg class="nmico" viewBox="0 0 16 16" fill="'+personColor(_t)+'">'+iconPaths(_t)+'</svg>';
+  html+='<div class="nmrow">'+_ico+'<div><div class="nmcat">'+esc(categoriaTexto(d))+'</div>'+
+        '<div class="nm">'+esc(nombreNormal(d.n))+'</div></div></div>';
+  // foto grande: aparece bajo el nombre solo si el archivo existe
+  html+='<img class="foto" src="'+fotoGrande(d)+'" alt="" '+
+        'onload="this.classList.add(\'show\')" onerror="this.remove()">';
+  if(meta.length){
+    html+='<dl class="meta">';
+    meta.forEach(function(m){ html+='<dt>'+m[0]+'</dt><dd>'+esc(m[1])+'</dd>'; });
+    html+='</dl>';
+  }
+  if(d.d) html+='<div class="rel">'+esc(d.d)+'</div>';
+  html+='<div class="src">Un aporte a la verdad, vol. '+ROM[d.vol]+', pág. '+d.pg+'.</div>';
+  card.innerHTML=html;
+  document.getElementById("cx").onclick=closeCard;
+  card.classList.add("show"); scrim.classList.add("show");
+}
+function closeCard(){
+  card.classList.remove("show"); scrim.classList.remove("show");
+}
+scrim.onclick=closeCard;
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeCard(); });
+document.getElementById("fab").onclick=function(){ document.getElementById("side").classList.toggle("open"); };
+
+
+// ===================== CONTROLES MÓVILES =====================
+function buildChips(){
+  const box=document.getElementById("chips");
+  if(!box) return;
+  box.innerHTML="";
+  const allc=document.createElement("div");
+  allc.className="chip all"; allc.textContent="Ver todos";
+  allc.onclick=function(){ FILTERS.forEach(function(f){ state[f.key].clear(); }); render(); };
+  box.appendChild(allc);
+  FILTERS.forEach(function(f){
+    f.opts.forEach(function(pair){
+      const val=pair[0], label=pair[1];
+      const c=document.createElement("div");
+      c.className="chip"+(state[f.key].has(val)?" on":"");
+      c.textContent=label;
+      c.onclick=function(){
+        const s=state[f.key];
+        if(s.has(val)) s.delete(val); else s.add(val);
+        render();
+      };
+      box.appendChild(c);
+    });
+  });
+}
+
+// pestañas Gráfico / Lista
+const tabGraf=document.getElementById("tabGraf");
+const tabList=document.getElementById("tabList");
+const stageEl=document.getElementById("stage");
+const listEl=document.querySelector("aside.list");
+function showTab(which){
+  if(which==="graf"){
+    tabGraf.classList.add("on"); tabList.classList.remove("on");
+    stageEl.classList.add("show"); listEl.classList.remove("show");
+    drawPlot(DATA.filter(passes));   // recalcular con el ancho visible
+  } else {
+    tabList.classList.add("on"); tabGraf.classList.remove("on");
+    listEl.classList.add("show"); stageEl.classList.remove("show");
+  }
+}
+if(tabGraf) tabGraf.onclick=function(){ showTab("graf"); };
+if(tabList) tabList.onclick=function(){ showTab("list"); };
+
+
+// ===================== ARRASTRE CON EL DEDO (scroll por drag) =====================
+function habilitarArrastre(el, ejes){
+  if(!el) return;
+  let down=false, moved=false, sx=0, sy=0, sl=0, st=0;
+  const horiz = ejes.indexOf("x")>=0, vert = ejes.indexOf("y")>=0;
+  el.addEventListener("pointerdown",function(e){
+    if(e.pointerType==="mouse" && e.button!==0) return;
+    down=true; moved=false; sx=e.clientX; sy=e.clientY; sl=el.scrollLeft; st=el.scrollTop;
+  });
+  el.addEventListener("pointermove",function(e){
+    if(!down) return;
+    const dx=e.clientX-sx, dy=e.clientY-sy;
+    if(Math.abs(dx)>5||Math.abs(dy)>5) moved=true;
+    if(horiz) el.scrollLeft=sl-dx;
+    if(vert)  el.scrollTop=st-dy;
+  });
+  function fin(){ down=false; setTimeout(function(){ moved=false; },0); }
+  el.addEventListener("pointerup",fin);
+  el.addEventListener("pointercancel",fin);
+  el.addEventListener("pointerleave",fin);
+  // evitar que un arrastre dispare click en hijos
+  el.addEventListener("click",function(e){ if(moved){ e.stopPropagation(); e.preventDefault(); } },true);
+}
+
+// aplicar a los contenedores scrolleables (solo hace falta en móvil, pero no molesta en desktop)
+habilitarArrastre(document.getElementById("chips"), "x");
+habilitarArrastre(document.getElementById("listscroll"), "y");
+
+function init(){
+  buildLegend();
+  buildChips();
+  render();
+}
+// cargar los datos desde el archivo externo y arrancar
+fetch("victimas.json")
+  .then(function(r){ return r.json(); })
+  .then(function(j){ DATA=j; init(); })
+  .catch(function(e){
+    document.getElementById("plot").innerHTML=
+      '<div class="empty">No se pudo cargar victimas.json.<br>Abrí la web desde un servidor o desde internet, no con doble clic.</div>';
+  });
+let rt;
+window.addEventListener("resize",function(){ clearTimeout(rt); rt=setTimeout(function(){ drawPlot(DATA.filter(passes)); },150); });
+</script>
+</body>
+</html>
