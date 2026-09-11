@@ -453,6 +453,7 @@ let zoom=0.8;
 let zoomManual=false;      // al tocar las lupas o pellizcar, manda el usuario
 let zoomRender=1;          // escala con la que se dibujó de verdad
 let baseY=0;               // y del eje dentro del svg: las figuras se apoyan ahí
+let ejeFijos=[];           // ticks y numeros de año: no cambian de tamaño al pellizcar
 
 function fijarZoom(nuevo, ancla){
   zoomManual=true;
@@ -593,12 +594,13 @@ function drawPlot(items){
   // eje: ticks/labels solo en años con datos, evitando solapamiento
   const g=document.createElementNS(NS,"g"); g.setAttribute("class","yr");
   let lastLabelX=-999;
+  ejeFijos=[];
   years.forEach(function(y){
     const cx=centerX[y];
     if(cntY[y]>0){
       const tick=document.createElementNS(NS,"line");
       tick.setAttribute("x1",cx);tick.setAttribute("x2",cx);tick.setAttribute("y1",axisY);tick.setAttribute("y2",axisY+5);
-      g.appendChild(tick);
+      g.appendChild(tick); ejeFijos.push({el:tick,cx:cx});
       if(cx-lastLabelX>=(y===MINY?46:30)){
         const txt=etiquetaGrupo(y);
         const grp=document.createElementNS(NS,"g");
@@ -615,7 +617,7 @@ function drawPlot(items){
         t.textContent=txt;
         grp.appendChild(t);
         grp.addEventListener("click",function(){ if(!dragMoved) elegirAnio(y); });
-        g.appendChild(grp); lastLabelX=cx;
+        g.appendChild(grp); ejeFijos.push({el:grp,cx:cx}); lastLabelX=cx;
       }
     }
   });
@@ -785,6 +787,18 @@ function distDedos(){
   const p=Array.from(punteros.values());
   return Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
 }
+// mientras se pellizca el dibujo entero se estira, pero los numeros de los años
+// tienen un tamaño fijo: se les aplica la escala al reves para que no cambien
+function contraescalarEje(k){
+  const inv=1/k;
+  ejeFijos.forEach(function(o){
+    o.el.setAttribute("transform",
+      "translate("+o.cx+" "+baseY+") scale("+inv+") translate("+(-o.cx)+" "+(-baseY)+")");
+  });
+}
+function soltarEje(){
+  ejeFijos.forEach(function(o){ o.el.removeAttribute("transform"); });
+}
 function escalaPrevia(){
   const svg=plot.querySelector("svg");
   const m=svg && /scale\(([\d.]+)\)/.exec(svg.style.transform||"");
@@ -824,7 +838,8 @@ plot.addEventListener("pointermove",function(e){
   // vista previa barata: escalar el dibujo ya hecho, sin volver a armarlo
   const objetivo=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN, pellizco.zoom*(distDedos()/pellizco.dist)));
   const svg=plot.querySelector("svg");
-  if(svg) svg.style.transform="scale("+(objetivo/pellizco.zoom)+")";
+  const k=objetivo/pellizco.zoom;
+  if(svg){ svg.style.transform="scale("+k+")"; contraescalarEje(k); }
 });
 function finPellizco(e){
   if(!punteros.has(e.pointerId)) return;
@@ -833,6 +848,7 @@ function finPellizco(e){
   const k=escalaPrevia();
   const svg=plot.querySelector("svg");
   if(svg){ svg.style.transform=""; svg.style.transformOrigin=""; }
+  soltarEje();
   const ancla=pellizco;
   pellizco=null;
   fijarZoom(ancla.zoom*k, ancla);        // ahora sí, redibujo nítido
