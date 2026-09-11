@@ -215,6 +215,7 @@
 
 <script>
 let DATA = [];
+let FOTOS = new Set();   // claves que efectivamente tienen retrato
 
 const NS="http://www.w3.org/2000/svg";
 const MINY=1960, MAXY=1989;
@@ -618,6 +619,21 @@ function claveFoto(nombre){
 }
 function fotoGrande(d){ return "fotos/"+claveFoto(d.n)+".jpg"; }
 function fotoThumb(d){ return "fotos/"+claveFoto(d.n)+"_thumb.jpg"; }
+function tieneFoto(d){ return FOTOS.has(claveFoto(d.n)); }
+
+// las miniaturas pesan poco; se traen en segundo plano, de a pocas, para que
+// al pasar el mouse ya estén en el navegador y aparezcan al instante
+function precargarMiniaturas(){
+  const claves=Array.from(FOTOS);
+  let i=0;
+  function siguiente(){
+    if(i>=claves.length) return;
+    const img=new Image();
+    img.onload=img.onerror=siguiente;
+    img.src="fotos/"+claves[i++]+"_thumb.jpg";
+  }
+  for(let k=0;k<4;k++) siguiente();
+}
 
 function showTip(e,d){
   const t=personType(d);
@@ -626,12 +642,9 @@ function showTip(e,d){
                 '<div><span class="tcat">'+esc(categoriaTexto(d))+'</span>'+
                 '<span class="tnom">'+esc(nombreNormal(d.n))+' · '+d.y+' <span class="cruz">\u2020</span></span></div>'+
                 ico+'</div>';
-  // cargar la miniatura aparte: si existe se muestra, si no queda oculta
   const imgEl=tip.querySelector(".tthumb");
-  const probe=new Image();
-  probe.onload=function(){ imgEl.src=probe.src; imgEl.style.display="block"; };
-  probe.onerror=function(){ if(imgEl) imgEl.remove(); };
-  probe.src=fotoThumb(d);
+  if(tieneFoto(d)){ imgEl.src=fotoThumb(d); imgEl.style.display="block"; }
+  else imgEl.remove();
   tip.style.display="block"; moveTip(e);
 }
 function moveTip(e){
@@ -718,9 +731,9 @@ function openCard(d){
   const _ico='<svg class="nmico" viewBox="0 0 16 16" fill="'+personColor(_t)+'">'+iconPaths(_t)+'</svg>';
   html+='<div class="nmrow">'+_ico+'<div><div class="nmcat">'+esc(categoriaTexto(d))+'</div>'+
         '<div class="nm">'+esc(nombreNormal(d.n))+'</div></div></div>';
-  // foto grande: aparece bajo el nombre solo si el archivo existe
-  html+='<img class="foto" src="'+fotoGrande(d)+'" alt="" '+
-        'onload="this.classList.add(\'show\')" onerror="this.remove()">';
+  if(tieneFoto(d)){
+    html+='<img class="foto show" src="'+fotoGrande(d)+'" alt="" loading="lazy">';
+  }
   if(meta.length){
     html+='<dl class="meta">';
     meta.forEach(function(m){ html+='<dt>'+m[0]+'</dt><dd>'+esc(m[1])+'</dd>'; });
@@ -819,6 +832,11 @@ function init(){
   render();
 }
 // cargar los datos desde el archivo externo y arrancar
+fetch("fotos/indice.json")
+  .then(function(r){ return r.json(); })
+  .then(function(j){ FOTOS=new Set(j); setTimeout(precargarMiniaturas,1200); })
+  .catch(function(){ /* sin índice: simplemente no se muestran fotos */ });
+
 fetch("victimas.json")
   .then(function(r){ return r.json(); })
   .then(function(j){ DATA=j; init(); })
