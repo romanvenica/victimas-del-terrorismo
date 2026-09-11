@@ -468,6 +468,12 @@ function vzMinimo(){
 }
 let vz=1, lienW=0, lienH=0;
 function lienzo(){ return plot.querySelector(".lienzo"); }
+// encuadre de arranque para los datos que haya en pantalla: se ve de una
+// alrededor del 80% del ancho del dibujo, sin agrandar más que el tamaño base
+function vzDefecto(){
+  if(!lienW) return 1;
+  return Math.min(1, Math.max(vzMinimo(), hueco().w/(0.8*lienW)));
+}
 function hueco(){   // el espacio visible del contenedor, sin contar sus márgenes
   const cs=getComputedStyle(plot);
   return {w: plot.clientWidth  - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
@@ -730,7 +736,7 @@ function drawPlot(items){
     const lien=document.createElement("div"); lien.className="lienzo";
     lien.appendChild(svg); wrap.appendChild(lien); plot.appendChild(wrap);
     lienW=W; lienH=H;
-    vz=Math.min(VZ_MAX,Math.max(vzMinimo(),vz));
+    vz=vzDefecto();          // cada vez que cambian los datos se reencuadra solo
     aplicarVZ(); actualizarLupas();
   } else {
     plot.appendChild(svg);
