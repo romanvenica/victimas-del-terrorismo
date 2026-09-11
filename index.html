@@ -445,9 +445,9 @@ const ZOOM_MIN=0.6, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
 const ZOOM_AUTO_MAX=2.75;   // tope del agrandado automatico cuando sobra lugar
 let zoom=0.8;
 
-function cambiarZoom(factor){
+function fijarZoom(nuevo){
   const previo=zoom;
-  const nuevo=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN, zoom*factor));
+  nuevo=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN,nuevo));
   if(Math.abs(nuevo-previo)<0.001) return;
   // guardar qué punto del contenido está al centro, para no perder de vista dónde estabas
   const centro=(plot.scrollLeft+plot.clientWidth/2)/previo;
@@ -456,6 +456,7 @@ function cambiarZoom(factor){
   plot.scrollLeft=Math.max(0, centro*nuevo - plot.clientWidth/2);
   actualizarLupas();
 }
+function cambiarZoom(factor){ fijarZoom(zoom*factor); }
 function actualizarLupas(){
   document.getElementById("zmas").disabled   = zoom>=ZOOM_MAX-0.001;
   document.getElementById("zmenos").disabled = zoom<=ZOOM_MIN+0.001;
@@ -746,6 +747,56 @@ function moveTip(e){
 }
 function hideTip(){ tip.style.display="none"; }
 
+// ---- pellizcar para agrandar y achicar (celular) ----
+const punteros=new Map();
+let pellizco=null;
+
+function distDedos(){
+  const p=Array.from(punteros.values());
+  return Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+}
+function escalaPrevia(){
+  const svg=plot.querySelector("svg");
+  const m=svg && /scale\(([\d.]+)\)/.exec(svg.style.transform||"");
+  return m ? parseFloat(m[1]) : 1;
+}
+plot.addEventListener("pointerdown",function(e){
+  if(e.pointerType==="mouse") return;
+  punteros.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(punteros.size===2){
+    dragging=false; dragMoved=true;      // cortar el arrastre de un dedo
+    plot.classList.remove("drag");
+    hideTip();
+    pellizco={ dist:distDedos(), zoom:zoom };
+  }
+});
+plot.addEventListener("pointermove",function(e){
+  if(!punteros.has(e.pointerId)) return;
+  punteros.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(!pellizco || punteros.size<2) return;
+  e.preventDefault();
+  // vista previa barata: escalar el dibujo ya hecho, sin volver a armarlo
+  const objetivo=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN, pellizco.zoom*(distDedos()/pellizco.dist)));
+  const svg=plot.querySelector("svg");
+  if(svg){
+    svg.style.transformOrigin="center bottom";
+    svg.style.transform="scale("+(objetivo/pellizco.zoom)+")";
+  }
+});
+function finPellizco(e){
+  if(!punteros.has(e.pointerId)) return;
+  punteros.delete(e.pointerId);
+  if(!pellizco || punteros.size>=2) return;
+  const k=escalaPrevia();
+  const svg=plot.querySelector("svg");
+  if(svg){ svg.style.transform=""; svg.style.transformOrigin=""; }
+  const objetivo=pellizco.zoom*k;
+  pellizco=null;
+  fijarZoom(objetivo);                   // ahora sí, redibujo nítido
+}
+plot.addEventListener("pointerup",finPellizco);
+plot.addEventListener("pointercancel",finPellizco);
+
 // ---- arrastrar para desplazar ----
 let dragging=false, dragMoved=false, dsx=0, dsy=0, dsl=0, dst=0;
 plot.addEventListener("pointerdown",function(e){
@@ -754,7 +805,7 @@ plot.addEventListener("pointerdown",function(e){
   dsx=e.clientX; dsy=e.clientY; dsl=plot.scrollLeft; dst=plot.scrollTop;
 });
 window.addEventListener("pointermove",function(e){
-  if(!dragging) return;
+  if(pellizco || !dragging) return;
   const dx=e.clientX-dsx, dy=e.clientY-dsy;
   if(Math.abs(dx)>4||Math.abs(dy)>4){ dragMoved=true; plot.classList.add("drag"); hideTip(); }
   plot.scrollLeft=dsl-dx; plot.scrollTop=dst-dy;
