@@ -441,11 +441,14 @@ const SEP_BASE=3;      // separación entre íconos
 const MAXCOLS=5;       // máximo de íconos de ancho por año
 const GAP_BASE=10;     // separación entre columnas
 const EMPTYW_BASE=3;   // ancho de un año sin víctimas
-const ZOOM_MIN=0.6, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
+const ZOOM_MIN=0.3, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
 const ZOOM_AUTO_MAX=2.75;   // tope del agrandado automatico cuando sobra lugar
 let zoom=0.8;
+let zoomManual=false;      // al tocar las lupas o pellizcar, manda el usuario
+let primerDibujo=true;
 
 function fijarZoom(nuevo){
+  zoomManual=true;
   const previo=zoom;
   nuevo=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN,nuevo));
   if(Math.abs(nuevo-previo)<0.001) return;
@@ -535,7 +538,7 @@ function drawPlot(items){
   // con pocas personas sobra lugar: agrandar hasta llenar el ancho, sin
   // pasarse de alto ni de un tamaño de figura razonable
   let plan=medidas(zoom);
-  if(plan.ancho<cajaW && plan.alto<cajaH){
+  if(!zoomManual && plan.ancho<cajaW && plan.alto<cajaH){
     for(let e=zoom+0.05; e<=ZOOM_AUTO_MAX; e+=0.05){
       const t=medidas(e);
       if(t.ancho>cajaW || t.alto>cajaH) break;
@@ -650,12 +653,15 @@ function drawPlot(items){
   plot.appendChild(svg);
   plot.scrollTop=plot.scrollHeight;
   // en móvil, abrir mostrando el año con más víctimas (donde el gráfico se ve lleno)
-  if(window.matchMedia("(max-width:760px)").matches){
+  if(isMobile){
     let peakY=MINY, peakN=-1;
     years.forEach(function(y){ if(cntY[y]>peakN){ peakN=cntY[y]; peakY=y; } });
     const target=centerX[peakY]-plot.clientWidth/2;
     plot.scrollLeft=Math.max(0,target);
+  } else if(primerDibujo && centerX[1975]!==undefined){
+    plot.scrollLeft=Math.max(0, centerX[1975]-plot.clientWidth/2);
   }
+  primerDibujo=false;
 }
 
 // ---- tooltip ----
