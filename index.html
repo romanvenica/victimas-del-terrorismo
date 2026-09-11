@@ -101,15 +101,17 @@
   .card .nmico{width:34px;height:34px;flex:none}
   .card .nmcat{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c9bda9;margin-bottom:3px}
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
+  .card .nmanio{margin-top:5px;font-size:13.5px;font-weight:600;color:var(--dim);
+    font-variant-numeric:tabular-nums}
+  .card .nmanio .cruz{font-weight:800;font-size:15px}
   .card .meta{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:18px 0;font-size:13.5px}
   .card .meta dt{color:var(--dim);font-weight:600}
   .card .meta dd{margin:0}
   .card .foto{display:none;width:100%;max-width:260px;border-radius:8px;margin:2px 0 16px;border:1px solid var(--line)}
   .card .foto.show{display:block}
-  .card .relh{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-    color:#c9bda9;margin:22px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
-  .card .rel{margin:0;font-family:var(--serif);
+  .card .rel{margin:0;padding-top:17px;border-top:1px solid var(--line);font-family:var(--serif);
     font-size:14.5px;line-height:1.62;color:#d8cfc0;white-space:pre-wrap}
+  .card .rel + .rel{margin-top:17px}
   .card .src{margin-top:18px;color:var(--dim);font-size:12.5px;font-weight:500}
   .empty{color:var(--dim);text-align:center;margin-top:26vh;font-family:var(--serif);font-size:16px}
   #tip .cruz{font-weight:800;font-size:14px}
@@ -743,7 +745,8 @@ function openCard(d){
   const _t=personType(d);
   const _ico='<svg class="nmico" viewBox="0 0 16 16" fill="'+personColor(_t)+'">'+iconPaths(_t)+'</svg>';
   html+='<div class="nmrow">'+_ico+'<div><div class="nmcat">'+esc(categoriaTexto(d))+'</div>'+
-        '<div class="nm">'+esc(nombreNormal(d.n))+'</div></div></div>';
+        '<div class="nm">'+esc(nombreNormal(d.n))+'</div>'+
+        '<div class="nmanio">'+d.y+' <span class="cruz">\u2020</span></div></div></div>';
   if(tieneFoto(d)){
     html+='<img class="foto show" src="'+fotoGrande(d)+'" alt="" loading="lazy">';
   }
@@ -753,10 +756,8 @@ function openCard(d){
     html+='</dl>';
   }
   const partes=partirRelato(d.d);
-  if(partes.semblanza)
-    html+='<h3 class="relh">Quién era</h3><div class="rel">'+esc(partes.semblanza)+'</div>';
-  if(partes.caso)
-    html+='<h3 class="relh">Qué pasó</h3><div class="rel">'+esc(partes.caso)+'</div>';
+  if(partes.semblanza) html+='<div class="rel">'+esc(partes.semblanza)+'</div>';
+  if(partes.caso)      html+='<div class="rel">'+esc(partes.caso)+'</div>';
   html+='<div class="src">Un aporte a la verdad, vol. '+ROM[d.vol]+', pág. '+d.pg+'.</div>';
   card.innerHTML=html;
   document.getElementById("cx").onclick=closeCard;
