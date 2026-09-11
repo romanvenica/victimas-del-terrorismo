@@ -653,12 +653,7 @@ function drawPlot(items){
   plot.appendChild(svg);
   plot.scrollTop=plot.scrollHeight;
   // en móvil, abrir mostrando el año con más víctimas (donde el gráfico se ve lleno)
-  if(isMobile){
-    let peakY=MINY, peakN=-1;
-    years.forEach(function(y){ if(cntY[y]>peakN){ peakN=cntY[y]; peakY=y; } });
-    const target=centerX[peakY]-plot.clientWidth/2;
-    plot.scrollLeft=Math.max(0,target);
-  } else if(primerDibujo && centerX[1975]!==undefined){
+  if(isMobile && primerDibujo && centerX[1975]!==undefined){
     plot.scrollLeft=Math.max(0, centerX[1975]-plot.clientWidth/2);
   }
   primerDibujo=false;
@@ -869,6 +864,7 @@ function markPerson(d){
   }
 }
 function openCard(d){
+  hideTip();          // con el dedo no llega el mouseleave que lo cerraria
   markPerson(d);
   const lugar=[d.l,d.p].filter(Boolean).join(", ");
   const meta=[];
