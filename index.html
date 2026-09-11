@@ -106,7 +106,9 @@
   .card .meta dd{margin:0}
   .card .foto{display:none;width:100%;max-width:260px;border-radius:8px;margin:2px 0 16px;border:1px solid var(--line)}
   .card .foto.show{display:block}
-  .card .rel{border-top:1px solid var(--line);padding-top:15px;margin-top:6px;font-family:var(--serif);
+  .card .relh{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:#c9bda9;margin:22px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+  .card .rel{margin:0;font-family:var(--serif);
     font-size:14.5px;line-height:1.62;color:#d8cfc0;white-space:pre-wrap}
   .card .src{margin-top:18px;color:var(--dim);font-size:12.5px;font-weight:500}
   .empty{color:var(--dim);text-align:center;margin-top:26vh;font-family:var(--serif);font-size:16px}
@@ -689,6 +691,17 @@ plot.addEventListener("click",function(e){
 
 const card=document.getElementById("card"), scrim=document.getElementById("scrim");
 const MES=["","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+// El libro arma cada ficha en dos bloques: "CASO [n] —" el hecho y
+// "SEMBLANZA —" la biografía. Se separan para mostrar primero quién era.
+const RE_CASO=/^CASO\s*\[?\d*\]?\s*[—–-]\s*/;
+function partirRelato(txt){
+  const s=String(txt||"");
+  const i=s.indexOf("SEMBLANZA");
+  const caso=(i<0 ? s : s.slice(0,i)).trim().replace(RE_CASO,"").trim();
+  const semblanza=i<0 ? "" : s.slice(i).trim().replace(/^SEMBLANZA\s*[—–-]\s*/,"");
+  return {caso:caso, semblanza:semblanza};
+}
 const ROM=["","I","II","III"];
 function fmtFecha(f){ const p=f.split("-"); return (+p[2])+" de "+MES[+p[1]]+" de "+p[0]; }
 function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}); }
@@ -739,7 +752,11 @@ function openCard(d){
     meta.forEach(function(m){ html+='<dt>'+m[0]+'</dt><dd>'+esc(m[1])+'</dd>'; });
     html+='</dl>';
   }
-  if(d.d) html+='<div class="rel">'+esc(d.d)+'</div>';
+  const partes=partirRelato(d.d);
+  if(partes.semblanza)
+    html+='<h3 class="relh">Quién era</h3><div class="rel">'+esc(partes.semblanza)+'</div>';
+  if(partes.caso)
+    html+='<h3 class="relh">Qué pasó</h3><div class="rel">'+esc(partes.caso)+'</div>';
   html+='<div class="src">Un aporte a la verdad, vol. '+ROM[d.vol]+', pág. '+d.pg+'.</div>';
   card.innerHTML=html;
   document.getElementById("cx").onclick=closeCard;
