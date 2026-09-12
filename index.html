@@ -1024,6 +1024,7 @@ function openCard(d){
   if(d.fu) meta.push(["Condición",d.fu]);
   if(d.edad!==null && d.edad!==undefined) meta.push(["Edad",d.edad+" años"]);
   if(d.t)  meta.push(["Tipo de hecho",d.t]);
+  if(d.org) meta.push(["Responsable",d.org]);
   let html="";
   html+='<div class="grip"></div>';
   html+='<button class="x" id="cx">&times;</button>';
