@@ -431,7 +431,9 @@ function drawList(){
         : '<span class="lhueco"></span>')+
       '<svg viewBox="0 0 16 16" fill="'+personColor(t)+'">'+iconPaths(t)+'</svg>'+
       '<span>'+esc(d.n)+'</span><span class="ly">'+d.y+'</span>';
-    row.addEventListener("click",function(){ openCard(d); });
+    // desde el listado la ficha se abre encima: el panel queda como estaba,
+    // con la búsqueda y el scroll intactos para seguir mirando nombres
+    row.addEventListener("click",function(){ openCard(d,true); });
     row.addEventListener("mouseenter",function(e){ showTip(e,d); });
     row.addEventListener("mousemove",function(e){ moveTip(e); });
     row.addEventListener("mouseleave",hideTip);
@@ -1013,9 +1015,9 @@ function markPerson(d){
     }
   }
 }
-function openCard(d){
+function openCard(d, dejarPanel){
   hideTip();          // con el dedo no llega el mouseleave que lo cerraria
-  cerrarPaneles();    // que la ficha no quede tapada por el panel
+  if(!dejarPanel) cerrarPaneles();   // que la ficha no quede tapada por el panel
   markPerson(d);
   const lugar=[d.l,d.p].filter(Boolean).join(", ");
   const meta=[];
@@ -1053,7 +1055,11 @@ function openCard(d){
   card.classList.add("show"); scrim.classList.add("show");
 }
 function closeCard(){
-  card.classList.remove("show"); scrim.classList.remove("show");
+  card.classList.remove("show");
+  // si el listado o los filtros siguen abiertos, el fondo oscuro se queda con ellos
+  const panelAbierto = panelFiltros.classList.contains("abierto") ||
+                       panelLista.classList.contains("abierto");
+  if(!panelAbierto) scrim.classList.remove("show");
 }
 scrim.onclick=function(){ cerrarPaneles(); closeCard(); };
 // en celular la ficha se cierra tocándola en cualquier parte, sin buscar la ×
