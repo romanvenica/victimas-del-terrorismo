@@ -588,6 +588,10 @@ function drawPlot(items){
   const isMobile=window.matchMedia("(max-width:760px)").matches;
   const cajaW=Math.max(280, plot.clientWidth-40);
   const cajaH=Math.max(120, Math.max(220, plot.clientHeight)-44);
+  // aire libre arriba de la columna más alta. es la única parte de la columna
+  // que queda tocable para seleccionar el año, porque sobre las figuras el
+  // toque abre la ficha de la persona: en el celular tiene que entrar un dedo
+  const AIRE = isMobile ? 64 : 30;
 
   // medidas completas del dibujo para una escala dada
   function medidas(escala){
@@ -605,7 +609,7 @@ function drawPlot(items){
       filas=Math.max(filas,Math.ceil(c/pr));
     });
     return {escala:escala,S:S,CELL:CELL,GAP:GAP,perRow:perRow,colW:colW,
-            ancho:ancho-GAP+pad, alto:filas*CELL+30, filas:filas};
+            ancho:ancho-GAP+pad, alto:filas*CELL+AIRE, filas:filas};
   }
 
   // con pocas personas sobra lugar: agrandar hasta llenar el ancho, sin
@@ -636,7 +640,7 @@ function drawPlot(items){
   // si el dibujo no llena el ancho, centrarlo en vez de dejarlo pegado a la izquierda
   const offX=Math.max(0,(W-contentW)/2);
   if(offX>0) years.forEach(function(y){ centerX[y]+=offX; });
-  const contentH=maxRows*CELL+30;               // alto real que ocupan las figuras
+  const contentH=maxRows*CELL+AIRE;            // alto real que ocupan las figuras
   // en celular el alto se calcula contra el hueco real de la caja (sin el padding),
   // asi cuando el dibujo entra no queda un scroll vertical hacia arriba sobre el vacio
   const disponible=plot.clientHeight-20;
