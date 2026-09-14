@@ -108,8 +108,8 @@
   .zoombar button:disabled{opacity:.35;cursor:default}
   .zoombar svg{width:19px;height:19px}
   /* columna de año: se sombrea al elegirla */
-  rect.yearbg{fill:transparent;cursor:pointer}
-  rect.yearbg:hover{fill:rgba(232,224,212,.05)}
+  /* solo marca la columna elegida: no se toca, se elige con el año de abajo */
+  rect.yearbg{fill:transparent;pointer-events:none}
   rect.yearbg.on{fill:rgba(232,224,212,.11)}
   .scrim{position:fixed;inset:0;background:rgba(6,4,2,.62);display:none;z-index:9}
   .scrim.show{display:block}
@@ -123,6 +123,7 @@
   .card .nmcat{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c9bda9;margin-bottom:3px}
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
   .card .cruznm{width:11px;height:17px;margin-left:9px;vertical-align:-2px;flex:none}
+  .card .nm .junto{white-space:nowrap}
   .card .meta .cruz{font-weight:800;font-size:15px;color:#c9bda9}
   .card .meta{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:18px 0;font-size:13.5px}
   .card .meta dt{color:var(--dim);font-weight:600}
@@ -604,10 +605,7 @@ function drawPlot(items){
   const isMobile=window.matchMedia("(max-width:760px)").matches;
   const cajaW=Math.max(280, plot.clientWidth-40);
   const cajaH=Math.max(120, Math.max(220, plot.clientHeight)-44);
-  // aire libre arriba de la columna más alta. es la única parte de la columna
-  // que queda tocable para seleccionar el año, porque sobre las figuras el
-  // toque abre la ficha de la persona: en el celular tiene que entrar un dedo
-  const AIRE = isMobile ? 64 : 30;
+  const AIRE = 30;   // aire libre arriba de la columna más alta
 
   // medidas completas del dibujo para una escala dada
   function medidas(escala){
@@ -714,7 +712,6 @@ function drawPlot(items){
     bg.setAttribute("y",0);
     bg.setAttribute("width",colWY[y]+6);
     bg.setAttribute("height",axisY);
-    bg.addEventListener("click",function(){ if(!dragMoved) elegirAnio(y); });
     svg.appendChild(bg);
   });
 
@@ -1035,6 +1032,14 @@ function markPerson(d){
     }
   }
 }
+// la cruz va pegada a la ultima palabra del nombre: si el nombre ocupa dos
+// renglones baja con ella, nunca queda sola colgando en el renglon siguiente
+function nombreConCruz(raw){
+  const nom=nombreNormal(raw), corte=nom.lastIndexOf(" ");
+  const antes=corte<0 ? "" : esc(nom.slice(0,corte+1));
+  const ultima=corte<0 ? nom : nom.slice(corte+1);
+  return antes+'<span class="junto">'+esc(ultima)+CRUZ_NM+'</span>';
+}
 const CRUZ_NM='<svg class="cruznm" viewBox="0 0 24 36" aria-hidden="true">'+
   '<rect x="9.2" y="0" width="5.6" height="36" fill="#fff"></rect>'+
   '<rect x="1.6" y="8.6" width="20.8" height="5.6" fill="#fff"></rect></svg>';
@@ -1056,7 +1061,7 @@ function openCard(d, dejarPanel){
   const _t=personType(d);
   const _ico='<svg class="nmico" viewBox="0 0 16 16" fill="'+personColor(_t)+'">'+iconPaths(_t)+'</svg>';
   html+='<div class="nmrow">'+_ico+'<div><div class="nmcat">'+esc(categoriaTexto(d))+'</div>'+
-        '<div class="nm">'+esc(nombreNormal(d.n))+CRUZ_NM+'</div></div></div>';
+        '<div class="nm">'+nombreConCruz(d.n)+'</div></div></div>';
   if(tieneFoto(d)){
     html+='<img class="foto show" src="'+fotoGrande(d)+'" alt="" loading="lazy">';
   }
