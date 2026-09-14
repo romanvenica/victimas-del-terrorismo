@@ -20,7 +20,9 @@
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
   body{display:flex;height:100vh;flex-direction:column;overflow:hidden}
   header{padding:14px 40px;border-bottom:1px solid var(--line);text-align:center}
-  .titulo{display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap}
+  .titulo{display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;
+    cursor:pointer;transition:opacity .15s}
+  .titulo:hover{opacity:.82}
   .cruzblanca{width:22px;height:33px;flex:none}
   h1{font-family:var(--serif);font-weight:500;font-size:24px;letter-spacing:.2px;margin:0;line-height:1.2}
   .sub{color:var(--dim);font-size:13.5px;margin-top:8px;max-width:70ch;line-height:1.5}
@@ -199,7 +201,7 @@
 </head>
 <body>
 <header>
-  <div class="titulo">
+  <div class="titulo" id="inicio" role="button" tabindex="0" title="Volver al inicio">
     <h1>Víctimas del terrorismo comunista en Argentina</h1>
     <svg class="cruzblanca" viewBox="0 0 24 36" aria-hidden="true">
       <rect x="9.2" y="0" width="5.6" height="36" fill="#fff"></rect>
@@ -370,6 +372,20 @@ function buildFilters(){
 document.getElementById("all").onclick=function(){
   FILTERS.forEach(function(f){ state[f.key].clear(); }); soltarAnio(); render();
 };
+
+// tocar el título vuelve al principio: las 1050 otra vez, sin filtros ni búsqueda
+function volverAlInicio(){
+  FILTERS.forEach(function(f){ state[f.key].clear(); });
+  anioSel=null;
+  lq.value=""; marcarBorrar();
+  cerrarPaneles(); closeCard();
+  render();
+}
+const titulo=document.getElementById("inicio");
+titulo.addEventListener("click",volverAlInicio);
+titulo.addEventListener("keydown",function(e){
+  if(e.key==="Enter" || e.key===" "){ e.preventDefault(); volverAlInicio(); }
+});
 
 function buildLegend(){
   const items=[["civil","Civiles"],["ffaa","Fuerzas Armadas"],
