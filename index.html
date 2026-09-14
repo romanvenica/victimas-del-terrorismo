@@ -491,10 +491,10 @@ function vzMinimo(){
 let vz=1, lienW=0, lienH=0;
 function lienzo(){ return plot.querySelector(".lienzo"); }
 // encuadre de arranque para los datos que haya en pantalla: se ve de una
-// alrededor del 60% del ancho del dibujo, sin agrandar más que el tamaño base
+// alrededor del 50% del ancho del dibujo, sin agrandar más que el tamaño base
 function vzDefecto(){
   if(!lienW) return 1;
-  return Math.min(1, Math.max(vzMinimo(), hueco().w/(0.6*lienW)));
+  return Math.min(1, Math.max(vzMinimo(), hueco().w/(0.5*lienW)));
 }
 function hueco(){   // el espacio visible del contenedor, sin contar sus márgenes
   const cs=getComputedStyle(plot);
