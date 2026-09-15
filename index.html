@@ -1196,6 +1196,12 @@ function init(){
   actualizarLupas();
   render();
 }
+// se sube de número en cada cambio: sirve para saber si el navegador
+// está mostrando la versión nueva o te quedó una vieja en memoria
+const VERSION="v1";
+console.log("%cVíctimas del terrorismo · "+VERSION,
+            "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
+
 // cargar los datos desde el archivo externo y arrancar
 fetch("fotos/indice.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
@@ -1208,7 +1214,10 @@ fetch("fotos/indice.json",{cache:"no-cache"})
 
 fetch("victimas.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
-  .then(function(j){ DATA=j; init(); })
+  .then(function(j){
+    DATA=j; init();
+    console.log(VERSION+" · "+DATA.length+" personas · "+FOTOS.size+" fotos");
+  })
   .catch(function(e){
     document.getElementById("plot").innerHTML=
       '<div class="empty">No se pudo cargar victimas.json.<br>Abrí la web desde un servidor o desde internet, no con doble clic.</div>';
