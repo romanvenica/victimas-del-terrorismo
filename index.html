@@ -149,10 +149,13 @@
     white-space:nowrap;display:none;transform:translate(-50%,-118%)}
   /* cartel de entrada: se va al tocar en cualquier lado */
   .intro{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
-    background:rgba(6,4,2,.95);cursor:pointer;padding:24px;
+    background:rgba(6,4,2,.55);cursor:pointer;padding:24px;
     transition:opacity .45s ease,visibility .45s ease}
   .intro.oculto{opacity:0;visibility:hidden}
-  .introcaja{max-width:640px;text-align:center}
+  /* cartel flotante: el gráfico se sigue viendo detrás, apenas velado */
+  .introcaja{max-width:640px;text-align:center;background:rgba(20,16,12,.94);
+    border:1px solid var(--line);border-radius:6px;padding:36px 40px;
+    box-shadow:0 18px 60px rgba(0,0,0,.6)}
   .introfotos{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:30px}
   .introfotos img{width:78px;height:78px;object-fit:cover;border-radius:4px;
     border:1px solid var(--line);filter:grayscale(1);opacity:.92}
@@ -161,6 +164,7 @@
   .introtocar{margin-top:30px;font-family:var(--sans);font-size:11px;font-weight:600;
     letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
   @media (max-width:760px){
+    .introcaja{padding:26px 20px}
     .introfotos img{width:56px;height:56px}
     .intro p{font-size:17px}
     .intro p.chica{font-size:15px}
@@ -1242,7 +1246,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.02";
+const VERSION="v1.03";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
