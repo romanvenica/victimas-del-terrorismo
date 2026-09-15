@@ -160,9 +160,8 @@
   .introfotos img{width:78px;height:78px;object-fit:cover;border-radius:4px;
     border:1px solid var(--line);filter:grayscale(1);opacity:.92}
   .intro p{font-family:var(--serif);color:var(--ink);font-size:20px;line-height:1.6;margin:0 0 15px}
+  .intro p:last-child{margin-bottom:0}
   .intro p.chica{font-size:17px;color:#c9bda9}
-  .introtocar{margin-top:30px;font-family:var(--sans);font-size:11px;font-weight:600;
-    letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
   @media (max-width:760px){
     .introcaja{padding:26px 20px}
     .introfotos img{width:56px;height:56px}
@@ -232,7 +231,6 @@
     <p>En memoria de los 1050 argentinos asesinados por grupos terroristas en los 70&rsquo;</p>
     <p class="chica">Y por aquellos militares que dieron su vida defendiendo la patria.</p>
     <p class="chica">Y los que hoy están en prisión.</p>
-    <div class="introtocar">Tocá en cualquier lugar para entrar</div>
   </div>
 </div>
 <header>
@@ -1246,7 +1244,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.03";
+const VERSION="v1.04";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
