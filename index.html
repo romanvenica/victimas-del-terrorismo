@@ -117,8 +117,16 @@
     border-left:1px solid var(--line);transform:translateX(100%);transition:transform .22s ease;z-index:10;
     padding:26px 28px;overflow-y:auto}
   .card.show{transform:none}
-  .card .x{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--dim);font-size:22px;cursor:pointer;line-height:1}
-  .card .nmrow{display:flex;align-items:center;gap:13px;margin:6px 40px 14px 0}
+  /* la × viaja con el scroll: la franja es de alto cero para no correr el texto,
+     y solo el botón recibe los clicks */
+  .card .xwrap{position:sticky;top:0;height:0;z-index:4;text-align:right;pointer-events:none}
+  .card .x{pointer-events:auto;width:38px;height:38px;padding:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:rgba(20,16,12,.92);border:1px solid var(--line);border-radius:50%;
+    color:var(--dim);font-size:28px;line-height:1;cursor:pointer;
+    transition:color .12s,background .12s}
+  .card .x:hover{color:var(--ink);background:#241d16}
+  .card .nmrow{display:flex;align-items:center;gap:13px;margin:6px 46px 14px 0}
   .card .nmico{width:34px;height:34px;flex:none}
   .card .nmcat{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c9bda9;margin-bottom:3px}
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
@@ -220,6 +228,9 @@
       z-index:13;cursor:pointer}
     .card.show{transform:none}
     .card .grip{display:block;width:38px;height:4px;background:var(--dim);border-radius:2px;margin:2px auto 12px}
+    .card .xwrap{margin-top:-30px}
+    .card .x{width:34px;height:34px;font-size:25px}
+    .card .nmrow{margin-right:40px}
   }
   .card .grip{display:none}
 </style>
@@ -1101,7 +1112,7 @@ function openCard(d, dejarPanel){
   if(d.org) meta.push(["Responsable",d.org]);
   let html="";
   html+='<div class="grip"></div>';
-  html+='<button class="x" id="cx">&times;</button>';
+  html+='<div class="xwrap"><button class="x" id="cx">&times;</button></div>';
   const _t=personType(d);
   const _ico='<svg class="nmico" viewBox="0 0 16 16" fill="'+personColor(_t)+'">'+iconPaths(_t)+'</svg>';
   html+='<div class="nmrow">'+_ico+'<div><div class="nmcat">'+esc(categoriaTexto(d))+'</div>'+
@@ -1244,7 +1255,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.05";
+const VERSION="v1.06";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
