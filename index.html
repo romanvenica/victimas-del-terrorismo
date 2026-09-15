@@ -411,8 +411,11 @@ let anioSel=null;  // año elegido al tocar una columna
 function render(){
   buildFilters();
   buildChips();
-  // en celular el tamaño se reacomoda a lo que quedó filtrado
-  if(window.matchMedia("(max-width:760px)").matches) zoomManual=false;
+  // al cambiar lo que se muestra, el encuadre vuelve al automático:
+  // el zoom que puso el usuario servía para el conjunto anterior, no para este.
+  // en celular se arranca del mínimo, que es desde donde crece hasta llenar el alto
+  zoom = window.matchMedia("(max-width:760px)").matches ? ZOOM_MIN : ZOOM_INICIAL;
+  zoomManual=false;
   const shown=DATA.filter(passes);
   drawPlot(shown);
   listPool=shown;
@@ -474,7 +477,8 @@ const GAP_BASE=10;     // separación entre columnas
 const EMPTYW_BASE=3;   // ancho de un año sin víctimas
 const ZOOM_MIN=0.3, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
 const ZOOM_AUTO_MAX=2.75;   // tope del agrandado automatico cuando sobra lugar
-let zoom=0.8;
+const ZOOM_INICIAL=0.8;
+let zoom=ZOOM_INICIAL;
 let zoomManual=false;      // al tocar las lupas o pellizcar, manda el usuario
 let zoomRender=1;          // escala con la que se dibujó de verdad
 let baseY=0;               // y del eje dentro del svg: las figuras se apoyan ahí
