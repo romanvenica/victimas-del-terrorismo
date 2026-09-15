@@ -147,6 +147,9 @@
   #tip{position:fixed;pointer-events:none;z-index:20;background:#000;border:1px solid var(--line);
     color:var(--ink);font-family:var(--sans);font-size:16px;padding:11px 15px;border-radius:5px;
     white-space:nowrap;display:none;transform:translate(-50%,-118%)}
+  /* número de versión: sirve para saber si el navegador tiene la última */
+  .ver{position:fixed;top:10px;right:14px;z-index:30;pointer-events:none;
+    font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--dim)}
   .fabf{display:none}
   /* ===================== MÓVIL ===================== */
   .mobilebar{display:none}
@@ -199,11 +202,13 @@
       z-index:13;cursor:pointer}
     .card.show{transform:none}
     .card .grip{display:block;width:38px;height:4px;background:var(--dim);border-radius:2px;margin:2px auto 12px}
+    .ver{display:none}
   }
   .card .grip{display:none}
 </style>
 </head>
 <body>
+<div class="ver" id="ver"></div>
 <header>
   <div class="titulo" id="inicio" role="button" tabindex="0" title="Volver al inicio">
     <h1>Víctimas del terrorismo comunista en Argentina</h1>
@@ -1186,6 +1191,12 @@ function init(){
   actualizarLupas();
   render();
 }
+// sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
+const VERSION="v2";
+document.getElementById("ver").textContent=VERSION;
+console.log("%cVíctimas del terrorismo · "+VERSION,
+            "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
+
 // cargar los datos desde el archivo externo y arrancar
 fetch("fotos/indice.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
@@ -1198,7 +1209,10 @@ fetch("fotos/indice.json",{cache:"no-cache"})
 
 fetch("victimas.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
-  .then(function(j){ DATA=j; init(); })
+  .then(function(j){
+    DATA=j; init();
+    console.log(VERSION+" · "+DATA.length+" personas · "+FOTOS.size+" fotos");
+  })
   .catch(function(e){
     document.getElementById("plot").innerHTML=
       '<div class="empty">No se pudo cargar victimas.json.<br>Abrí la web desde un servidor o desde internet, no con doble clic.</div>';
