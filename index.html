@@ -638,11 +638,23 @@ function drawPlot(items){
   // pasarse de alto ni de un tamaño de figura razonable
   let plan=medidas(zoom);
   if(!zoomManual){
-    // en celular el ancho no frena, porque se arrastra de costado: manda el alto
-    for(let e=zoom+0.05; e<=ZOOM_AUTO_MAX; e+=0.05){
-      const t=medidas(e);
-      if(t.alto>cajaH || (!isMobile && t.ancho>cajaW)) break;
-      plan=t;
+    if(isMobile){
+      // en celular el ancho no frena, porque se arrastra de costado: manda el alto
+      for(let e=zoom+0.05; e<=ZOOM_AUTO_MAX; e+=0.05){
+        const t=medidas(e);
+        if(t.alto>cajaH) break;
+        plan=t;
+      }
+    } else {
+      // la escala más grande que entre entera, agrandando o achicando. antes solo
+      // podía agrandar: si el tamaño de arranque ya no entraba, quedaba cortado
+      let entra=null;
+      for(let e=ZOOM_MIN; e<=ZOOM_AUTO_MAX+0.001; e+=0.05){
+        const t=medidas(e);
+        if(t.alto<=cajaH && t.ancho<=cajaW) entra=t; else if(entra) break;
+      }
+      plan = entra || medidas(ZOOM_MIN);
+      zoom = plan.escala;    // las lupas arrancan desde lo que se está viendo
     }
   }
 
@@ -1192,7 +1204,7 @@ function init(){
   render();
 }
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v2";
+const VERSION="v3";
 document.getElementById("ver").textContent=VERSION;
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
