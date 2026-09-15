@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Víctimas del terrorismo comunista en Argentina</title>
+<title>Víctimas del terrorismo en Argentina</title>
 <style>
   :root{
     --bg:#14100c; --panel:#1c1712; --ink:#e8e0d4; --dim:#a99d8b;
@@ -147,6 +147,24 @@
   #tip{position:fixed;pointer-events:none;z-index:20;background:#000;border:1px solid var(--line);
     color:var(--ink);font-family:var(--sans);font-size:16px;padding:11px 15px;border-radius:5px;
     white-space:nowrap;display:none;transform:translate(-50%,-118%)}
+  /* cartel de entrada: se va al tocar en cualquier lado */
+  .intro{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+    background:rgba(6,4,2,.95);cursor:pointer;padding:24px;
+    transition:opacity .45s ease,visibility .45s ease}
+  .intro.oculto{opacity:0;visibility:hidden}
+  .introcaja{max-width:640px;text-align:center}
+  .introfotos{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:30px}
+  .introfotos img{width:78px;height:78px;object-fit:cover;border-radius:4px;
+    border:1px solid var(--line);filter:grayscale(1);opacity:.92}
+  .intro p{font-family:var(--serif);color:var(--ink);font-size:20px;line-height:1.6;margin:0 0 15px}
+  .intro p.chica{font-size:17px;color:#c9bda9}
+  .introtocar{margin-top:30px;font-family:var(--sans);font-size:11px;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  @media (max-width:760px){
+    .introfotos img{width:56px;height:56px}
+    .intro p{font-size:17px}
+    .intro p.chica{font-size:15px}
+  }
   .fabf{display:none}
   /* ===================== MÓVIL ===================== */
   .mobilebar{display:none}
@@ -204,9 +222,18 @@
 </style>
 </head>
 <body>
+<div class="intro" id="intro">
+  <div class="introcaja">
+    <div class="introfotos" id="introfotos"></div>
+    <p>En memoria de los 1050 argentinos asesinados por grupos terroristas en los 70&rsquo;</p>
+    <p class="chica">Y por aquellos militares que dieron su vida defendiendo la patria.</p>
+    <p class="chica">Y los que hoy están en prisión.</p>
+    <div class="introtocar">Tocá en cualquier lugar para entrar</div>
+  </div>
+</div>
 <header>
   <div class="titulo" id="inicio" role="button" tabindex="0" title="Volver al inicio">
-    <h1>Víctimas del terrorismo comunista en Argentina</h1>
+    <h1>Víctimas del terrorismo en Argentina</h1>
     <svg class="cruzblanca" viewBox="0 0 24 36" aria-hidden="true">
       <rect x="9.2" y="0" width="5.6" height="36" fill="#fff"></rect>
       <rect x="1.6" y="8.6" width="20.8" height="5.6" fill="#fff"></rect>
@@ -1198,8 +1225,24 @@ function init(){
   actualizarLupas();
   render();
 }
+// arriba del cartel de entrada van los chicos de los que tenemos foto
+function pintarIntroFotos(){
+  const caja=document.getElementById("introfotos");
+  if(!caja || !DATA.length || !FOTOS.size) return;
+  caja.innerHTML=DATA.filter(function(d){ return d.nino && tieneFoto(d); })
+    .sort(function(a,b){ return a.y-b.y; })
+    .map(function(d){
+      const nom=esc(nombreNormal(d.n));
+      return '<img src="'+fotoThumb(d)+'" alt="'+nom+'" title="'+nom+'">';
+    }).join("");
+}
+const intro=document.getElementById("intro");
+function cerrarIntro(){ intro.classList.add("oculto"); }
+intro.addEventListener("click",cerrarIntro);
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
+
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.01";
+const VERSION="v1.02";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
@@ -1208,6 +1251,7 @@ fetch("fotos/indice.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
   .then(function(j){
     FOTOS=new Set(j);
+    pintarIntroFotos();
     if(DATA.length) drawList();
     setTimeout(precargarMiniaturas,1200);
   })
@@ -1216,7 +1260,7 @@ fetch("fotos/indice.json",{cache:"no-cache"})
 fetch("victimas.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
   .then(function(j){
-    DATA=j; init();
+    DATA=j; init(); pintarIntroFotos();
     console.log(VERSION+" · "+DATA.length+" personas · "+FOTOS.size+" fotos");
   })
   .catch(function(e){
