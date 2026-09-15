@@ -1093,9 +1093,12 @@ function closeCard(){
   if(!panelAbierto) scrim.classList.remove("show");
 }
 scrim.onclick=function(){ cerrarPaneles(); closeCard(); };
-// en celular la ficha se cierra tocándola en cualquier parte, sin buscar la ×
+// la ficha se cierra tocándola en cualquier parte, sin tener que buscar la ×
 card.addEventListener("click",function(){
-  if(window.matchMedia("(max-width:760px)").matches) closeCard();
+  // salvo que se esté copiando texto: ahí el click es para seleccionar, no para cerrar
+  const sel=window.getSelection();
+  if(sel && sel.toString().trim()!=="") return;
+  closeCard();
 });
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeCard(); });
 document.getElementById("fab").onclick=function(){ document.getElementById("side").classList.toggle("open"); };
