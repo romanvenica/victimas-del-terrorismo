@@ -180,13 +180,6 @@
   .intro p{font-family:var(--serif);color:var(--ink);font-size:20px;line-height:1.6;margin:0 0 15px}
   .intro p:last-child{margin-bottom:0}
   .intro p.chica{font-size:17px;color:#c9bda9}
-  /* celeste, blanco y celeste, como las franjas de la bandera */
-  .bandera{
-    color:#74ACDF;font-weight:600;
-    background:linear-gradient(180deg,#74ACDF 0 34%,#ffffff 34% 66%,#74ACDF 66%);
-    -webkit-background-clip:text;background-clip:text;
-    -webkit-text-fill-color:transparent
-  }
   @media (max-width:760px){
     .introcaja{padding:26px 20px}
     .introfotos img{width:56px;height:56px}
@@ -258,7 +251,7 @@
     <div class="introfotos" id="introfotos"></div>
     <p>En memoria de los 1050 argentinos asesinados por grupos terroristas en los años 70&rsquo;</p>
     <p class="chica">Por los militares y policías que dieron su vida por defender a nuestro país.</p>
-    <p class="chica">Y por aquellos <span class="bandera">héroes</span> que todavía están en prisión.</p>
+    <p class="chica">Y por aquellos HÉROES que todavía están en prisión.</p>
   </div>
 </div>
 <header>
@@ -1275,7 +1268,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.18";
+const VERSION="v1.19";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
