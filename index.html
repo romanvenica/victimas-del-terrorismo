@@ -166,7 +166,7 @@
     box-shadow:0 18px 60px rgba(0,0,0,.6)}
   .introfotos{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:30px}
   .introfotos img{width:78px;height:78px;object-fit:cover;border-radius:4px;
-    border:1px solid var(--line);filter:grayscale(1);opacity:.92}
+    border:1px solid var(--line)}
   .intro p{font-family:var(--serif);color:var(--ink);font-size:20px;line-height:1.6;margin:0 0 15px}
   .intro p:last-child{margin-bottom:0}
   .intro p.chica{font-size:17px;color:#c9bda9}
@@ -1257,7 +1257,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.09";
+const VERSION="v1.10";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
