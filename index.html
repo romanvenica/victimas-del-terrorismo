@@ -166,7 +166,17 @@
     box-shadow:0 18px 60px rgba(0,0,0,.6)}
   .introfotos{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:30px}
   .introfotos img{width:78px;height:78px;object-fit:cover;border-radius:4px;
-    border:1px solid var(--line)}
+    border:1px solid var(--line);display:block}
+  /* el nombre aparece flotando al pasar el mouse, como en el gráfico */
+  .introfoto{position:relative;display:inline-block;line-height:0}
+  .introfoto::after{
+    content:attr(data-nom);position:absolute;left:50%;bottom:calc(100% + 9px);
+    transform:translateX(-50%);white-space:nowrap;z-index:2;
+    background:#000;border:1px solid var(--line);border-radius:4px;
+    color:var(--ink);font-family:var(--sans);font-size:13.5px;line-height:1.2;
+    padding:7px 11px;opacity:0;pointer-events:none;transition:opacity .12s
+  }
+  .introfoto:hover::after{opacity:1}
   .intro p{font-family:var(--serif);color:var(--ink);font-size:20px;line-height:1.6;margin:0 0 15px}
   .intro p:last-child{margin-bottom:0}
   .intro p.chica{font-size:17px;color:#c9bda9}
@@ -1248,7 +1258,8 @@ function pintarIntroFotos(){
     .sort(function(a,b){ return a.y-b.y; })
     .map(function(d){
       const nom=esc(nombreNormal(d.n));
-      return '<img src="'+fotoThumb(d)+'" alt="'+nom+'" title="'+nom+'">';
+      return '<span class="introfoto" data-nom="'+nom+'">'+
+             '<img src="'+fotoThumb(d)+'" alt="'+nom+'"></span>';
     }).join("");
 }
 const intro=document.getElementById("intro");
@@ -1257,7 +1268,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.11";
+const VERSION="v1.12";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
