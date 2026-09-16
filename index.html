@@ -1131,7 +1131,9 @@ function openCard(d, dejarPanel){
   const partes=partirRelato(d.d);
   if(partes.semblanza) html+='<div class="rel">'+esc(partes.semblanza)+'</div>';
   if(partes.caso)      html+='<div class="rel">'+esc(partes.caso)+'</div>';
-  html+='<div class="src">Un aporte a la verdad, vol. '+ROM[d.vol]+', pág. '+d.pg+'.</div>';
+  // el autor es el mismo para las 1050, así que va acá y no repetido en el json
+  html+='<div class="src">Un aporte a la verdad, vol. '+ROM[d.vol]+', pág. '+d.pg+
+        ' \u2014 Jorge Héctor Di Pasquale.</div>';
   card.innerHTML=html;
   card.scrollTop=0;   // siempre desde arriba, no donde quedo la ficha anterior
   document.getElementById("cx").onclick=closeCard;
@@ -1255,7 +1257,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.08";
+const VERSION="v1.09";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
