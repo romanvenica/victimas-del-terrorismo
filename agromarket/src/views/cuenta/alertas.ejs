@@ -1,0 +1,11 @@
+<%- include('../partials/head') %>
+<section class="panel panel-medio">
+  <h1>Alertas de búsqueda</h1>
+  <p class="secundario">Te avisamos por email cuando se publica una máquina que coincide. Creá una desde el buscador con el botón "Crear alerta con estos filtros".</p>
+  <% if (!alertas.length) { %><div class="vacio"><p>No tenés alertas.</p><a class="btn btn-primario" href="/buscar">Ir al buscador</a></div><% } %>
+  <% for (const al of alertas) { %>
+    <div class="fila-aviso"><div class="fila-info"><h3><%= al.nombre %></h3><p class="secundario"><%= Object.entries(al.filtros).filter(([k, v]) => v).map(([k, v]) => `${k}: ${v}`).join(' · ') || 'Todas las máquinas' %></p></div>
+    <form method="post" action="/alertas/<%= al.id %>/borrar"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="enlace enlace-peligro">Borrar</button></form></div>
+  <% } %>
+</section>
+<%- include('../partials/foot') %>

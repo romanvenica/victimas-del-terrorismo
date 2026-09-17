@@ -1,0 +1,91 @@
+<%- include('partials/head') %>
+<% const destacado = aviso.destacado_hasta && new Date(aviso.destacado_hasta) > new Date(); %>
+<% const ETIQ = { potencia_hp: 'Potencia (HP)', traccion: 'Tracción', transmision: 'Transmisión', cabina: 'Cabina', ancho_plataforma_m: 'Plataforma (m)', capacidad_tolva_l: 'Tolva (l)', tipo_trilla: 'Trilla', cantidad_surcos: 'Surcos', distancia_surcos_cm: 'Distancia entre surcos (cm)', tipo_siembra: 'Tipo de siembra', ancho_labor_m: 'Ancho de labor (m)', capacidad_tanque_l: 'Tanque (l)', ancho_botalon_m: 'Botalón (m)', autopropulsada: 'Autopropulsada', tipo: 'Tipo', capacidad_l: 'Capacidad (l)', capacidad: 'Capacidad', ejes: 'Ejes', caudal: 'Caudal', compatible_con: 'Compatible con' }; %>
+<% if (aviso.estado !== 'activo') { %><div class="aviso-flash aviso-flash--info">Este aviso está en estado <strong><%= aviso.estado.replace('_', ' ') %></strong> y solo lo ves vos<%= aviso.motivo_rechazo ? ': ' + aviso.motivo_rechazo : '' %>.</div><% } %>
+<nav class="migas"><a href="/">Inicio</a> › <a href="/categoria/<%= aviso.categoria_slug %>"><%= aviso.categoria %></a><% if (aviso.marca) { %> › <a href="/buscar?categoria=<%= aviso.categoria_slug %>&marca=<%= aviso.marca_slug %>"><%= aviso.marca %></a><% } %></nav>
+
+<article class="ficha" data-aviso="<%= aviso.id %>">
+  <div class="ficha-galeria" id="galeria">
+    <% if (aviso.fotos.length) { %>
+      <img id="foto-principal" src="<%= aviso.fotos[0].url %>" alt="<%= aviso.titulo %>" width="<%= aviso.fotos[0].ancho %>" height="<%= aviso.fotos[0].alto %>">
+      <% if (aviso.fotos.length > 1) { %><div class="miniaturas"><% aviso.fotos.forEach((f, i) => { %><button type="button" data-src="<%= f.url %>" class="<%= i === 0 ? 'activa' : '' %>"><img src="<%= f.url_miniatura %>" alt="Foto <%= i + 1 %>" loading="lazy"></button><% }) %></div><% } %>
+    <% } else { %><div class="sin-foto sin-foto--grande">Sin fotos</div><% } %>
+  </div>
+
+  <div class="ficha-lateral">
+    <% if (destacado) { %><span class="etiqueta etiqueta--destacado">Destacado</span><% } %>
+    <h1><%= aviso.titulo %></h1>
+    <p class="ficha-precio"><%= fmtPrecio(aviso.precio, aviso.moneda) %><% if (aviso.precio_mas_iva && aviso.precio !== null) { %> <small>+ IVA</small><% } %></p>
+    <p class="ficha-lugar"><%= aviso.localidad ? aviso.localidad + ', ' : '' %><%= aviso.provincia %></p>
+    <ul class="chips">
+      <li><%= aviso.estado_maquina === 'nuevo' ? 'Nuevo' : 'Usado' %></li>
+      <% if (aviso.anio) { %><li>Año <%= aviso.anio %></li><% } %>
+      <% if (aviso.horas_uso !== null && aviso.horas_uso !== undefined) { %><li><%= Number(aviso.horas_uso).toLocaleString('es-AR') %> horas</li><% } %>
+      <% if (aviso.acepta_permuta) { %><li>Acepta permuta</li><% } %>
+      <% if (aviso.acepta_financiacion) { %><li>Financiación</li><% } %>
+    </ul>
+
+    <div class="contacto" id="contacto">
+      <p class="contacto-tel" id="tel-mask"><%= telefonoMask %></p>
+      <% if (aviso.estado === 'activo') { %>
+        <button type="button" class="btn btn-primario btn-bloque" id="btn-ver-tel">Ver teléfono / WhatsApp</button>
+        <div id="contacto-acciones" hidden>
+          <a class="btn btn-whatsapp btn-bloque" id="btn-wa" href="#" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+          <a class="btn btn-fantasma btn-bloque" id="btn-llamar" href="#">Llamar</a>
+        </div>
+        <div id="turnstile-tel" class="turnstile"></div>
+        <p class="contacto-seguridad">Nunca envíes dinero ni señas antes de ver la máquina en persona. <a href="/consejos-de-seguridad">Más consejos</a></p>
+      <% } %>
+    </div>
+
+    <div class="vendedor-caja">
+      <p><a href="/vendedor/<%= aviso.vendedor_slug %>"><strong><%= aviso.vendedor %></strong></a><% if (aviso.vendedor_tipo === 'profesional') { %> <span class="sello">Empresa</span><% } %></p>
+      <p class="secundario"><%= telefonoVerificado ? 'Teléfono verificado · ' : '' %>Publica desde <%= new Date(aviso.vendedor_desde).getFullYear() %> · <%= avisosVendedor %> aviso<%= avisosVendedor === 1 ? '' : 's' %> activo<%= avisosVendedor === 1 ? '' : 's' %></p>
+    </div>
+
+    <div class="ficha-acciones">
+      <% if (esDueno) { %>
+        <a class="btn btn-fantasma" href="/aviso/<%= aviso.id %>/editar">Editar</a>
+        <% if (config.pagosActivos) { %><a class="btn btn-destacar" href="/pagos/destacar/<%= aviso.id %>">Destacar</a><% } %>
+      <% } else { %>
+        <button type="button" class="btn btn-fantasma" id="btn-favorito" data-activo="<%= esFavorito ? '1' : '0' %>"><%= esFavorito ? 'Guardado' : 'Guardar' %></button>
+        <button type="button" class="btn btn-enlace" id="btn-reportar">Reportar</button>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="ficha-detalle">
+    <h2>Descripción</h2>
+    <p class="prosa-usuario"><%= aviso.descripcion %></p>
+    <% const ficha = Object.entries(aviso.ficha).filter(([k, v]) => v); if (ficha.length || aviso.modelo || aviso.marca) { %>
+    <h2>Ficha técnica</h2>
+    <dl class="ficha-tecnica">
+      <% if (aviso.marca) { %><dt>Marca</dt><dd><%= aviso.marca %></dd><% } %>
+      <% if (aviso.modelo) { %><dt>Modelo</dt><dd><%= aviso.modelo %></dd><% } %>
+      <% for (const [k, v] of ficha) { %><dt><%= ETIQ[k] || k %></dt><dd><%= v %></dd><% } %>
+    </dl>
+    <% } %>
+    <p class="secundario">Publicado el <%= aviso.fecha_publicacion ? new Date(aviso.fecha_publicacion).toLocaleDateString('es-AR') : '—' %> · <%= aviso.visitas %> visitas</p>
+  </div>
+</article>
+
+<dialog id="dialogo-reporte" class="dialogo">
+  <form method="dialog">
+    <h2>Reportar este aviso</h2>
+    <label>Motivo<select name="motivo" id="rep-motivo">
+      <option value="telefono_no_responde">El teléfono no responde</option><option value="no_es_el_vendedor">Quien atiende no es el vendedor</option>
+      <option value="pide_sena">Pide seña o transferencia antes de ver la máquina</option><option value="fotos_falsas">Las fotos no son de la máquina</option>
+      <option value="ya_vendido">Ya se vendió</option><option value="precio_enganoso">Precio engañoso</option><option value="otro">Otro</option>
+    </select></label>
+    <label>Comentario (opcional)<textarea id="rep-comentario" maxlength="500" rows="3"></textarea></label>
+    <div id="turnstile-rep" class="turnstile"></div>
+    <div class="dialogo-acciones"><button type="button" class="btn btn-fantasma" data-cerrar>Cancelar</button><button type="button" class="btn btn-primario" id="btn-enviar-reporte">Enviar reporte</button></div>
+  </form>
+</dialog>
+
+<% if (similares.length) { %>
+<section class="seccion"><h2>Similares</h2><div class="grilla"><% for (const a of similares) { %><%- include('partials/card', { a }) %><% } %></div></section>
+<% } %>
+
+<script type="application/ld+json"><%- JSON.stringify({ '@context': 'https://schema.org', '@type': 'Product', name: aviso.titulo, description: aviso.descripcion.slice(0, 300), image: aviso.fotos.map((f) => config.baseUrl + f.url), brand: aviso.marca ? { '@type': 'Brand', name: aviso.marca } : undefined, offers: aviso.precio !== null ? { '@type': 'Offer', price: Number(aviso.precio), priceCurrency: aviso.moneda, itemCondition: aviso.estado_maquina === 'nuevo' ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition', availability: 'https://schema.org/InStock', url: config.baseUrl + '/aviso/' + aviso.id + '/' + aviso.slug } : undefined }) %></script>
+<%- include('partials/foot') %>

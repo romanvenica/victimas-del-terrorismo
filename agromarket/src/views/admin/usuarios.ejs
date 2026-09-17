@@ -1,0 +1,20 @@
+<%- include('../partials/head') %><%- include('_nav') %>
+<h1>Usuarios</h1>
+<form method="get" action="/admin/usuarios" class="buscador-mini buscador-admin"><input type="search" name="q" value="<%= q %>" placeholder="Email, nombre o teléfono"><button type="submit">Buscar</button></form>
+<table class="tabla"><thead><tr><th>Usuario</th><th>Teléfonos</th><th>Rol / tipo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+<% for (const u of usuarios) { %><tr>
+  <td><strong><%= u.nombre %></strong><br><small><%= u.email %><%= u.email_verificado ? ' ✓' : '' %></small><br><small>Alta <%= new Date(u.created_at).toLocaleDateString('es-AR') %> · <%= u.avisos_publicados %> publicados</small><% if (u.empresa) { %><br><small>Empresa: <%= u.empresa.razon_social %> CUIT <%= u.empresa.cuit %> <%= u.empresa.cuit_validado ? '(validado)' : '(sin validar)' %> · plan <%= u.empresa.plan %></small><% } %></td>
+  <td><% for (const t of u.telefonos) { %><small><%= t.numero_e164 %> <%= t.verificado && t.activo ? '✓' : '' %></small><br><% } %></td>
+  <td><%= u.rol %> / <%= u.tipo %></td>
+  <td><span class="estado estado--<%= u.estado %>"><%= u.estado %></span></td>
+  <td class="acciones-celda">
+    <form method="post" action="/admin/usuarios/<%= u.id %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <% if (u.estado === 'activo') { %><button name="accion" value="suspender" class="enlace enlace-peligro" data-confirmar="¿Suspender y bloquear teléfonos y email?">Suspender</button><% } else { %><button name="accion" value="activar" class="enlace">Activar</button><% } %>
+      <% if (u.empresa && !u.empresa.cuit_validado) { %><button name="accion" value="validar_cuit" class="enlace">Validar CUIT</button><% } %>
+      <% if (u.empresa) { %><button name="accion" value="plan_basico" class="enlace">Plan básico</button><button name="accion" value="plan_pro" class="enlace">Plan pro</button><button name="accion" value="plan_ninguno" class="enlace">Sin plan</button><% } %>
+      <% if (user.rol === 'admin') { if (u.rol === 'usuario') { %><button name="accion" value="hacer_moderador" class="enlace">Hacer moderador</button><% } else if (u.rol === 'moderador') { %><button name="accion" value="quitar_moderador" class="enlace">Quitar moderador</button><% } } %>
+    </form>
+  </td>
+</tr><% } %>
+</tbody></table>
+<%- include('../partials/foot') %>

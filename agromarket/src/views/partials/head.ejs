@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= titulo ? titulo + ' | ' : '' %><%= config.siteName %></title>
+<meta name="description" content="<%= descripcionMeta %>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/app.css">
+<link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+<meta name="csrf-token" content="<%= csrfToken %>">
+<% if (config.turnstileSiteKey) { %><meta name="turnstile-key" content="<%= config.turnstileSiteKey %>"><script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script><% } %>
+</head>
+<body>
+<a class="salto" href="#contenido">Ir al contenido</a>
+<header class="cabecera">
+  <div class="contenedor cabecera-fila">
+    <a class="logo" href="/"><span class="logo-marca"><%= config.siteName %></span><span class="logo-sub">maquinaria agrícola</span></a>
+    <form class="buscador-mini" action="/buscar" method="get" role="search">
+      <input type="search" name="q" placeholder="Buscar tractor, cosechadora, marca…" value="<%= typeof filtros !== 'undefined' && filtros.q ? filtros.q : '' %>" aria-label="Buscar">
+      <button type="submit" aria-label="Buscar">Buscar</button>
+    </form>
+    <nav class="nav">
+      <a class="btn btn-primario" href="/publicar">Publicar</a>
+      <% if (user) { %>
+        <details class="menu-usuario">
+          <summary><%= user.nombre.split(' ')[0] %></summary>
+          <div class="menu-desplegable">
+            <a href="/mis-avisos">Mis avisos</a><a href="/favoritos">Favoritos</a><a href="/alertas">Alertas</a><a href="/pagos">Pagos</a><a href="/mi-cuenta">Mi cuenta</a>
+            <% if (['admin','moderador'].includes(user.rol)) { %><a href="/admin">Administración</a><% } %>
+            <form action="/salir" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="enlace">Salir</button></form>
+          </div>
+        </details>
+      <% } else { %><a class="btn btn-fantasma" href="/ingresar">Ingresar</a><% } %>
+    </nav>
+  </div>
+</header>
+<main id="contenido" class="contenedor">
+<% for (const f of flash) { %><div class="aviso-flash aviso-flash--<%= f.tipo %>" role="status"><%= f.msg %></div><% } %>

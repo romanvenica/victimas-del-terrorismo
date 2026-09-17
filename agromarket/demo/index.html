@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgroMarket — demo estática</title>
+<meta name="description" content="Demo navegable del marketplace de maquinaria agrícola. Sin servidor: todos los datos son de ejemplo y viven en este archivo.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Tokens ===== */
+:root {
+  --fondo: #F2F4EE; --superficie: #FFFFFF; --tinta: #17201A; --secundario: #5C665E; --borde: #D5DBD2;
+  --verde: #245C31; --verde-oscuro: #1B4626; --verde-suave: #E3EEE4; --cosecha: #E9B531; --cosecha-suave: #FBF1D3;
+  --error: #B3261E; --error-suave: #FBE9E7; --whatsapp: #1FA855; --info-suave: #E6EEF7;
+  --radio: 6px; --radio-g: 10px; --sombra: 0 1px 2px rgba(23,32,26,.08);
+  --fuente: "Barlow", system-ui, sans-serif; --titulos: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-family: var(--fuente); font-size: 16px; line-height: 1.5; color: var(--tinta); background: var(--fondo); }
+h1, h2, h3 { font-family: var(--titulos); line-height: 1.15; margin: 0 0 .5rem; letter-spacing: -.01em; }
+h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); } h2 { font-size: 1.35rem; } h3 { font-size: 1.1rem; }
+h1 small { font-size: .55em; color: var(--secundario); font-weight: 500; font-family: var(--fuente); }
+a { color: var(--verde); } a:hover { color: var(--verde-oscuro); }
+p { margin: 0 0 .75rem; }
+.contenedor { width: min(1180px, 100% - 2rem); margin-inline: auto; }
+.salto { position: absolute; left: -999px; } .salto:focus { left: 8px; top: 8px; background: #fff; padding: .5rem; z-index: 99; }
+:focus-visible { outline: 3px solid var(--cosecha); outline-offset: 2px; }
+.secundario { color: var(--secundario); font-size: .92rem; }
+.texto-error { color: var(--error); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ===== Cabecera ===== */
+.cabecera { background: var(--superficie); border-bottom: 1px solid var(--borde); position: sticky; top: 0; z-index: 20; }
+.cabecera-fila { display: flex; align-items: center; gap: 1rem; min-height: 64px; }
+.logo { text-decoration: none; color: var(--tinta); display: flex; flex-direction: column; line-height: 1; }
+.logo-marca { font-family: var(--titulos); font-weight: 700; font-size: 1.5rem; color: var(--verde); }
+.logo-sub { font-size: .7rem; color: var(--secundario); letter-spacing: .02em; }
+.buscador-mini { flex: 1; display: flex; max-width: 520px; }
+.buscador-mini input { flex: 1; border: 1px solid var(--borde); border-right: 0; border-radius: var(--radio) 0 0 var(--radio); padding: .55rem .8rem; font: inherit; min-width: 0; }
+.buscador-mini button { border: 1px solid var(--verde); background: var(--verde); color: #fff; border-radius: 0 var(--radio) var(--radio) 0; padding: 0 1rem; font: inherit; font-weight: 600; cursor: pointer; }
+.nav { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+.menu-usuario { position: relative; }
+.menu-usuario summary { list-style: none; cursor: pointer; padding: .5rem .8rem; border: 1px solid var(--borde); border-radius: var(--radio); font-weight: 600; background: #fff; }
+.menu-usuario summary::-webkit-details-marker { display: none; }
+.menu-desplegable { position: absolute; right: 0; top: calc(100% + 6px); background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); box-shadow: 0 8px 24px rgba(23,32,26,.12); min-width: 190px; padding: .4rem; display: flex; flex-direction: column; z-index: 30; }
+.menu-desplegable a, .menu-desplegable button { text-align: left; padding: .5rem .7rem; text-decoration: none; color: var(--tinta); border-radius: var(--radio); font: inherit; background: none; border: 0; cursor: pointer; }
+.menu-desplegable a:hover, .menu-desplegable button:hover { background: var(--verde-suave); }
+@media (max-width: 720px) { .buscador-mini { display: none; } .logo-sub { display: none; } }
+
+/* ===== Botones ===== */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: .6rem 1.1rem; border-radius: var(--radio); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; border: 1px solid transparent; line-height: 1.2; transition: background .15s; }
+.btn-primario { background: var(--verde); color: #fff; border-color: var(--verde); } .btn-primario:hover { background: var(--verde-oscuro); color: #fff; }
+.btn-fantasma { background: #fff; color: var(--tinta); border-color: var(--borde); } .btn-fantasma:hover { background: var(--verde-suave); color: var(--tinta); }
+.btn-whatsapp { background: var(--whatsapp); color: #fff; } .btn-whatsapp:hover { background: #178a45; color: #fff; }
+.btn-destacar { background: var(--cosecha); color: var(--tinta); } .btn-destacar:hover { background: #d9a520; color: var(--tinta); }
+.btn-peligro { background: var(--error); color: #fff; } .btn-peligro:hover { background: #8f1d17; color: #fff; }
+.btn-enlace { background: none; border: 0; color: var(--secundario); text-decoration: underline; padding: .6rem .4rem; }
+.btn-bloque { width: 100%; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.enlace { background: none; border: 0; color: var(--verde); text-decoration: underline; cursor: pointer; font: inherit; padding: .2rem .3rem; }
+.enlace-peligro { color: var(--error); }
+
+/* ===== Flash ===== */
+.aviso-flash { padding: .75rem 1rem; border-radius: var(--radio); margin: 1rem 0; border: 1px solid; }
+.aviso-flash--exito { background: var(--verde-suave); border-color: #b9d3bd; }
+.aviso-flash--error { background: var(--error-suave); border-color: #efb4ae; color: var(--error); }
+.aviso-flash--info { background: var(--info-suave); border-color: #b9cbe3; }
+
+/* ===== Portada ===== */
+.portada { padding: 2.5rem 0 1.5rem; }
+.portada-texto { max-width: 640px; margin-bottom: 1.25rem; }
+.portada h1 { font-size: clamp(2rem, 5vw, 3.2rem); color: var(--verde-oscuro); }
+.portada p { font-size: 1.1rem; color: var(--secundario); }
+.buscador-grande { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: .5rem; background: #fff; padding: .6rem; border-radius: var(--radio-g); border: 1px solid var(--borde); box-shadow: var(--sombra); }
+.buscador-grande input, .buscador-grande select { border: 1px solid var(--borde); border-radius: var(--radio); padding: .7rem .8rem; font: inherit; min-width: 0; background: #fff; }
+@media (max-width: 760px) { .buscador-grande { grid-template-columns: 1fr 1fr; } .buscador-grande input { grid-column: 1 / -1; } .buscador-grande .btn { grid-column: 1 / -1; } }
+.categorias { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .6rem; margin: 1.5rem 0; }
+.categoria { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); padding: .8rem .9rem; text-decoration: none; color: var(--tinta); display: flex; align-items: center; gap: .6rem; font-weight: 500; min-width: 0; }
+.categoria > span:nth-child(2) { flex: 1; min-width: 0; }
+.categoria:hover { border-color: var(--verde); color: var(--verde-oscuro); }
+.categoria-icono { font-size: 1.4rem; } .categoria small { margin-left: auto; color: var(--secundario); }
+.seccion { margin: 2rem 0; } .seccion-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .75rem; }
+.franja-confianza { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; padding: 2rem 0; border-top: 1px solid var(--borde); margin-top: 2rem; }
+.franja-confianza h3 { color: var(--verde-oscuro); }
+
+/* ===== Tarjetas ===== */
+.grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--sombra); }
+.tarjeta--destacada { border-color: var(--cosecha); box-shadow: 0 0 0 2px var(--cosecha-suave); }
+.tarjeta-foto { position: relative; display: block; aspect-ratio: 4/3; background: var(--verde-suave); }
+.tarjeta-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sin-foto { display: grid; place-items: center; height: 100%; color: var(--secundario); }
+.sin-foto--grande { aspect-ratio: 4/3; background: var(--verde-suave); border-radius: var(--radio-g); }
+.etiqueta { position: absolute; top: .5rem; left: .5rem; font-size: .75rem; font-weight: 700; padding: .2rem .5rem; border-radius: 4px; }
+.etiqueta--destacado { background: var(--cosecha); color: var(--tinta); }
+.tarjeta-cuerpo { padding: .75rem .9rem .9rem; }
+.tarjeta-precio { font-family: var(--titulos); font-weight: 700; font-size: 1.3rem; color: var(--verde-oscuro); }
+.tarjeta-precio small, .ficha-precio small { font-size: .65em; font-weight: 500; color: var(--secundario); }
+.tarjeta-titulo { font-size: 1rem; margin: .2rem 0; font-family: var(--fuente); font-weight: 600; }
+.tarjeta-titulo a { color: var(--tinta); text-decoration: none; } .tarjeta-titulo a:hover { text-decoration: underline; }
+.tarjeta-datos, .tarjeta-lugar { font-size: .88rem; color: var(--secundario); margin: 0; }
+.sello { display: inline-block; font-size: .72rem; font-weight: 700; background: var(--verde-suave); color: var(--verde-oscuro); padding: .1rem .45rem; border-radius: 4px; vertical-align: middle; }
+.sello--gris { background: #eee; color: var(--secundario); }
+.vacio { background: #fff; border: 1px dashed var(--borde); border-radius: var(--radio-g); padding: 2rem; text-align: center; }
+
+/* ===== Búsqueda ===== */
+.busqueda { display: grid; grid-template-columns: 260px 1fr; gap: 1.5rem; margin: 1.25rem 0; }
+.filtros { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); padding: 1rem; align-self: start; position: sticky; top: 80px; }
+.filtros form { display: flex; flex-direction: column; gap: .6rem; }
+.resultados-cab { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: .75rem; }
+.orden label { font-size: .9rem; color: var(--secundario); display: flex; gap: .4rem; align-items: center; }
+.paginacion { display: flex; gap: 1rem; justify-content: center; align-items: center; margin: 1.5rem 0; }
+@media (max-width: 860px) { .busqueda { grid-template-columns: 1fr; } .filtros { position: static; } }
+
+/* ===== Formularios ===== */
+.formulario { display: flex; flex-direction: column; gap: .8rem; }
+.formulario label, .filtros label { display: flex; flex-direction: column; gap: .25rem; font-weight: 500; font-size: .92rem; }
+.formulario small { font-weight: 400; color: var(--secundario); }
+input[type=text], input[type=email], input[type=password], input[type=search], input[type=number], input[type=tel], input[type=file], select, textarea { border: 1px solid var(--borde); border-radius: var(--radio); padding: .6rem .75rem; font: inherit; width: 100%; background: #fff; }
+textarea { resize: vertical; }
+.check, .radios label { flex-direction: row !important; align-items: center; gap: .5rem; font-weight: 400 !important; }
+.check-alto { align-self: end; padding-bottom: .6rem; }
+.radios { border: 0; padding: 0; margin: 0; display: flex; gap: 1.2rem; flex-wrap: wrap; } .radios legend { font-weight: 500; font-size: .92rem; margin-bottom: .3rem; }
+.fila-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; } .fila-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .8rem; }
+@media (max-width: 600px) { .fila-2, .fila-3 { grid-template-columns: 1fr; } }
+.formulario-pasos fieldset { border: 1px solid var(--borde); border-radius: var(--radio-g); padding: 1rem 1.1rem 1.2rem; display: flex; flex-direction: column; gap: .8rem; margin: 0; }
+.formulario-pasos legend { font-family: var(--titulos); font-weight: 700; font-size: 1.15rem; padding: 0 .4rem; color: var(--verde-oscuro); }
+.formulario-inline { flex-direction: row; flex-wrap: wrap; align-items: center; } .formulario-inline input, .formulario-inline select { width: auto; flex: 1; }
+.input-codigo { font-size: 1.6rem; letter-spacing: .4em; text-align: center; }
+.previsualizacion, .fotos-actuales { display: flex; flex-wrap: wrap; gap: .5rem; }
+.previsualizacion img, .foto-actual img { width: 110px; height: 82px; object-fit: cover; border-radius: var(--radio); border: 1px solid var(--borde); display: block; }
+.foto-actual { font-size: .8rem; gap: .2rem; }
+.turnstile:empty { display: none; }
+
+/* ===== Paneles ===== */
+.panel { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); padding: 1.4rem; margin: 1.25rem 0; box-shadow: var(--sombra); }
+.panel-angosto { max-width: 480px; margin-inline: auto; } .panel-medio { max-width: 820px; margin-inline: auto; }
+.panel-centrado { text-align: center; max-width: 560px; margin: 3rem auto; }
+.panel-peligro { border-color: #efb4ae; }
+.prosa { max-width: 760px; margin-inline: auto; } .prosa h1 { margin-bottom: 1rem; } .prosa h2 { margin-top: 1.5rem; } .prosa li { margin-bottom: .3rem; }
+.prosa-usuario { white-space: pre-line; overflow-wrap: anywhere; }
+.lista-telefonos { list-style: none; padding: 0; margin: 0 0 1rem; } .lista-telefonos li { display: flex; align-items: center; gap: .6rem; padding: .5rem 0; border-bottom: 1px solid var(--borde); }
+.cuenta-stats { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+.cuenta-stats > * { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); padding: .8rem 1.2rem; display: flex; flex-direction: column; text-decoration: none; color: var(--tinta); min-width: 140px; }
+.cuenta-stats strong { font-family: var(--titulos); font-size: 1.7rem; color: var(--verde-oscuro); } .cuenta-stats span { font-size: .85rem; color: var(--secundario); }
+
+/* ===== Ficha de aviso ===== */
+.migas { font-size: .88rem; color: var(--secundario); margin: 1rem 0 .5rem; }
+.ficha { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 1.5rem; align-items: start; }
+.ficha-galeria { grid-column: 1; grid-row: 1; }
+.ficha-detalle { grid-column: 1; grid-row: 2; }
+.ficha-galeria img#foto-principal { width: 100%; height: auto; aspect-ratio: 4/3; object-fit: contain; background: #0f1a12; border-radius: var(--radio-g); display: block; }
+.miniaturas { display: flex; gap: .4rem; overflow-x: auto; padding: .5rem 0; }
+.miniaturas button { border: 2px solid transparent; padding: 0; background: none; border-radius: var(--radio); cursor: pointer; flex: 0 0 auto; }
+.miniaturas button.activa { border-color: var(--verde); }
+.miniaturas img { width: 96px; height: 72px; object-fit: cover; border-radius: 4px; display: block; }
+.ficha-lateral { grid-column: 2; grid-row: 1 / span 2; align-self: start; background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); padding: 1.2rem; position: sticky; top: 80px; }
+.ficha-lateral .etiqueta { position: static; display: inline-block; margin-bottom: .4rem; }
+.ficha-lateral h1 { font-size: 1.45rem; }
+.ficha-precio { font-family: var(--titulos); font-size: 2rem; font-weight: 700; color: var(--verde-oscuro); margin: 0; }
+.ficha-lugar { color: var(--secundario); margin-bottom: .6rem; }
+.chips { list-style: none; padding: 0; margin: 0 0 1rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+.chips li { font-size: .82rem; background: var(--fondo); border: 1px solid var(--borde); border-radius: 999px; padding: .15rem .6rem; }
+.contacto { border-top: 1px solid var(--borde); padding-top: 1rem; display: flex; flex-direction: column; gap: .5rem; }
+.contacto-tel { font-family: var(--titulos); font-size: 1.6rem; font-weight: 700; margin: 0; letter-spacing: .02em; }
+.contacto-seguridad { font-size: .8rem; color: var(--secundario); margin: .3rem 0 0; }
+.vendedor-caja { border-top: 1px solid var(--borde); margin-top: 1rem; padding-top: .8rem; } .vendedor-caja p { margin: 0 0 .2rem; }
+.ficha-acciones { display: flex; gap: .5rem; margin-top: 1rem; flex-wrap: wrap; }
+.ficha-detalle { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); padding: 1.2rem 1.4rem; }
+.ficha-tecnica { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1.2rem; margin: 0 0 1rem; } .ficha-tecnica dt { color: var(--secundario); } .ficha-tecnica dd { margin: 0; font-weight: 500; }
+@media (max-width: 900px) { .ficha { grid-template-columns: 1fr; } .ficha-galeria, .ficha-lateral, .ficha-detalle { grid-column: auto; grid-row: auto; } .ficha-lateral { position: static; } }
+@media (max-width: 640px) { .contacto { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; padding: .6rem 1rem calc(.6rem + env(safe-area-inset-bottom)); border-top: 1px solid var(--borde); box-shadow: 0 -4px 16px rgba(0,0,0,.08); z-index: 15; } .contacto-seguridad { display: none; } body { padding-bottom: 130px; } }
+.dialogo { border: 0; border-radius: var(--radio-g); padding: 1.4rem; max-width: 460px; width: calc(100% - 2rem); box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+.dialogo::backdrop { background: rgba(23,32,26,.45); } .dialogo form { display: flex; flex-direction: column; gap: .8rem; } .dialogo label { display: flex; flex-direction: column; gap: .25rem; font-weight: 500; }
+.dialogo-acciones { display: flex; justify-content: flex-end; gap: .5rem; }
+
+/* ===== Mis avisos / listas ===== */
+.fila-aviso { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); padding: .8rem; display: grid; grid-template-columns: 120px 1fr auto; gap: 1rem; align-items: center; margin-bottom: .7rem; }
+.fila-foto img { width: 120px; height: 90px; object-fit: cover; border-radius: var(--radio); display: block; background: var(--verde-suave); }
+.fila-info h3 { margin: 0 0 .2rem; } .fila-info a { color: var(--tinta); text-decoration: none; }
+.fila-acciones { display: flex; flex-direction: column; gap: .3rem; align-items: flex-end; } .acciones-estado { display: flex; flex-wrap: wrap; gap: .1rem; justify-content: flex-end; }
+@media (max-width: 700px) { .fila-aviso { grid-template-columns: 1fr; } .fila-acciones { align-items: flex-start; } }
+.estado { display: inline-block; font-size: .75rem; font-weight: 700; padding: .1rem .5rem; border-radius: 4px; background: #eee; vertical-align: middle; }
+.estado--activo, .estado--aprobado { background: var(--verde-suave); color: var(--verde-oscuro); }
+.estado--en_revision, .estado--pendiente { background: var(--cosecha-suave); color: #7a5a06; }
+.estado--rechazado, .estado--suspendido { background: var(--error-suave); color: var(--error); }
+.opciones-pago { display: flex; flex-direction: column; gap: .6rem; }
+.opcion-pago { display: flex; align-items: center; gap: .8rem; border: 1px solid var(--borde); border-radius: var(--radio); padding: .8rem 1rem; cursor: pointer; }
+.opcion-pago:has(input:checked) { border-color: var(--verde); background: var(--verde-suave); }
+.opcion-pago span { display: flex; justify-content: space-between; flex: 1; } .opcion-pago em { font-style: normal; font-weight: 700; }
+.tabla { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--borde); border-radius: var(--radio-g); font-size: .92rem; }
+.tabla th, .tabla td { padding: .6rem .7rem; border-bottom: 1px solid var(--borde); text-align: left; vertical-align: top; } .tabla th { background: var(--fondo); font-weight: 600; }
+.acciones-celda form { display: inline; }
+
+/* ===== Admin ===== */
+.admin-nav { display: flex; gap: .3rem; flex-wrap: wrap; margin: 1rem 0; border-bottom: 1px solid var(--borde); }
+.admin-nav a { padding: .6rem .9rem; text-decoration: none; color: var(--secundario); font-weight: 600; border-bottom: 3px solid transparent; }
+.admin-nav a.activo, .admin-nav a:hover { color: var(--verde-oscuro); border-bottom-color: var(--verde); }
+.stats-admin > * { min-width: 120px; }
+.mod-item { display: grid; grid-template-columns: 240px 1fr; gap: 1rem; } .mod-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem; align-content: start; } .mod-fotos img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 4px; }
+.mod-desc { font-size: .9rem; max-height: 8em; overflow: auto; background: var(--fondo); padding: .6rem; border-radius: var(--radio); }
+.mod-acciones { display: flex; gap: .5rem; flex-wrap: wrap; } .mod-acciones input { flex: 1; min-width: 200px; }
+.senales { margin: .3rem 0; padding-left: 1.2rem; color: #7a5a06; font-size: .9rem; }
+.riesgo { font-size: .75rem; padding: .15rem .5rem; border-radius: 4px; font-weight: 700; vertical-align: middle; }
+.riesgo--alto { background: var(--error-suave); color: var(--error); } .riesgo--medio { background: var(--cosecha-suave); color: #7a5a06; } .riesgo--bajo { background: var(--verde-suave); color: var(--verde-oscuro); }
+.buscador-admin { max-width: 420px; margin-bottom: 1rem; display: flex; }
+@media (max-width: 700px) { .mod-item { grid-template-columns: 1fr; } .tabla { display: block; overflow-x: auto; } }
+
+/* ===== Pie ===== */
+.pie { border-top: 1px solid var(--borde); margin-top: 3rem; padding: 2rem 0; background: #fff; font-size: .9rem; color: var(--secundario); }
+.pie-cols { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem; } .pie nav { display: flex; flex-direction: column; gap: .4rem; } .pie strong { color: var(--verde-oscuro); font-family: var(--titulos); font-size: 1.2rem; }
+@media (max-width: 700px) { .pie-cols { grid-template-columns: 1fr; } }
+
+/* --- demo --- */
+.demo-banner { background: #17201A; color: #E9B531; font-size: .85rem; text-align: center; padding: .35rem 1rem; }
+.demo-banner a { color: #fff; }
+.vista { display: none; } .vista.activa { display: block; }
+.cabecera-fila .nav .btn-fantasma[data-ir] { cursor: pointer; }
+.ficha-lateral, .filtros { position: static; }
+.demo-nota { font-size: .8rem; color: var(--secundario); background: var(--cosecha-suave); border: 1px dashed var(--cosecha); border-radius: var(--radio); padding: .5rem .8rem; margin: 1rem 0; }
+</style>
+</head>
+<body>
+<div class="demo-banner">Demo estática de AgroMarket: datos de ejemplo, sin servidor. La app real está en <code>src/</code> (<code>npm start</code>). <a href="#/">Inicio</a> · <a href="#/buscar">Buscar</a> · <a href="#/publicar">Publicar</a> · <a href="#/mis-avisos">Mis avisos</a> · <a href="#/admin">Admin</a></div>
+<header class="cabecera">
+  <div class="contenedor cabecera-fila">
+    <a class="logo" href="#/"><span class="logo-marca">AgroMarket</span><span class="logo-sub">maquinaria agrícola</span></a>
+    <form class="buscador-mini" id="buscador-mini" role="search"><input type="search" name="q" placeholder="Buscar tractor, cosechadora, marca…" aria-label="Buscar"><button type="submit">Buscar</button></form>
+    <nav class="nav">
+      <a class="btn btn-primario" href="#/publicar">Publicar</a>
+      <details class="menu-usuario"><summary>Juan</summary><div class="menu-desplegable"><a href="#/mis-avisos">Mis avisos</a><a href="#/favoritos">Favoritos</a><a href="#/mi-cuenta">Mi cuenta</a><a href="#/admin">Administración</a><a href="#/ingresar">Salir</a></div></details>
+    </nav>
+  </div>
+</header>
+<main id="contenido" class="contenedor">
+<div id="flash"></div>
+
+<!-- ===== PORTADA ===== -->
+<section class="vista" id="v-home">
+  <div class="portada">
+    <div class="portada-texto"><h1>La maquinaria del campo, de mano en mano.</h1><p id="home-total"></p></div>
+    <form class="buscador-grande" id="buscador-grande">
+      <input type="search" name="q" placeholder="¿Qué máquina buscás?" aria-label="Qué máquina buscás">
+      <select name="categoria" aria-label="Categoría"><option value="">Todas las categorías</option></select>
+      <select name="provincia" aria-label="Provincia"><option value="">Todo el país</option></select>
+      <button type="submit" class="btn btn-primario">Buscar</button>
+    </form>
+  </div>
+  <div class="categorias" id="home-categorias"></div>
+  <div class="seccion"><h2>Destacados</h2><div class="grilla" id="home-destacados"></div></div>
+  <div class="seccion"><div class="seccion-cab"><h2>Últimas publicadas</h2><a href="#/buscar">Ver todas</a></div><div class="grilla" id="home-recientes"></div></div>
+  <div class="franja-confianza">
+    <div><h3>Teléfono verificado</h3><p>Cada vendedor confirma su celular con un código antes de publicar. No hay avisos con números inventados.</p></div>
+    <div><h3>Sin comisión por venta</h3><p>La operación la cerrás vos con el vendedor. Publicar es gratis; cobramos solo por destacar.</p></div>
+    <div><h3>Reportá lo raro</h3><p>Precio irreal, piden seña, no atienden: un toque en Reportar y lo revisamos en horas. <a href="#/consejos">Consejos de seguridad</a></p></div>
+  </div>
+</section>
+
+<!-- ===== BUSCAR ===== -->
+<section class="vista" id="v-buscar">
+  <div class="busqueda">
+    <aside class="filtros"><form id="form-filtros">
+      <h2>Filtrar</h2>
+      <label>Palabra clave<input type="search" name="q"></label>
+      <label>Categoría<select name="categoria"><option value="">Todas</option></select></label>
+      <label>Marca<select name="marca"><option value="">Todas</option></select></label>
+      <label>Provincia<select name="provincia"><option value="">Todo el país</option></select></label>
+      <label>Estado<select name="estado"><option value="">Nuevo y usado</option><option value="nuevo">Nuevo</option><option value="usado">Usado</option></select></label>
+      <label>Moneda<select name="moneda"><option value="">Cualquiera</option><option value="USD">Dólares</option><option value="ARS">Pesos</option></select></label>
+      <div class="fila-2"><label>Año desde<input type="number" name="anio_min"></label><label>Año hasta<input type="number" name="anio_max"></label></div>
+      <label>Horas máx.<input type="number" name="horas_max"></label>
+      <label class="check"><input type="checkbox" name="verificados"> Solo empresas</label>
+      <label class="check"><input type="checkbox" name="permuta"> Acepta permuta</label>
+      <button class="btn btn-primario" type="submit">Aplicar filtros</button>
+      <button class="btn btn-fantasma" type="reset" id="limpiar">Limpiar</button>
+      <button class="btn btn-fantasma" type="button" id="btn-alerta">Crear alerta con estos filtros</button>
+    </form></aside>
+    <div class="resultados">
+      <div class="resultados-cab"><h1 id="buscar-titulo"></h1><form class="orden"><label>Ordenar <select id="orden"><option value="">Más recientes</option><option value="precio_asc">Menor precio</option><option value="precio_desc">Mayor precio</option><option value="anio_desc">Más nuevas</option></select></label></form></div>
+      <div class="grilla" id="buscar-grilla"></div>
+      <div class="vacio" id="buscar-vacio" hidden><p>No encontramos máquinas con esos filtros.</p><p>Probá con menos filtros o creá una alerta.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== AVISO ===== -->
+<section class="vista" id="v-aviso"></section>
+
+<!-- ===== PUBLICAR ===== -->
+<section class="vista" id="v-publicar">
+  <div class="panel panel-medio">
+    <h1>Publicar máquina</h1>
+    <p class="demo-nota">En la app real este formulario exige un teléfono verificado por código (WhatsApp/SMS) y sube las fotos al servidor. Acá solo simula la publicación.</p>
+    <form class="formulario formulario-pasos" id="form-publicar">
+      <fieldset><legend>1. Qué vendés</legend>
+        <label>Categoría<select name="categoria" id="pub-categoria" required><option value="">Elegir</option></select></label>
+        <div class="fila-2"><label>Marca<select name="marca"><option value="">Elegir</option></select></label><label>Modelo<input type="text" name="modelo" placeholder="Ej: 6110J"></label></div>
+        <label>Título del aviso<input type="text" name="titulo" required minlength="8" placeholder="Ej: Tractor John Deere 6110J 2018, 3.200 horas"></label>
+        <div class="fila-3"><label>Año<input type="number" name="anio" min="1950" max="2027"></label><label>Horas de uso<input type="number" name="horas" min="0"></label><label>Estado<select name="estado"><option value="usado">Usado</option><option value="nuevo">Nuevo</option></select></label></div>
+        <div id="pub-ficha" class="fila-2"></div>
+        <label>Descripción<textarea name="desc" rows="5" required minlength="30" placeholder="Estado general, mantenimiento, reparaciones, equipamiento, motivo de venta."></textarea></label>
+      </fieldset>
+      <fieldset><legend>2. Fotos</legend>
+        <label>Subí hasta 20 fotos (JPG, PNG o WebP, máximo 10 MB cada una). La primera es la principal.<input type="file" id="pub-fotos" accept="image/*" multiple></label>
+        <div id="pub-previsualizacion" class="previsualizacion"></div>
+        <p class="secundario">Sacamos los datos de ubicación GPS de las fotos antes de publicarlas.</p>
+      </fieldset>
+      <fieldset><legend>3. Precio y ubicación</legend>
+        <div class="fila-3"><label>Precio (vacío = consultar)<input type="number" name="precio" min="0"></label><label>Moneda<select name="moneda"><option value="USD">Dólares</option><option value="ARS">Pesos</option></select></label><label class="check check-alto"><input type="checkbox" name="iva"> Más IVA</label></div>
+        <div class="fila-2"><label class="check"><input type="checkbox" name="permuta"> Acepto permuta</label><label class="check"><input type="checkbox" name="financiacion"> Ofrezco financiación</label></div>
+        <div class="fila-2"><label>Provincia<select name="provincia" required><option value="">Elegir</option></select></label><label>Localidad<input type="text" name="localidad"></label></div>
+      </fieldset>
+      <fieldset><legend>4. Contacto</legend>
+        <label>Teléfono verificado que van a ver los compradores<select name="tel"><option>+5491123456789 (principal)</option></select><small><a href="#/verificar">Agregar otro número</a></small></label>
+        <div class="fila-2"><label class="check"><input type="checkbox" checked> Acepto WhatsApp</label><label class="check"><input type="checkbox" checked> Acepto llamadas</label></div>
+      </fieldset>
+      <p class="secundario">La primera publicación de cada cuenta se revisa antes de aparecer (menos de 24 h). El aviso dura 60 días y se renueva gratis.</p>
+      <button class="btn btn-primario btn-bloque" type="submit">Publicar</button>
+    </form>
+  </div>
+</section>
+
+<!-- ===== MIS AVISOS ===== -->
+<section class="vista" id="v-mis-avisos">
+  <div class="seccion-cab"><h1>Mis avisos</h1><a class="btn btn-primario" href="#/publicar">Publicar</a></div>
+  <div id="mis-avisos-lista"></div>
+</section>
+
+<!-- ===== FAVORITOS ===== -->
+<section class="vista" id="v-favoritos"><h1>Favoritos</h1><div class="grilla" id="fav-grilla"></div><div class="vacio" id="fav-vacio" hidden><p>No guardaste ningún aviso todavía.</p><a class="btn btn-primario" href="#/buscar">Buscar máquinas</a></div></section>
+
+<!-- ===== VERIFICAR TELÉFONO ===== -->
+<section class="vista" id="v-verificar">
+  <div class="panel panel-angosto">
+    <h1>Verificar teléfono</h1>
+    <p class="secundario">Es el número que van a ver los compradores. Te mandamos un código de 6 dígitos para confirmar que es tuyo.</p>
+    <form class="formulario" id="form-otp-enviar">
+      <label>Celular con código de área, sin 0 ni 15<input type="tel" required placeholder="11 2345 6789"></label>
+      <fieldset class="radios"><legend>Enviar el código por</legend><label><input type="radio" name="canal" value="whatsapp" checked> WhatsApp</label><label><input type="radio" name="canal" value="sms"> SMS</label></fieldset>
+      <button class="btn btn-primario btn-bloque" type="submit">Enviar código</button>
+    </form>
+    <form class="formulario" id="form-otp-confirmar" hidden style="margin-top:1rem">
+      <h2>Ingresá el código enviado</h2>
+      <label>Código<input type="text" inputmode="numeric" pattern="\d{6}" maxlength="6" required class="input-codigo"></label>
+      <button class="btn btn-primario btn-bloque" type="submit">Confirmar</button>
+      <p class="secundario">En esta demo cualquier código de 6 dígitos vale. En la app real vence a los 10 minutos, admite 3 intentos y hay 3 envíos por hora por número.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ===== INGRESAR ===== -->
+<section class="vista" id="v-ingresar">
+  <div class="panel panel-angosto"><h1>Ingresar</h1>
+    <form class="formulario" id="form-login"><label>Email<input type="email" required></label><label>Contraseña<input type="password" required></label><button class="btn btn-primario btn-bloque" type="submit">Ingresar</button></form>
+    <p class="secundario"><a href="#/recuperar">Olvidé mi contraseña</a> · <a href="#/registrarse">Crear cuenta</a></p>
+  </div>
+</section>
+<section class="vista" id="v-registrarse">
+  <div class="panel panel-angosto"><h1>Crear cuenta</h1><p class="secundario">Gratis. Para publicar vas a verificar un celular con un código; para buscar no hace falta cuenta.</p>
+    <form class="formulario" id="form-registro"><label>Nombre o empresa<input type="text" required></label><label>Email<input type="email" required></label><label>Contraseña<input type="password" required minlength="10"><small>Mínimo 10 caracteres. Rechazamos contraseñas que aparecieron en filtraciones.</small></label>
+    <fieldset class="radios"><legend>Soy</legend><label><input type="radio" name="tipo" checked> Particular</label><label><input type="radio" name="tipo"> Concesionario o empresa</label></fieldset>
+    <label class="check"><input type="checkbox" required> Acepto los <a href="#/terminos">términos y condiciones</a> y la <a href="#/privacidad">política de privacidad</a>. Soy mayor de 18 años.</label>
+    <button class="btn btn-primario btn-bloque" type="submit">Crear cuenta</button></form>
+  </div>
+</section>
+
+<!-- ===== MI CUENTA ===== -->
+<section class="vista" id="v-mi-cuenta">
+  <div class="cuenta"><h1>Mi cuenta</h1>
+    <div class="cuenta-stats"><div><strong id="cta-activos">0</strong><span>avisos activos</span></div><div><strong>37</strong><span>contactos recibidos</span></div><div><a class="btn btn-primario" href="#/publicar">Publicar</a></div></div>
+    <div class="panel"><h2>Datos</h2><form class="formulario" onsubmit="return false"><label>Nombre<input type="text" value="Juan Pérez"></label><label>Email<input type="email" value="juan@ejemplo.com" disabled><small>Email confirmado.</small></label><div class="fila-2"><label>Provincia<select><option>Buenos Aires</option></select></label><label>Localidad<input type="text" value="Pergamino"></label></div><button class="btn btn-primario">Guardar datos</button></form></div>
+    <div class="panel"><h2>Teléfonos verificados</h2><ul class="lista-telefonos"><li><span>+5491123456789</span> <span class="sello">Verificado</span></li></ul><a class="btn btn-fantasma" href="#/verificar">Administrar teléfonos</a></div>
+    <div class="panel"><h2>Empresa o concesionario</h2><p class="secundario">Completá estos datos si vendés como empresa. Tu perfil muestra el sello "Empresa" y, cuando validamos el CUIT, "CUIT validado".</p><form class="formulario" onsubmit="return false"><div class="fila-2"><label>Razón social<input type="text" value="Maquinarias Pérez SRL"></label><label>CUIT (11 dígitos)<input type="text" value="30712345678"><small>CUIT validado. Plan: básico</small></label></div><button class="btn btn-primario">Guardar empresa</button></form></div>
+  </div>
+</section>
+
+<!-- ===== ADMIN ===== -->
+<section class="vista" id="v-admin">
+  <nav class="admin-nav"><a href="#/admin" class="activo">Resumen</a><a href="#/admin-moderacion">Moderación</a><a href="#/admin-reportes">Reportes</a><a href="#/admin-usuarios">Usuarios</a><a href="#/admin-listas">Listas negras</a><a href="#/admin-pagos">Pagos</a></nav>
+  <h1>Resumen</h1>
+  <div class="cuenta-stats stats-admin"><a href="#/admin-moderacion"><strong id="adm-rev">0</strong><span>en revisión</span></a><a href="#/admin-reportes"><strong id="adm-rep">0</strong><span>reportes pendientes</span></a><div><strong id="adm-act">0</strong><span>avisos activos</span></div><div><strong>1.284</strong><span>usuarios</span></div><div><strong>23</strong><span>avisos últimas 24 h</span></div><div><strong>318</strong><span>contactos últimas 24 h</span></div><div><strong>$ 412.000</strong><span>ingresos aprobados</span></div></div>
+  <div class="panel"><h2>Última actividad</h2><table class="tabla"><thead><tr><th>Fecha</th><th>Acción</th><th>Entidad</th><th>Detalle</th></tr></thead><tbody id="adm-auditoria"></tbody></table></div>
+</section>
+<section class="vista" id="v-admin-moderacion">
+  <nav class="admin-nav"><a href="#/admin">Resumen</a><a href="#/admin-moderacion" class="activo">Moderación</a><a href="#/admin-reportes">Reportes</a><a href="#/admin-usuarios">Usuarios</a><a href="#/admin-listas">Listas negras</a><a href="#/admin-pagos">Pagos</a></nav>
+  <h1>Moderación <small id="mod-count"></small></h1>
+  <div id="mod-lista"></div>
+</section>
+<section class="vista" id="v-admin-reportes">
+  <nav class="admin-nav"><a href="#/admin">Resumen</a><a href="#/admin-moderacion">Moderación</a><a href="#/admin-reportes" class="activo">Reportes</a><a href="#/admin-usuarios">Usuarios</a><a href="#/admin-listas">Listas negras</a><a href="#/admin-pagos">Pagos</a></nav>
+  <h1>Reportes pendientes</h1>
+  <table class="tabla"><thead><tr><th>Fecha</th><th>Aviso</th><th>Motivo</th><th>Comentario</th><th>Acciones</th></tr></thead><tbody id="rep-lista"></tbody></table>
+</section>
+<section class="vista" id="v-admin-usuarios">
+  <nav class="admin-nav"><a href="#/admin">Resumen</a><a href="#/admin-moderacion">Moderación</a><a href="#/admin-reportes">Reportes</a><a href="#/admin-usuarios" class="activo">Usuarios</a><a href="#/admin-listas">Listas negras</a><a href="#/admin-pagos">Pagos</a></nav>
+  <h1>Usuarios</h1>
+  <form class="buscador-mini buscador-admin" onsubmit="return false"><input type="search" placeholder="Email, nombre o teléfono"><button>Buscar</button></form>
+  <table class="tabla"><thead><tr><th>Usuario</th><th>Teléfonos</th><th>Rol / tipo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+    <tr><td><strong>Juan Pérez</strong><br><small>juan@ejemplo.com ✓</small><br><small>Alta 12/8/2026 · 4 publicados</small><br><small>Empresa: Maquinarias Pérez SRL CUIT 30712345678 (validado) · plan basico</small></td><td><small>+5492477123456 ✓</small></td><td>usuario / profesional</td><td><span class="estado estado--activo">activo</span></td><td class="acciones-celda"><button class="enlace enlace-peligro">Suspender</button> <button class="enlace">Plan pro</button> <button class="enlace">Hacer moderador</button></td></tr>
+    <tr><td><strong>Cristian López</strong><br><small>clopez@ejemplo.com</small><br><small>Alta 15/9/2026 · 1 publicado</small></td><td><small>+5492302111222 ✓</small></td><td>usuario / particular</td><td><span class="estado estado--activo">activo</span></td><td class="acciones-celda"><button class="enlace enlace-peligro">Suspender</button></td></tr>
+    <tr><td><strong>Ventas Rápidas</strong><br><small>ventas.rapidas@correo-temporal.xyz</small><br><small>Alta 16/9/2026 · 3 publicados</small></td><td><small>+5491155550000</small></td><td>usuario / particular</td><td><span class="estado estado--suspendido">suspendido</span></td><td class="acciones-celda"><button class="enlace">Activar</button></td></tr>
+  </tbody></table>
+</section>
+<section class="vista" id="v-admin-listas">
+  <nav class="admin-nav"><a href="#/admin">Resumen</a><a href="#/admin-moderacion">Moderación</a><a href="#/admin-reportes">Reportes</a><a href="#/admin-usuarios">Usuarios</a><a href="#/admin-listas" class="activo">Listas negras</a><a href="#/admin-pagos">Pagos</a></nav>
+  <h1>Listas negras</h1>
+  <form class="formulario formulario-inline" onsubmit="return false"><select><option>Teléfono (+549…)</option><option>Email</option><option>Dominio de email</option><option>IP (hash)</option></select><input type="text" placeholder="Valor"><input type="text" placeholder="Motivo"><button class="btn btn-primario">Agregar</button></form>
+  <table class="tabla"><thead><tr><th>Tipo</th><th>Valor</th><th>Motivo</th><th>Fecha</th><th></th></tr></thead><tbody><tr><td>telefono</td><td>+5491155550000</td><td>usuario suspendido</td><td>16/9/2026</td><td><button class="enlace">Quitar</button></td></tr><tr><td>dominio_email</td><td>correo-temporal.xyz</td><td>emails descartables</td><td>10/9/2026</td><td><button class="enlace">Quitar</button></td></tr></tbody></table>
+</section>
+<section class="vista" id="v-admin-pagos">
+  <nav class="admin-nav"><a href="#/admin">Resumen</a><a href="#/admin-moderacion">Moderación</a><a href="#/admin-reportes">Reportes</a><a href="#/admin-usuarios">Usuarios</a><a href="#/admin-listas">Listas negras</a><a href="#/admin-pagos" class="activo">Pagos</a></nav>
+  <h1>Pagos</h1>
+  <table class="tabla"><thead><tr><th>Fecha</th><th>Usuario</th><th>Concepto</th><th>Monto</th><th>Estado</th><th>ID MP</th><th>Factura</th></tr></thead><tbody>
+    <tr><td>16/9/2026 14:02</td><td>juan@ejemplo.com</td><td>destacado_15</td><td>$ 14.000</td><td><span class="estado estado--aprobado">aprobado</span></td><td><small>118237744</small></td><td>sí</td></tr>
+    <tr><td>15/9/2026 09:41</td><td>agrorios@ejemplo.com</td><td>destacado_30</td><td>$ 24.000</td><td><span class="estado estado--aprobado">aprobado</span></td><td><small>118201199</small></td><td>sí</td></tr>
+    <tr><td>15/9/2026 08:10</td><td>clopez@ejemplo.com</td><td>bump</td><td>$ 2.000</td><td><span class="estado estado--pendiente">pendiente</span></td><td><small>pref:9912…</small></td><td></td></tr>
+  </tbody></table>
+</section>
+
+<!-- ===== LEGAL ===== -->
+<section class="vista" id="v-consejos"><article class="panel prosa"><h1>Consejos de seguridad</h1><p>En AgroMarket cada vendedor verifica su celular con un código antes de publicar y revisamos los avisos con señales de riesgo. Aun así, la operación la cerrás vos con la otra persona.</p><h2>Si vas a comprar</h2><ul><li><strong>Nunca envíes dinero, señas ni "reservas" sin ver la máquina en persona.</strong></li><li>Desconfiá de precios muy por debajo del mercado.</li><li>Pedí ver la máquina funcionando y, para operaciones grandes, una inspección técnica independiente.</li><li>Verificá la documentación: título, cédula e informe de dominio para maquinaria patentada.</li><li>Pagá contra entrega en un lugar seguro.</li></ul><h2>Si vas a vender</h2><ul><li>No entregues la máquina sin confirmar la acreditación con tu banco.</li><li>Desconfiá de compradores que piden tu CBU antes de ver la máquina.</li></ul><p class="secundario">Texto completo en <code>legal/consejos-de-seguridad.md</code>.</p></article></section>
+<section class="vista" id="v-terminos"><article class="panel prosa"><h1>Términos y condiciones</h1><p>Modelo base en <code>legal/terminos.md</code>: qué es la plataforma (no interviene en la compraventa), registro y verificación de teléfono, reglas de publicación, contacto entre usuarios, servicios pagos y derecho de arrepentimiento, limitación de responsabilidad, datos personales, jurisdicción.</p></article></section>
+<section class="vista" id="v-privacidad"><article class="panel prosa"><h1>Política de privacidad</h1><p>Modelo base en <code>legal/privacidad.md</code> conforme a la Ley 25.326: qué datos se recolectan, para qué, con quién se comparten, plazos de conservación, derechos del titular y leyenda de la AAIP.</p></article></section>
+<section class="vista" id="v-recuperar"><div class="panel panel-angosto"><h1>Recuperar contraseña</h1><form class="formulario" id="form-recuperar"><label>Email<input type="email" required></label><button class="btn btn-primario btn-bloque">Enviar enlace</button></form></div></section>
+
+<dialog id="dialogo-reporte" class="dialogo"><form method="dialog"><h2>Reportar este aviso</h2><label>Motivo<select id="rep-motivo"><option value="telefono_no_responde">El teléfono no responde</option><option value="no_es_el_vendedor">Quien atiende no es el vendedor</option><option value="pide_sena">Pide seña o transferencia antes de ver la máquina</option><option value="fotos_falsas">Las fotos no son de la máquina</option><option value="ya_vendido">Ya se vendió</option><option value="precio_enganoso">Precio engañoso</option><option value="otro">Otro</option></select></label><label>Comentario (opcional)<textarea id="rep-comentario" rows="3"></textarea></label><div class="dialogo-acciones"><button type="button" class="btn btn-fantasma" id="rep-cancelar">Cancelar</button><button type="button" class="btn btn-primario" id="rep-enviar">Enviar reporte</button></div></form></dialog>
+</main>
+<footer class="pie"><div class="contenedor pie-cols"><div><strong>AgroMarket</strong><p>Compra y venta de maquinaria agrícola en Argentina. Contacto directo con vendedores de teléfono verificado. No intervenimos en la operación.</p></div><nav><a href="#/publicar">Cómo publicar</a><a href="#/consejos">Consejos de seguridad</a><a href="#/consejos">Ayuda</a><a href="#/consejos">Contacto</a></nav><nav><a href="#/terminos">Términos y condiciones</a><a href="#/privacidad">Privacidad</a><a href="#/terminos">Botón de arrepentimiento</a></nav></div></footer>
+
+<script>
+const DATOS = {"avisos": [{"id": 1, "titulo": "Tractor John Deere 6110J 2018, 3.200 horas", "categoria": "Tractores", "cat": "tractores", "marca": "John Deere", "modelo": "6110J", "anio": 2018, "horas": 3200, "precio": 68000, "moneda": "USD", "iva": true, "provincia": "Buenos Aires", "prov": "buenos-aires", "localidad": "Pergamino", "vendedor": "Maquinarias Pérez SRL", "tipo": "profesional", "destacado": true, "permuta": true, "financiacion": true, "estado": "usado", "desc": "Tractor doble tracción con cabina y aire acondicionado. Service completo cada 250 horas en concesionario oficial, cubiertas al 70 %. Se entrega con documentación al día y factura. Posibilidad de tomar tractor menor en parte de pago.", "ficha": {"Potencia (HP)": "110", "Tracción": "4x4", "Transmisión": "PowerQuad 16x16", "Cabina": "Sí"}, "tel": "+5492477123456", "color": "#245C31", "icono": "🚜", "fotos": ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23245C31'/><text x='240' y='200' font-size='120' text-anchor='middle'>🚜</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 1 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23245C31'/><text x='240' y='200' font-size='120' text-anchor='middle'>🚜</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 2 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23245C31'/><text x='240' y='200' font-size='120' text-anchor='middle'>🚜</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 3 de ejemplo</text></svg>"]}, {"id": 2, "titulo": "Cosechadora New Holland CR 6.80 2016 con plataforma 35 pies", "categoria": "Cosechadoras", "cat": "cosechadoras", "marca": "New Holland", "modelo": "CR 6.80", "anio": 2016, "horas": 2900, "precio": 245000, "moneda": "USD", "iva": false, "provincia": "Santa Fe", "prov": "santa-fe", "localidad": "Venado Tuerto", "vendedor": "Agro Ríos SA", "tipo": "profesional", "destacado": true, "permuta": false, "financiacion": true, "estado": "usado", "desc": "Cosechadora axial con 2.900 horas de motor y 2.100 de trilla. Plataforma draper de 35 pies y carro. Monitor de rinde, piloto automático, picador de paja. Lista para la campaña gruesa.", "ficha": {"Potencia (HP)": "360", "Plataforma (m)": "10,6", "Tolva (l)": "11.500", "Trilla": "Axial"}, "tel": "+5493462555123", "color": "#7A5A06", "icono": "🌾", "fotos": ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%237A5A06'/><text x='240' y='200' font-size='120' text-anchor='middle'>🌾</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 1 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%237A5A06'/><text x='240' y='200' font-size='120' text-anchor='middle'>🌾</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 2 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%237A5A06'/><text x='240' y='200' font-size='120' text-anchor='middle'>🌾</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 3 de ejemplo</text></svg>"]}, {"id": 3, "titulo": "Sembradora Agrometal TX Mega 16 a 52,5", "categoria": "Sembradoras", "cat": "sembradoras", "marca": "Agrometal", "modelo": "TX Mega", "anio": 2019, "horas": null, "precio": 95000000, "moneda": "ARS", "iva": true, "provincia": "Córdoba", "prov": "cordoba", "localidad": "Marcos Juárez", "vendedor": "Roberto Giménez", "tipo": "particular", "destacado": false, "permuta": true, "financiacion": false, "estado": "usado", "desc": "Sembradora de grano grueso 16 surcos a 52,5 cm con fertilización doble y monitor de siembra. Muy poco uso, guardada bajo techo. Se vende por cambio de sistema de siembra.", "ficha": {"Surcos": "16", "Distancia entre surcos (cm)": "52,5", "Tipo de siembra": "Neumática", "Ancho de labor (m)": "8,4"}, "tel": "+5493472444789", "color": "#3B7A47", "icono": "🌱", "fotos": ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%233B7A47'/><text x='240' y='200' font-size='120' text-anchor='middle'>🌱</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 1 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%233B7A47'/><text x='240' y='200' font-size='120' text-anchor='middle'>🌱</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 2 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%233B7A47'/><text x='240' y='200' font-size='120' text-anchor='middle'>🌱</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 3 de ejemplo</text></svg>"]}, {"id": 4, "titulo": "Pulverizadora Metalfor 3200 autopropulsada 2015", "categoria": "Pulverizadoras", "cat": "pulverizadoras", "marca": "Metalfor", "modelo": "3200", "anio": 2015, "horas": 4100, "precio": 110000, "moneda": "USD", "iva": false, "provincia": "La Pampa", "prov": "la-pampa", "localidad": "General Pico", "vendedor": "Cristian López", "tipo": "particular", "destacado": false, "permuta": false, "financiacion": false, "estado": "usado", "desc": "Botalón de 28 metros, banderillero satelital, corte por secciones. Motor Cummins con 4.100 horas, recién hecho service de bomba. Cubiertas nuevas.", "ficha": {"Tanque (l)": "3.200", "Botalón (m)": "28", "Autopropulsada": "Sí"}, "tel": "+5492302111222", "color": "#1F5F8B", "icono": "💧", "fotos": ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%231F5F8B'/><text x='240' y='200' font-size='120' text-anchor='middle'>💧</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 1 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%231F5F8B'/><text x='240' y='200' font-size='120' text-anchor='middle'>💧</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 2 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%231F5F8B'/><text x='240' y='200' font-size='120' text-anchor='middle'>💧</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 3 de ejemplo</text></svg>"]}, {"id": 5, "titulo": "Tractor Kioti RX7330 2021 con pala frontal", "categoria": "Tractores", "cat": "tractores", "marca": "Kioti", "modelo": "RX7330", "anio": 2021, "horas": 1250, "precio": 42000, "moneda": "USD", "iva": true, "provincia": "Buenos Aires", "prov": "buenos-aires", "localidad": "San Carlos de Bolívar", "vendedor": "Gangoni Maquinarias", "tipo": "profesional", "destacado": false, "permuta": true, "financiacion": true, "estado": "usado", "desc": "Tractor de 73 HP con pala frontal original, cabina, aire acondicionado y transmisión sincronizada. Un solo dueño, uso en tambo. Service en concesionario oficial.", "ficha": {"Potencia (HP)": "73", "Tracción": "4x4", "Transmisión": "Sincronizada 24x24", "Cabina": "Sí"}, "tel": "+5492314666777", "color": "#245C31", "icono": "🚜", "fotos": ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23245C31'/><text x='240' y='200' font-size='120' text-anchor='middle'>🚜</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 1 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23245C31'/><text x='240' y='200' font-size='120' text-anchor='middle'>🚜</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 2 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23245C31'/><text x='240' y='200' font-size='120' text-anchor='middle'>🚜</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 3 de ejemplo</text></svg>"]}, {"id": 6, "titulo": "Acoplado tolva Cestari 14 toneladas", "categoria": "Acoplados y tolvas", "cat": "acoplados", "marca": "Cestari", "modelo": "14 tn", "anio": 2012, "horas": null, "precio": null, "moneda": "USD", "iva": false, "provincia": "Entre Ríos", "prov": "entre-rios", "localidad": "Gualeguaychú", "vendedor": "Estancia La Fortuna", "tipo": "particular", "destacado": false, "permuta": false, "financiacion": false, "estado": "usado", "desc": "Tolva autodescargable de 14 toneladas, sinfín de descarga hidráulico, cubiertas en buen estado, lona nueva. Precio a consultar.", "ficha": {"Capacidad": "14 tn", "Ejes": "2"}, "tel": "+5493446888999", "color": "#8B4A1F", "icono": "🛻", "fotos": ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%238B4A1F'/><text x='240' y='200' font-size='120' text-anchor='middle'>🛻</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 1 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%238B4A1F'/><text x='240' y='200' font-size='120' text-anchor='middle'>🛻</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 2 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%238B4A1F'/><text x='240' y='200' font-size='120' text-anchor='middle'>🛻</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 3 de ejemplo</text></svg>"]}, {"id": 7, "titulo": "Rotoenfardadora Mainero 5880 0 km", "categoria": "Forraje y henificación", "cat": "forraje", "marca": "Mainero", "modelo": "5880", "anio": 2026, "horas": 0, "precio": 48500000, "moneda": "ARS", "iva": true, "provincia": "Córdoba", "prov": "cordoba", "localidad": "Bell Ville", "vendedor": "Agro Ríos SA", "tipo": "profesional", "destacado": false, "permuta": false, "financiacion": true, "estado": "nuevo", "desc": "Unidad nueva en stock, entrega inmediata. Rollos de 1,20 x 1,50 m, atado con red y con hilo. Financiación bancaria disponible.", "ficha": {"Tipo": "Rotoenfardadora", "Ancho de labor (m)": "2,0"}, "tel": "+5493855123456", "color": "#556B2F", "icono": "🌿", "fotos": ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23556B2F'/><text x='240' y='200' font-size='120' text-anchor='middle'>🌿</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 1 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23556B2F'/><text x='240' y='200' font-size='120' text-anchor='middle'>🌿</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 2 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23556B2F'/><text x='240' y='200' font-size='120' text-anchor='middle'>🌿</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 3 de ejemplo</text></svg>"]}, {"id": 8, "titulo": "Tractor Pauny 280A 2010", "categoria": "Tractores", "cat": "tractores", "marca": "Pauny", "modelo": "280A", "anio": 2010, "horas": 7800, "precio": 38000, "moneda": "USD", "iva": false, "provincia": "Santiago del Estero", "prov": "santiago-del-estero", "localidad": "Bandera", "vendedor": "Miguel Ruiz", "tipo": "particular", "destacado": false, "permuta": true, "financiacion": false, "estado": "usado", "desc": "Tractor articulado 280 HP, motor Cummins, 7.800 horas, cubiertas duales. Trabajando actualmente. Acepto permuta por tractor menor más diferencia.", "ficha": {"Potencia (HP)": "280", "Tracción": "4x4 articulado", "Transmisión": "Mecánica 12x4", "Cabina": "Sí"}, "tel": "+5493855123456", "color": "#B3261E", "icono": "🚜", "fotos": ["data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23B3261E'/><text x='240' y='200' font-size='120' text-anchor='middle'>🚜</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 1 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23B3261E'/><text x='240' y='200' font-size='120' text-anchor='middle'>🚜</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 2 de ejemplo</text></svg>", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 360'><rect width='480' height='360' fill='%23B3261E'/><text x='240' y='200' font-size='120' text-anchor='middle'>🚜</text><text x='240' y='330' font-family='sans-serif' font-size='22' fill='%23fff' text-anchor='middle' opacity='.8'>Foto 3 de ejemplo</text></svg>"]}], "categorias": [["Tractores", "tractores", "🚜"], ["Cosechadoras", "cosechadoras", "🌾"], ["Sembradoras", "sembradoras", "🌱"], ["Pulverizadoras", "pulverizadoras", "💧"], ["Implementos de labranza", "implementos", "⚙️"], ["Fertilizadoras", "fertilizadoras", "🧪"], ["Forraje y henificación", "forraje", "🌿"], ["Acoplados y tolvas", "acoplados", "🛻"], ["Riego", "riego", "🚿"], ["Repuestos", "repuestos", "🔩"], ["Otros", "otros", "📦"]], "provincias": ["Buenos Aires", "Córdoba", "Santa Fe", "Entre Ríos", "La Pampa", "Santiago del Estero", "Chaco", "Tucumán", "Salta", "Mendoza", "San Luis", "Corrientes"], "fichas": {"tractores": ["Potencia (HP)", "Tracción", "Transmisión", "Cabina"], "cosechadoras": ["Potencia (HP)", "Plataforma (m)", "Tolva (l)", "Trilla"], "sembradoras": ["Surcos", "Distancia entre surcos (cm)", "Tipo de siembra", "Ancho de labor (m)"], "pulverizadoras": ["Tanque (l)", "Botalón (m)", "Autopropulsada"], "implementos": ["Ancho de labor (m)", "Tipo"], "fertilizadoras": ["Capacidad (l)", "Ancho de labor (m)"], "forraje": ["Tipo", "Ancho de labor (m)"], "acoplados": ["Capacidad", "Ejes"], "riego": ["Tipo", "Caudal"], "repuestos": ["Compatible con"], "otros": []}};
+const estado = { favoritos: new Set([1]), reportes: [ {id: 1, aviso: 8, motivo: 'pide seña', comentario: 'Me pidió transferir el 20 % para "reservar"', fecha: '16/9/2026 18:20'} ], enRevision: [], misAvisos: [5, 1], auditoria: [] };
+const $ = (s, el = document) => el.querySelector(s); const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const fmt = (p, m) => p == null ? 'Consultar' : (m === 'USD' ? 'US$ ' : '$ ') + Number(p).toLocaleString('es-AR');
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mask = (t) => { const n = t.replace(/^\+549/, ''); return n.slice(0, 2) + ' ' + n.slice(2, 4) + '** ****'; };
+const nice = (t) => { const n = t.replace(/^\+549/, ''); return n.slice(0, n.length - 8) + ' ' + n.slice(-8, -4) + '-' + n.slice(-4); };
+const avisoPor = (id) => DATOS.avisos.find((a) => a.id === Number(id));
+DATOS.avisos.forEach((a) => { a.estadoAviso = 'activo'; a.visitas = 40 + a.id * 37; a.contactos = 3 + a.id * 2; });
+// avisos de ejemplo en revisión
+DATOS.avisos.push({ id: 9, titulo: 'Tractor John Deere 7230J 2020 — oportunidad, liquido urgente', categoria: 'Tractores', cat: 'tractores', marca: 'John Deere', modelo: '7230J', anio: 2020, horas: 900, precio: 21000, moneda: 'USD', provincia: 'Chaco', prov: 'chaco', localidad: 'Sáenz Peña', vendedor: 'Ventas Rápidas', tipo: 'particular', destacado: false, permuta: false, financiacion: false, estado: 'usado', desc: 'Tractor impecable, se vende urgente por viaje al exterior. Se reserva con seña por transferencia.', ficha: {}, tel: '+5491155550000', fotos: [DATOS.avisos[0].fotos[0]], estadoAviso: 'en_revision', riesgo: 85, senales: ['Cuenta con menos de 7 días', 'Primera publicación', 'Menos de 3 fotos', 'Palabras sospechosas: urgente, exterior, seña', 'Precio menor al 50 % de la mediana (68000)'], visitas: 0, contactos: 0 });
+DATOS.avisos.push({ id: 10, titulo: 'Fertilizadora Fertec 3000 al voleo', categoria: 'Fertilizadoras', cat: 'fertilizadoras', marca: 'Fertec', modelo: '3000', anio: 2017, horas: null, precio: 18000000, moneda: 'ARS', provincia: 'Buenos Aires', prov: 'buenos-aires', localidad: 'Tres Arroyos', vendedor: 'Marcela Díaz', tipo: 'particular', destacado: false, permuta: false, financiacion: false, estado: 'usado', desc: 'Fertilizadora al voleo de 3.000 litros, discos nuevos, computadora de dosis variable. Muy buen estado, poco uso.', ficha: {'Capacidad (l)': '3.000', 'Ancho de labor (m)': '36'}, tel: '+5492983444555', fotos: [DATOS.avisos[2].fotos[0], DATOS.avisos[2].fotos[1], DATOS.avisos[2].fotos[2]], estadoAviso: 'en_revision', riesgo: 35, senales: ['Cuenta con menos de 7 días', 'Primera publicación'], visitas: 0, contactos: 0 });
+
+function flash(tipo, msg) { $('#flash').innerHTML = `<div class="aviso-flash aviso-flash--${tipo}" role="status">${esc(msg)}</div>`; setTimeout(() => { $('#flash').innerHTML = ''; }, 5000); }
+function card(a) {
+  return `<article class="tarjeta${a.destacado ? ' tarjeta--destacada' : ''}"><a class="tarjeta-foto" href="#/aviso/${a.id}"><img src="${a.fotos[0]}" alt="" loading="lazy">${a.destacado ? '<span class="etiqueta etiqueta--destacado">Destacado</span>' : ''}</a><div class="tarjeta-cuerpo"><div class="tarjeta-precio">${fmt(a.precio, a.moneda)}${a.iva && a.precio != null ? ' <small>+ IVA</small>' : ''}</div><h3 class="tarjeta-titulo"><a href="#/aviso/${a.id}">${esc(a.titulo)}</a></h3><p class="tarjeta-datos">${a.categoria} · ${a.marca} · ${a.anio}${a.horas != null ? ' · ' + a.horas.toLocaleString('es-AR') + ' h' : ''}</p><p class="tarjeta-lugar">${a.localidad}, ${a.provincia}${a.tipo === 'profesional' ? ' <span class="sello">Empresa</span>' : ''}</p></div></article>`;
+}
+const activos = () => DATOS.avisos.filter((a) => a.estadoAviso === 'activo');
+function llenarSelects() {
+  $$('select[name=categoria]').forEach((s) => { DATOS.categorias.forEach(([n, slug]) => s.insertAdjacentHTML('beforeend', `<option value="${slug}">${n}</option>`)); });
+  $$('select[name=provincia]').forEach((s) => { DATOS.provincias.forEach((n) => s.insertAdjacentHTML('beforeend', `<option value="${n}">${n}</option>`)); });
+  const marcas = [...new Set(DATOS.avisos.map((a) => a.marca))].sort();
+  $$('select[name=marca]').forEach((s) => marcas.forEach((m) => s.insertAdjacentHTML('beforeend', `<option value="${m}">${m}</option>`)));
+}
+function renderHome() {
+  const act = activos();
+  $('#home-total').textContent = `${act.length} máquinas publicadas por sus dueños y concesionarios. Hablás directo con el vendedor, por WhatsApp, con teléfono verificado.`;
+  $('#home-categorias').innerHTML = DATOS.categorias.map(([n, slug, ic]) => `<a class="categoria" href="#/buscar?categoria=${slug}"><span class="categoria-icono" aria-hidden="true">${ic}</span><span>${n}</span><small>${act.filter((a) => a.cat === slug).length}</small></a>`).join('');
+  $('#home-destacados').innerHTML = act.filter((a) => a.destacado).map(card).join('');
+  $('#home-recientes').innerHTML = act.slice().reverse().map(card).join('');
+}
+function renderBuscar(params) {
+  const f = Object.fromEntries(params.entries());
+  const form = $('#form-filtros');
+  for (const el of form.elements) { if (!el.name) continue; if (el.type === 'checkbox') el.checked = !!f[el.name]; else el.value = f[el.name] || ''; }
+  $('#buscador-mini input').value = f.q || '';
+  let r = activos().filter((a) => (!f.q || (a.titulo + a.desc + a.marca + a.modelo).toLowerCase().includes(f.q.toLowerCase())) && (!f.categoria || a.cat === f.categoria) && (!f.marca || a.marca === f.marca) && (!f.provincia || a.provincia === f.provincia) && (!f.estado || a.estado === f.estado) && (!f.moneda || a.moneda === f.moneda) && (!f.anio_min || a.anio >= +f.anio_min) && (!f.anio_max || a.anio <= +f.anio_max) && (!f.horas_max || (a.horas != null && a.horas <= +f.horas_max)) && (!f.verificados || a.tipo === 'profesional') && (!f.permuta || a.permuta));
+  const o = f.orden || ''; $('#orden').value = o;
+  r.sort((a, b) => (b.destacado - a.destacado) || (o === 'precio_asc' ? (a.precio ?? 1e12) - (b.precio ?? 1e12) : o === 'precio_desc' ? (b.precio ?? 0) - (a.precio ?? 0) : o === 'anio_desc' ? b.anio - a.anio : b.id - a.id));
+  const cat = DATOS.categorias.find((c) => c[1] === f.categoria);
+  $('#buscar-titulo').innerHTML = `${cat ? cat[0] : 'Buscar maquinaria'}${f.provincia ? ' en ' + esc(f.provincia) : ''} <small>${r.length} aviso${r.length === 1 ? '' : 's'}</small>`;
+  $('#buscar-grilla').innerHTML = r.map(card).join(''); $('#buscar-vacio').hidden = r.length > 0;
+}
+function renderAviso(id) {
+  const a = avisoPor(id); const v = $('#v-aviso');
+  if (!a) { v.innerHTML = '<div class="panel panel-centrado"><h1>Aviso no disponible</h1><p>Este aviso ya no está publicado.</p><a class="btn btn-primario" href="#/">Volver al inicio</a></div>'; return; }
+  const esDueno = estado.misAvisos.includes(a.id); const fav = estado.favoritos.has(a.id);
+  const similares = activos().filter((x) => x.cat === a.cat && x.id !== a.id).slice(0, 4);
+  v.innerHTML = `${a.estadoAviso !== 'activo' ? `<div class="aviso-flash aviso-flash--info">Este aviso está en estado <strong>${a.estadoAviso.replace('_', ' ')}</strong> y solo lo ve su dueño.</div>` : ''}
+  <nav class="migas"><a href="#/">Inicio</a> › <a href="#/buscar?categoria=${a.cat}">${a.categoria}</a> › <a href="#/buscar?marca=${encodeURIComponent(a.marca)}">${a.marca}</a></nav>
+  <article class="ficha">
+    <div class="ficha-galeria"><img id="foto-principal" src="${a.fotos[0]}" alt="${esc(a.titulo)}"><div class="miniaturas">${a.fotos.map((f, i) => `<button type="button" data-src="${f}" class="${i === 0 ? 'activa' : ''}"><img src="${f}" alt="Foto ${i + 1}"></button>`).join('')}</div></div>
+    <div class="ficha-lateral">${a.destacado ? '<span class="etiqueta etiqueta--destacado">Destacado</span>' : ''}<h1>${esc(a.titulo)}</h1><p class="ficha-precio">${fmt(a.precio, a.moneda)}${a.iva && a.precio != null ? ' <small>+ IVA</small>' : ''}</p><p class="ficha-lugar">${a.localidad}, ${a.provincia}</p>
+      <ul class="chips"><li>${a.estado === 'nuevo' ? 'Nuevo' : 'Usado'}</li><li>Año ${a.anio}</li>${a.horas != null ? `<li>${a.horas.toLocaleString('es-AR')} horas</li>` : ''}${a.permuta ? '<li>Acepta permuta</li>' : ''}${a.financiacion ? '<li>Financiación</li>' : ''}</ul>
+      <div class="contacto"><p class="contacto-tel" id="tel-mask">${mask(a.tel)}</p><button type="button" class="btn btn-primario btn-bloque" id="btn-ver-tel">Ver teléfono</button><div id="contacto-acciones" hidden><a class="btn btn-whatsapp btn-bloque" id="btn-wa" href="#" target="_blank" rel="noopener">Escribir por WhatsApp</a><a class="btn btn-fantasma btn-bloque" id="btn-llamar" href="#">Llamar</a></div><p class="contacto-seguridad">Nunca envíes dinero ni señas antes de ver la máquina en persona. <a href="#/consejos">Más consejos</a></p></div>
+      <div class="vendedor-caja"><p><a href="#/buscar?q=${encodeURIComponent(a.vendedor)}"><strong>${esc(a.vendedor)}</strong></a>${a.tipo === 'profesional' ? ' <span class="sello">Empresa</span>' : ''}</p><p class="secundario">Teléfono verificado · Publica desde 2025 · ${activos().filter((x) => x.vendedor === a.vendedor).length} avisos activos</p></div>
+      <div class="ficha-acciones">${esDueno ? `<a class="btn btn-fantasma" href="#/publicar">Editar</a><a class="btn btn-destacar" href="#/destacar/${a.id}">Destacar</a>` : `<button type="button" class="btn btn-fantasma" id="btn-favorito">${fav ? 'Guardado' : 'Guardar'}</button><button type="button" class="btn btn-enlace" id="btn-reportar">Reportar</button>`}</div>
+    </div>
+    <div class="ficha-detalle"><h2>Descripción</h2><p class="prosa-usuario">${esc(a.desc)}</p><h2>Ficha técnica</h2><dl class="ficha-tecnica"><dt>Marca</dt><dd>${a.marca}</dd><dt>Modelo</dt><dd>${a.modelo}</dd>${Object.entries(a.ficha).map(([k, val]) => `<dt>${k}</dt><dd>${esc(val)}</dd>`).join('')}</dl><p class="secundario">Publicado el 10/9/2026 · ${a.visitas} visitas</p></div>
+  </article>
+  ${similares.length ? `<section class="seccion"><h2>Similares</h2><div class="grilla">${similares.map(card).join('')}</div></section>` : ''}`;
+  $$('.miniaturas button', v).forEach((b) => b.addEventListener('click', () => { $('#foto-principal').src = b.dataset.src; $$('.miniaturas button', v).forEach((x) => x.classList.remove('activa')); b.classList.add('activa'); }));
+  $('#btn-ver-tel').addEventListener('click', () => {
+    // En la app real: POST /api/aviso/:id/telefono con Turnstile y límite diario.
+    $('#tel-mask').textContent = nice(a.tel); $('#btn-ver-tel').hidden = true; $('#contacto-acciones').hidden = false;
+    $('#btn-wa').href = `https://wa.me/${a.tel.replace('+', '')}?text=${encodeURIComponent('Hola, vi tu ' + a.titulo + ' en AgroMarket. ¿Sigue disponible?')}`; $('#btn-llamar').href = 'tel:' + a.tel; a.contactos++;
+  });
+  const bf = $('#btn-favorito'); if (bf) bf.addEventListener('click', () => { estado.favoritos.has(a.id) ? estado.favoritos.delete(a.id) : estado.favoritos.add(a.id); bf.textContent = estado.favoritos.has(a.id) ? 'Guardado' : 'Guardar'; });
+  const br = $('#btn-reportar'); if (br) br.addEventListener('click', () => { $('#dialogo-reporte').dataset.aviso = a.id; $('#dialogo-reporte').showModal(); });
+}
+function renderMisAvisos() {
+  const E = { en_revision: 'En revisión', activo: 'Activo', pausado: 'Pausado', vencido: 'Vencido', vendido: 'Vendido', rechazado: 'Rechazado' };
+  const lista = DATOS.avisos.filter((a) => estado.misAvisos.includes(a.id));
+  $('#mis-avisos-lista').innerHTML = lista.map((a) => `<article class="fila-aviso"><a class="fila-foto" href="#/aviso/${a.id}"><img src="${a.fotos[0]}" alt=""></a><div class="fila-info"><h3><a href="#/aviso/${a.id}">${esc(a.titulo)}</a> <span class="estado estado--${a.estadoAviso}">${E[a.estadoAviso]}</span>${a.destacado ? ' <span class="etiqueta etiqueta--destacado">Destacado</span>' : ''}</h3><p class="secundario">${fmt(a.precio, a.moneda)} · ${a.visitas} visitas · ${a.contactos} contactos · vence 9/11/2026</p></div><div class="fila-acciones"><a class="btn btn-fantasma" href="#/publicar">Editar</a>${a.estadoAviso === 'activo' ? `<a class="btn btn-destacar" href="#/destacar/${a.id}">Destacar</a>` : ''}<div class="acciones-estado">${a.estadoAviso === 'activo' ? `<button class="enlace" data-acc="pausado" data-id="${a.id}">Pausar</button><button class="enlace" data-acc="renovar" data-id="${a.id}">Renovar</button>` : ''}${['pausado', 'vencido'].includes(a.estadoAviso) ? `<button class="enlace" data-acc="activo" data-id="${a.id}">Activar</button>` : ''}<button class="enlace" data-acc="vendido" data-id="${a.id}">Marcar vendido</button></div></div></article>`).join('') || '<div class="vacio"><p>Todavía no publicaste ninguna máquina.</p><a class="btn btn-primario" href="#/publicar">Publicar la primera</a></div>';
+  $$('#mis-avisos-lista [data-acc]').forEach((b) => b.addEventListener('click', () => { const a = avisoPor(b.dataset.id); if (b.dataset.acc !== 'renovar') a.estadoAviso = b.dataset.acc; flash('exito', 'Listo.'); renderMisAvisos(); }));
+}
+function renderAdmin() {
+  const rev = DATOS.avisos.filter((a) => a.estadoAviso === 'en_revision');
+  $('#adm-rev').textContent = rev.length; $('#adm-rep').textContent = estado.reportes.length; $('#adm-act').textContent = activos().length;
+  const base = [['16/9/2026 18:20', 'reportar', 'aviso 8', 'pide_sena'], ['16/9/2026 14:02', 'pago_aprobado', 'pago 3f1a…', 'destacado_15'], ['16/9/2026 11:47', 'moderar_aprobar', 'aviso 6', ''], ['16/9/2026 09:03', 'usuario_suspender', 'usuario 8c2e…', 'spam de señas'], ['15/9/2026 21:15', 'publicar', 'aviso 7', 'riesgo 15']];
+  $('#adm-auditoria').innerHTML = [...estado.auditoria, ...base].map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td><small>${esc(r[3])}</small></td></tr>`).join('');
+  $('#mod-count').textContent = `${rev.length} en revisión`;
+  $('#mod-lista').innerHTML = rev.map((a) => `<article class="panel mod-item"><div class="mod-fotos">${a.fotos.slice(0, 4).map((f) => `<img src="${f}" alt="">`).join('')}</div><div class="mod-info"><h3><a href="#/aviso/${a.id}">${esc(a.titulo)}</a> <span class="riesgo riesgo--${a.riesgo >= 50 ? 'alto' : a.riesgo >= 25 ? 'medio' : 'bajo'}">Riesgo ${a.riesgo}</span></h3><p class="secundario">${a.categoria} · ${a.marca} ${a.modelo} · ${fmt(a.precio, a.moneda)} · ${a.provincia} · ${esc(a.vendedor)} (${a.tipo})</p><ul class="senales">${a.senales.map((s) => `<li>${esc(s)}</li>`).join('')}</ul><p class="prosa-usuario mod-desc">${esc(a.desc)}</p><div class="mod-acciones"><input type="text" placeholder="Motivo si se rechaza (lo ve el usuario)" id="motivo-${a.id}"><button class="btn btn-primario" data-dec="activo" data-id="${a.id}">Aprobar</button><button class="btn btn-peligro" data-dec="rechazado" data-id="${a.id}">Rechazar</button></div></div></article>`).join('') || '<div class="vacio"><p>No hay avisos pendientes.</p></div>';
+  $$('#mod-lista [data-dec]').forEach((b) => b.addEventListener('click', () => { const a = avisoPor(b.dataset.id); a.estadoAviso = b.dataset.dec; estado.auditoria.unshift([new Date().toLocaleString('es-AR'), 'moderar_' + (b.dataset.dec === 'activo' ? 'aprobar' : 'rechazar'), 'aviso ' + a.id, $('#motivo-' + a.id).value]); flash('exito', b.dataset.dec === 'activo' ? 'Aviso aprobado y publicado. Se avisó al dueño por email.' : 'Aviso rechazado. Se avisó al dueño con el motivo.'); renderAdmin(); }));
+  $('#rep-lista').innerHTML = estado.reportes.map((r) => { const a = avisoPor(r.aviso); return `<tr><td>${r.fecha}</td><td><a href="#/aviso/${a.id}">${esc(a.titulo)}</a> <span class="estado estado--${a.estadoAviso}">${a.estadoAviso}</span></td><td>${r.motivo}</td><td><small>${esc(r.comentario)}</small></td><td class="acciones-celda"><button class="enlace" data-rep="${r.id}" data-acc="descartar">Descartar</button> <button class="enlace" data-rep="${r.id}" data-acc="resolver">Resuelto</button> <button class="enlace enlace-peligro" data-rep="${r.id}" data-acc="suspender">Suspender aviso</button></td></tr>`; }).join('') || '<tr><td colspan="5">No hay reportes pendientes.</td></tr>';
+  $$('#rep-lista [data-rep]').forEach((b) => b.addEventListener('click', () => { const r = estado.reportes.find((x) => x.id === +b.dataset.rep); if (b.dataset.acc === 'suspender') { avisoPor(r.aviso).estadoAviso = 'rechazado'; } estado.reportes = estado.reportes.filter((x) => x !== r); flash('exito', 'Reporte gestionado.'); renderAdmin(); }));
+}
+function renderFavoritos() { const l = DATOS.avisos.filter((a) => estado.favoritos.has(a.id)); $('#fav-grilla').innerHTML = l.map(card).join(''); $('#fav-vacio').hidden = l.length > 0; }
+function ruta() {
+  const h = location.hash.slice(1) || '/'; const [path, qs] = h.split('?'); const params = new URLSearchParams(qs || '');
+  const partes = path.split('/').filter(Boolean); let vista = partes[0] || 'home';
+  if (vista === 'destacar') { flash('info', 'En la app real acá se elige 7/15/30 días o "subir al inicio" y se paga con Mercado Pago.'); vista = 'mis-avisos'; }
+  $$('.vista').forEach((v) => v.classList.remove('activa'));
+  const el = $('#v-' + vista); if (!el) { $('#v-aviso').classList.add('activa'); renderAviso(-1); return; }
+  el.classList.add('activa'); window.scrollTo(0, 0);
+  if (vista === 'home') renderHome(); if (vista === 'buscar') renderBuscar(params); if (vista === 'aviso') renderAviso(partes[1]);
+  if (vista === 'mis-avisos') renderMisAvisos(); if (vista === 'favoritos') renderFavoritos(); if (vista.startsWith('admin')) renderAdmin(); if (vista === 'mi-cuenta') $('#cta-activos').textContent = DATOS.avisos.filter((a) => estado.misAvisos.includes(a.id) && a.estadoAviso === 'activo').length;
+}
+llenarSelects();
+const irBuscar = (form) => { const p = new URLSearchParams(); for (const el of form.elements) { if (!el.name) continue; const v = el.type === 'checkbox' ? (el.checked ? '1' : '') : el.value; if (v) p.set(el.name, v); } location.hash = '#/buscar?' + p.toString(); };
+$('#buscador-mini').addEventListener('submit', (e) => { e.preventDefault(); irBuscar(e.target); });
+$('#buscador-grande').addEventListener('submit', (e) => { e.preventDefault(); irBuscar(e.target); });
+$('#form-filtros').addEventListener('submit', (e) => { e.preventDefault(); irBuscar(e.target); });
+$('#limpiar').addEventListener('click', () => { location.hash = '#/buscar'; });
+$('#orden').addEventListener('change', () => { const p = new URLSearchParams((location.hash.split('?')[1]) || ''); p.set('orden', $('#orden').value); location.hash = '#/buscar?' + p; });
+$('#btn-alerta').addEventListener('click', () => { const n = prompt('Nombre de la alerta', 'Mi búsqueda'); if (n) flash('exito', `Alerta "${n}" creada. Te avisamos por email cuando aparezca algo nuevo.`); });
+$('#pub-categoria').addEventListener('change', (e) => { $('#pub-ficha').innerHTML = (DATOS.fichas[e.target.value] || []).map((c) => `<label>${c}<input type="text" maxlength="80"></label>`).join(''); });
+$('#pub-fotos').addEventListener('change', (e) => { const c = $('#pub-previsualizacion'); c.innerHTML = ''; [...e.target.files].slice(0, 20).forEach((f) => { const i = document.createElement('img'); i.src = URL.createObjectURL(f); c.appendChild(i); }); });
+$('#form-publicar').addEventListener('submit', (e) => { e.preventDefault(); const f = e.target; const cat = DATOS.categorias.find((c) => c[1] === f.categoria.value) || DATOS.categorias[10]; const id = Math.max(...DATOS.avisos.map((a) => a.id)) + 1; DATOS.avisos.push({ id, titulo: f.titulo.value, categoria: cat[0], cat: cat[1], marca: f.marca.value || 'Otra', modelo: f.modelo.value, anio: +f.anio.value || 2020, horas: f.horas.value ? +f.horas.value : null, precio: f.precio.value ? +f.precio.value : null, moneda: f.moneda.value, iva: f.iva.checked, provincia: f.provincia.value, prov: '', localidad: f.localidad.value, vendedor: 'Juan Pérez', tipo: 'profesional', destacado: false, permuta: f.permuta.checked, financiacion: f.financiacion.checked, estado: f.estado.value, desc: f.desc.value, ficha: {}, tel: '+5491123456789', fotos: [DATOS.avisos[0].fotos[1]], estadoAviso: 'en_revision', riesgo: 35, senales: ['Menos de 3 fotos', 'Primera publicación'], visitas: 0, contactos: 0 }); estado.misAvisos.unshift(id); f.reset(); $('#pub-ficha').innerHTML = ''; $('#pub-previsualizacion').innerHTML = ''; location.hash = '#/aviso/' + id; flash('exito', 'Aviso enviado. Lo revisamos y lo publicamos en menos de 24 horas. (Aprobalo vos desde Admin → Moderación.)'); });
+$('#form-otp-enviar').addEventListener('submit', (e) => { e.preventDefault(); $('#form-otp-confirmar').hidden = false; flash('info', 'Te enviamos un código de 6 dígitos por WhatsApp. (En dev sale en la consola del servidor.)'); });
+$('#form-otp-confirmar').addEventListener('submit', (e) => { e.preventDefault(); flash('exito', 'Teléfono verificado. Ya podés publicar.'); location.hash = '#/publicar'; });
+$('#form-login').addEventListener('submit', (e) => { e.preventDefault(); location.hash = '#/mi-cuenta'; });
+$('#form-registro').addEventListener('submit', (e) => { e.preventDefault(); flash('exito', 'Cuenta creada. Te enviamos un email para confirmarlo.'); location.hash = '#/verificar'; });
+$('#form-recuperar').addEventListener('submit', (e) => { e.preventDefault(); flash('info', 'Si el email está registrado, te enviamos un enlace para restablecer la contraseña.'); location.hash = '#/ingresar'; });
+$('#rep-cancelar').addEventListener('click', () => $('#dialogo-reporte').close());
+$('#rep-enviar').addEventListener('click', () => { const d = $('#dialogo-reporte'); estado.reportes.push({ id: Date.now(), aviso: +d.dataset.aviso, motivo: $('#rep-motivo').value.replaceAll('_', ' '), comentario: $('#rep-comentario').value, fecha: new Date().toLocaleString('es-AR') }); d.close(); flash('exito', 'Gracias. El equipo de moderación lo revisa a la brevedad.'); });
+window.addEventListener('hashchange', ruta); ruta();
+</script>
+</body>
+</html>

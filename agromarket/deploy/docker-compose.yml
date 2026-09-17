@@ -1,0 +1,42 @@
+# Stack completo: app + PostgreSQL + Redis. Nginx/Caddy van por fuera (ver nginx.conf).
+# Uso: cd deploy && docker compose --env-file ../.env up -d --build
+services:
+  app:
+    build: { context: .., dockerfile: deploy/Dockerfile }
+    restart: unless-stopped
+    env_file: ../.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://agromarket:${POSTGRES_PASSWORD:-agromarket}@db:5432/agromarket
+      REDIS_URL: redis://redis:6379
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on: [db, redis]
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: agromarket
+      POSTGRES_USER: agromarket
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agromarket}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+  cron:
+    build: { context: .., dockerfile: deploy/Dockerfile }
+    restart: unless-stopped
+    env_file: ../.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://agromarket:${POSTGRES_PASSWORD:-agromarket}@db:5432/agromarket
+    command: ["sh", "-c", "while true; do node scripts/vencer-avisos.js; sleep 86400; done"]
+    depends_on: [db]
+volumes:
+  pgdata:
+  uploads:

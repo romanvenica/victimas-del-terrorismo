@@ -1,0 +1,56 @@
+<%- include('partials/head') %>
+<div class="busqueda">
+  <aside class="filtros">
+    <form action="/buscar" method="get" id="form-filtros">
+      <h2>Filtrar</h2>
+      <label>Palabra clave<input type="search" name="q" value="<%= filtros.q || '' %>"></label>
+      <label>Categoría<select name="categoria"><option value="">Todas</option><% for (const c of categorias) { %><option value="<%= c.slug %>" <%= filtros.categoria === c.slug ? 'selected' : '' %>><%= c.nombre %></option><% } %></select></label>
+      <label>Marca<select name="marca"><option value="">Todas</option><% for (const m of marcas) { %><option value="<%= m.slug %>" <%= filtros.marca === m.slug ? 'selected' : '' %>><%= m.nombre %></option><% } %></select></label>
+      <label>Provincia<select name="provincia"><option value="">Todo el país</option><% for (const p of provincias) { %><option value="<%= p.slug %>" <%= filtros.provincia === p.slug ? 'selected' : '' %>><%= p.nombre %></option><% } %></select></label>
+      <label>Estado<select name="estado_maquina"><option value="">Nuevo y usado</option><option value="nuevo" <%= filtros.estado_maquina === 'nuevo' ? 'selected' : '' %>>Nuevo</option><option value="usado" <%= filtros.estado_maquina === 'usado' ? 'selected' : '' %>>Usado</option></select></label>
+      <div class="fila-2">
+        <label>Año desde<input type="number" name="anio_min" value="<%= filtros.anio_min || '' %>" min="1950" max="2030"></label>
+        <label>Año hasta<input type="number" name="anio_max" value="<%= filtros.anio_max || '' %>" min="1950" max="2030"></label>
+      </div>
+      <label>Moneda<select name="moneda"><option value="">Cualquiera</option><option value="USD" <%= filtros.moneda === 'USD' ? 'selected' : '' %>>Dólares</option><option value="ARS" <%= filtros.moneda === 'ARS' ? 'selected' : '' %>>Pesos</option></select></label>
+      <div class="fila-2">
+        <label>Precio mín.<input type="number" name="precio_min" value="<%= filtros.precio_min || '' %>" min="0"></label>
+        <label>Precio máx.<input type="number" name="precio_max" value="<%= filtros.precio_max || '' %>" min="0"></label>
+      </div>
+      <label>Horas máx.<input type="number" name="horas_max" value="<%= filtros.horas_max || '' %>" min="0"></label>
+      <label class="check"><input type="checkbox" name="verificados" value="1" <%= filtros.verificados ? 'checked' : '' %>> Solo empresas</label>
+      <label class="check"><input type="checkbox" name="permuta" value="1" <%= filtros.permuta ? 'checked' : '' %>> Acepta permuta</label>
+      <button class="btn btn-primario" type="submit">Aplicar filtros</button>
+      <a class="btn btn-fantasma" href="/buscar">Limpiar</a>
+      <% if (user) { %><button class="btn btn-fantasma" type="button" id="btn-guardar-alerta">Crear alerta con estos filtros</button><% } %>
+    </form>
+  </aside>
+  <section class="resultados">
+    <div class="resultados-cab">
+      <h1><%= titulo %> <small><%= total.toLocaleString('es-AR') %> aviso<%= total === 1 ? '' : 's' %></small></h1>
+      <form method="get" action="/buscar" class="orden">
+        <% for (const [k, v] of Object.entries(filtros)) { if (k !== 'orden' && k !== 'pagina' && v) { %><input type="hidden" name="<%= k %>" value="<%= v %>"><% } } %>
+        <label>Ordenar <select name="orden" data-autosubmit>
+          <option value="" <%= !filtros.orden ? 'selected' : '' %>>Más recientes</option>
+          <option value="precio_asc" <%= filtros.orden === 'precio_asc' ? 'selected' : '' %>>Menor precio</option>
+          <option value="precio_desc" <%= filtros.orden === 'precio_desc' ? 'selected' : '' %>>Mayor precio</option>
+          <option value="anio_desc" <%= filtros.orden === 'anio_desc' ? 'selected' : '' %>>Más nuevas</option>
+        </select></label>
+      </form>
+    </div>
+    <% if (avisos.length) { %>
+      <div class="grilla"><% for (const a of avisos) { %><%- include('partials/card', { a }) %><% } %></div>
+      <% if (paginas > 1) { %>
+      <nav class="paginacion" aria-label="Páginas">
+        <% const qs = (p) => { const u = new URLSearchParams(); for (const [k, v] of Object.entries(filtros)) if (k !== 'pagina' && v) u.set(k, v); u.set('pagina', p); return '/buscar?' + u.toString(); }; %>
+        <% if (pagina > 1) { %><a href="<%= qs(pagina - 1) %>">Anterior</a><% } %>
+        <span>Página <%= pagina %> de <%= paginas %></span>
+        <% if (pagina < paginas) { %><a href="<%= qs(pagina + 1) %>">Siguiente</a><% } %>
+      </nav>
+      <% } %>
+    <% } else { %>
+      <div class="vacio"><p>No encontramos máquinas con esos filtros.</p><p>Probá con menos filtros<% if (user) { %> o creá una alerta para que te avisemos cuando aparezca algo<% } %>.</p></div>
+    <% } %>
+  </section>
+</div>
+<%- include('partials/foot') %>

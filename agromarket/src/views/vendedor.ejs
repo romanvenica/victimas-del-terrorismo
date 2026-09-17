@@ -1,0 +1,11 @@
+<%- include('partials/head') %>
+<section class="panel">
+  <h1><%= titulo %><% if (vendedor.tipo === 'profesional') { %> <span class="sello">Empresa<%= empresa && empresa.cuit_validado ? ' · CUIT validado' : '' %></span><% } %></h1>
+  <p class="secundario">Publica desde <%= new Date(vendedor.created_at).getFullYear() %><%= vendedor.localidad ? ' · ' + vendedor.localidad : '' %></p>
+  <% if (empresa && empresa.descripcion) { %><p class="prosa-usuario"><%= empresa.descripcion %></p><% } %>
+  <% if (empresa && empresa.direccion) { %><p><%= empresa.direccion %></p><% } %>
+</section>
+<section class="seccion"><h2><%= avisos.length %> aviso<%= avisos.length === 1 ? '' : 's' %> activo<%= avisos.length === 1 ? '' : 's' %></h2>
+<% if (avisos.length) { %><div class="grilla"><% for (const a of avisos) { %><%- include('partials/card', { a }) %><% } %></div><% } else { %><div class="vacio"><p>Este vendedor no tiene avisos activos.</p></div><% } %>
+</section>
+<%- include('partials/foot') %>

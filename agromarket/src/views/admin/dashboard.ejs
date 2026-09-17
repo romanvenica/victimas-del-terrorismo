@@ -1,0 +1,16 @@
+<%- include('../partials/head') %><%- include('_nav') %>
+<h1>Resumen</h1>
+<div class="cuenta-stats stats-admin">
+  <a href="/admin/moderacion"><strong><%= stats.enRevision %></strong><span>en revisión</span></a>
+  <a href="/admin/reportes"><strong><%= stats.reportesPendientes %></strong><span>reportes pendientes</span></a>
+  <div><strong><%= stats.activos %></strong><span>avisos activos</span></div>
+  <div><strong><%= stats.usuarios %></strong><span>usuarios</span></div>
+  <div><strong><%= stats.nuevosHoy %></strong><span>avisos últimas 24 h</span></div>
+  <div><strong><%= stats.contactosHoy %></strong><span>contactos últimas 24 h</span></div>
+  <div><strong><%= fmtPrecio(stats.ingresos, 'ARS') %></strong><span>ingresos aprobados</span></div>
+</div>
+<section class="panel"><h2>Última actividad</h2>
+<table class="tabla"><thead><tr><th>Fecha</th><th>Acción</th><th>Entidad</th><th>Detalle</th></tr></thead><tbody>
+<% for (const u of ultimos) { %><tr><td><%= new Date(u.created_at).toLocaleString('es-AR') %></td><td><%= u.accion %></td><td><%= u.entidad %> <small><%= u.entidad_id.slice(0, 8) %></small></td><td><small><%= (u.detalle || '').slice(0, 120) %></small></td></tr><% } %>
+</tbody></table></section>
+<%- include('../partials/foot') %>

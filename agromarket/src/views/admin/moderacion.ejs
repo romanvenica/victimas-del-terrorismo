@@ -1,0 +1,22 @@
+<%- include('../partials/head') %><%- include('_nav') %>
+<h1>Moderación <small><%= avisos.length %> en revisión</small></h1>
+<% if (!avisos.length) { %><div class="vacio"><p>No hay avisos pendientes.</p></div><% } %>
+<% for (const a of avisos) { %>
+<article class="panel mod-item">
+  <div class="mod-fotos"><% for (const f of a.fotos.slice(0, 4)) { %><img src="<%= f.url_miniatura %>" alt=""><% } %></div>
+  <div class="mod-info">
+    <h3><a href="/aviso/<%= a.id %>/<%= a.slug %>" target="_blank"><%= a.titulo %></a> <span class="riesgo riesgo--<%= a.puntaje_riesgo >= 50 ? 'alto' : a.puntaje_riesgo >= 25 ? 'medio' : 'bajo' %>">Riesgo <%= a.puntaje_riesgo %></span></h3>
+    <p class="secundario"><%= a.categoria %> · <%= a.marca || '' %> <%= a.modelo %> · <%= fmtPrecio(a.precio, a.moneda) %> · <%= a.provincia %> · <a href="/admin/usuarios?q=<%= encodeURIComponent(a.vendedor) %>"><%= a.vendedor %></a> (<%= a.vendedor_tipo %>) · creado <%= new Date(a.created_at).toLocaleString('es-AR') %></p>
+    <% if (a.senales.length) { %><ul class="senales"><% for (const s of a.senales) { %><li><%= s %></li><% } %></ul><% } %>
+    <% if (a.reportes.length) { %><p class="texto-error"><%= a.reportes.length %> reporte(s): <%= a.reportes.map((r) => r.motivo + (r.comentario ? ' ("' + r.comentario + '")' : '')).join('; ') %></p><% } %>
+    <p class="prosa-usuario mod-desc"><%= a.descripcion.slice(0, 600) %></p>
+    <form method="post" action="/admin/aviso/<%= a.id %>/decidir" class="mod-acciones">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="text" name="motivo" placeholder="Motivo si se rechaza (lo ve el usuario)" maxlength="300">
+      <button name="decision" value="aprobar" class="btn btn-primario">Aprobar</button>
+      <button name="decision" value="rechazar" class="btn btn-peligro">Rechazar</button>
+    </form>
+  </div>
+</article>
+<% } %>
+<%- include('../partials/foot') %>

@@ -1,0 +1,8 @@
+<nav class="admin-nav">
+  <a href="/admin" class="<%= path === '/admin' ? 'activo' : '' %>">Resumen</a>
+  <a href="/admin/moderacion" class="<%= path.startsWith('/admin/moderacion') ? 'activo' : '' %>">Moderación</a>
+  <a href="/admin/reportes" class="<%= path.startsWith('/admin/reportes') ? 'activo' : '' %>">Reportes</a>
+  <a href="/admin/usuarios" class="<%= path.startsWith('/admin/usuarios') ? 'activo' : '' %>">Usuarios</a>
+  <a href="/admin/listas-negras" class="<%= path.startsWith('/admin/listas') ? 'activo' : '' %>">Listas negras</a>
+  <a href="/admin/pagos" class="<%= path.startsWith('/admin/pagos') ? 'activo' : '' %>">Pagos</a>
+</nav>

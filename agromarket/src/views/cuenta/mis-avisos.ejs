@@ -1,0 +1,26 @@
+<%- include('../partials/head') %>
+<div class="seccion-cab"><h1>Mis avisos</h1><a class="btn btn-primario" href="/publicar">Publicar</a></div>
+<% const ESTADO = { en_revision: 'En revisión', activo: 'Activo', pausado: 'Pausado', vencido: 'Vencido', vendido: 'Vendido', rechazado: 'Rechazado' }; %>
+<% if (!avisos.length) { %><div class="vacio"><p>Todavía no publicaste ninguna máquina.</p><a class="btn btn-primario" href="/publicar">Publicar la primera</a></div><% } %>
+<% for (const a of avisos) { const destacado = a.destacado_hasta && new Date(a.destacado_hasta) > new Date(); %>
+<article class="fila-aviso">
+  <a class="fila-foto" href="/aviso/<%= a.id %>/<%= a.slug %>"><% if (a.foto) { %><img src="<%= a.foto.url_miniatura %>" alt=""><% } %></a>
+  <div class="fila-info">
+    <h3><a href="/aviso/<%= a.id %>/<%= a.slug %>"><%= a.titulo %></a> <span class="estado estado--<%= a.estado %>"><%= ESTADO[a.estado] %></span><% if (destacado) { %> <span class="etiqueta etiqueta--destacado">Destacado hasta <%= new Date(a.destacado_hasta).toLocaleDateString('es-AR') %></span><% } %></h3>
+    <p class="secundario"><%= fmtPrecio(a.precio, a.moneda) %> · <%= a.visitas %> visitas · <%= a.contactos %> contactos<% if (a.fecha_vencimiento) { %> · vence <%= new Date(a.fecha_vencimiento).toLocaleDateString('es-AR') %><% } %></p>
+    <% if (a.estado === 'rechazado' && a.motivo_rechazo) { %><p class="texto-error">Motivo: <%= a.motivo_rechazo %>. Editalo para volver a enviarlo.</p><% } %>
+  </div>
+  <div class="fila-acciones">
+    <a class="btn btn-fantasma" href="/aviso/<%= a.id %>/editar">Editar</a>
+    <% if (a.estado === 'activo' && config.pagosActivos) { %><a class="btn btn-destacar" href="/pagos/destacar/<%= a.id %>">Destacar</a><% } %>
+    <form method="post" action="/aviso/<%= a.id %>/estado" class="acciones-estado">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <% if (a.estado === 'activo') { %><button name="accion" value="pausar" class="enlace">Pausar</button><button name="accion" value="renovar" class="enlace">Renovar</button><% } %>
+      <% if (['pausado','vencido'].includes(a.estado)) { %><button name="accion" value="activar" class="enlace">Activar</button><% } %>
+      <% if (a.estado !== 'vendido') { %><button name="accion" value="vendido" class="enlace">Marcar vendido</button><% } %>
+      <button name="accion" value="eliminar" class="enlace enlace-peligro" data-confirmar="¿Eliminar el aviso definitivamente?">Eliminar</button>
+    </form>
+  </div>
+</article>
+<% } %>
+<%- include('../partials/foot') %>

@@ -1,0 +1,11 @@
+# /etc/systemd/system/agromarket-cron.service  (+ agromarket-cron.timer)
+[Unit]
+Description=AgroMarket: vencimientos, alertas y limpieza
+
+[Service]
+Type=oneshot
+User=agromarket
+WorkingDirectory=/opt/agromarket
+EnvironmentFile=/opt/agromarket/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node scripts/vencer-avisos.js

@@ -1,0 +1,6 @@
+<%- include('../partials/head') %><%- include('_nav') %>
+<h1>Pagos</h1>
+<table class="tabla"><thead><tr><th>Fecha</th><th>Usuario</th><th>Concepto</th><th>Monto</th><th>Estado</th><th>ID MP</th><th>Factura</th></tr></thead><tbody>
+<% for (const p of pagos) { %><tr><td><%= new Date(p.created_at).toLocaleString('es-AR') %></td><td><%= p.email %></td><td><%= p.concepto %></td><td><%= fmtPrecio(p.monto, p.moneda) %></td><td><span class="estado estado--<%= p.estado %>"><%= p.estado %></span></td><td><small><%= p.id_externo %></small></td><td><%= p.factura_id ? 'sí' : '' %></td></tr><% } %>
+</tbody></table>
+<%- include('../partials/foot') %>

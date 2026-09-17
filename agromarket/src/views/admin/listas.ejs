@@ -1,0 +1,12 @@
+<%- include('../partials/head') %><%- include('_nav') %>
+<h1>Listas negras</h1>
+<form method="post" action="/admin/listas-negras" class="formulario formulario-inline">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <select name="tipo"><option value="telefono">Teléfono (+549…)</option><option value="email">Email</option><option value="dominio_email">Dominio de email</option><option value="ip">IP (hash)</option></select>
+  <input type="text" name="valor" placeholder="Valor" required><input type="text" name="motivo" placeholder="Motivo">
+  <button class="btn btn-primario">Agregar</button>
+</form>
+<table class="tabla"><thead><tr><th>Tipo</th><th>Valor</th><th>Motivo</th><th>Fecha</th><th></th></tr></thead><tbody>
+<% for (const i of items) { %><tr><td><%= i.tipo %></td><td><%= i.valor %></td><td><%= i.motivo %></td><td><%= new Date(i.created_at).toLocaleDateString('es-AR') %></td><td><form method="post" action="/admin/listas-negras/<%= i.id %>/borrar"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="enlace">Quitar</button></form></td></tr><% } %>
+</tbody></table>
+<%- include('../partials/foot') %>

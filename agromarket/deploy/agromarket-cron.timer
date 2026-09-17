@@ -1,0 +1,9 @@
+[Unit]
+Description=Ejecuta agromarket-cron todos los días a las 06:00
+
+[Timer]
+OnCalendar=*-*-* 06:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

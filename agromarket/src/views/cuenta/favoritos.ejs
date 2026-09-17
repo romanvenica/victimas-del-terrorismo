@@ -1,0 +1,4 @@
+<%- include('../partials/head') %>
+<h1>Favoritos</h1>
+<% if (avisos.length) { %><div class="grilla"><% for (const a of avisos) { %><%- include('../partials/card', { a }) %><% } %></div><% } else { %><div class="vacio"><p>No guardaste ningún aviso todavía.</p><a class="btn btn-primario" href="/buscar">Buscar máquinas</a></div><% } %>
+<%- include('../partials/foot') %>

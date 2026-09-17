@@ -1,0 +1,75 @@
+<%- include('../partials/head') %>
+<div class="cuenta">
+  <h1>Mi cuenta</h1>
+  <div class="cuenta-stats"><div><strong><%= stats.activos %></strong><span>avisos activos</span></div><div><strong><%= stats.contactos %></strong><span>contactos recibidos</span></div><div><a class="btn btn-primario" href="/publicar">Publicar</a></div></div>
+
+  <section class="panel">
+    <h2>Datos</h2>
+    <form method="post" action="/mi-cuenta" class="formulario">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Nombre<input type="text" name="nombre" value="<%= user.nombre %>" required minlength="2" maxlength="80"></label>
+      <label>Email<input type="email" value="<%= user.email %>" disabled><small><%= user.email_verificado ? 'Email confirmado.' : 'Email sin confirmar: revisá tu casilla.' %></small></label>
+      <div class="fila-2">
+        <label>Provincia<select name="provincia_id"><option value="">Elegir</option><% for (const p of provincias) { %><option value="<%= p.id %>" <%= user.provincia_id === p.id ? 'selected' : '' %>><%= p.nombre %></option><% } %></select></label>
+        <label>Localidad<input type="text" name="localidad" value="<%= user.localidad %>" maxlength="80"></label>
+      </div>
+      <button class="btn btn-primario" type="submit">Guardar datos</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <% if (requiereOtp) { %>
+    <h2>Teléfonos verificados</h2>
+    <% if (telefonos.length) { %><ul class="lista-telefonos"><% for (const t of telefonos) { %><li><span><%= t.numero_e164 %></span> <span class="sello">Verificado</span></li><% } %></ul><% } else { %><p class="secundario">Todavía no verificaste ningún celular.</p><% } %>
+    <a class="btn btn-fantasma" href="/verificar-telefono">Administrar teléfonos</a>
+    <% } else { %>
+    <% const principal = telefonos.find((t) => t.principal) || telefonos[0]; %>
+    <h2>Tu WhatsApp</h2>
+    <p class="secundario">Es el número que ven los compradores cuando tocan "Ver teléfono" en tus avisos. Si lo cambiás, se actualiza en todos tus avisos.</p>
+    <form method="post" action="/mi-cuenta/telefono" class="formulario">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Celular con código de área, sin 0 ni 15<input type="tel" name="numero" value="<%= principal ? principal.numero_e164 : '' %>" placeholder="11 2345 6789" required autocomplete="tel-national" maxlength="25"></label>
+      <button class="btn btn-primario" type="submit"><%= principal ? 'Cambiar número' : 'Guardar número' %></button>
+    </form>
+    <% } %>
+  </section>
+
+  <section class="panel">
+    <h2>Empresa o concesionario</h2>
+    <p class="secundario">Completá estos datos si vendés como empresa. Tu perfil muestra el sello "Empresa" y, cuando validamos el CUIT, "CUIT validado".</p>
+    <form method="post" action="/mi-empresa" class="formulario">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="fila-2">
+        <label>Razón social<input type="text" name="razon_social" value="<%= empresa ? empresa.razon_social : '' %>" required minlength="3" maxlength="120"></label>
+        <label>CUIT (11 dígitos)<input type="text" name="cuit" value="<%= empresa ? empresa.cuit : '' %>" required pattern="\d{11}" inputmode="numeric"><% if (empresa) { %><small><%= empresa.cuit_validado ? 'CUIT validado.' : 'Pendiente de validación.' %> Plan: <%= empresa.plan %></small><% } %></label>
+      </div>
+      <label>Nombre de fantasía<input type="text" name="nombre_fantasia" value="<%= empresa ? empresa.nombre_fantasia : '' %>" maxlength="80"></label>
+      <label>Descripción<textarea name="descripcion" rows="3" maxlength="1000"><%= empresa ? empresa.descripcion : '' %></textarea></label>
+      <label>Dirección<input type="text" name="direccion" value="<%= empresa ? empresa.direccion : '' %>" maxlength="160"></label>
+      <button class="btn btn-primario" type="submit">Guardar empresa</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Contraseña</h2>
+    <form method="post" action="/mi-cuenta/contrasena" class="formulario">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="fila-2">
+        <label>Actual<input type="password" name="actual" required autocomplete="current-password"></label>
+        <label>Nueva<input type="password" name="nueva" required minlength="10" autocomplete="new-password"></label>
+      </div>
+      <button class="btn btn-primario" type="submit">Cambiar contraseña</button>
+    </form>
+  </section>
+
+  <section class="panel panel-peligro">
+    <h2>Eliminar cuenta</h2>
+    <p class="secundario">Se dan de baja tus avisos y se anonimizan tus datos personales. Los comprobantes de pago se conservan por obligación contable.</p>
+    <form method="post" action="/mi-cuenta/eliminar" class="formulario" data-confirmar="¿Eliminar la cuenta? Esta acción no se puede deshacer.">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Confirmá con tu contraseña<input type="password" name="contrasena" required></label>
+      <button class="btn btn-peligro" type="submit">Eliminar mi cuenta</button>
+    </form>
+  </section>
+</div>
+<%- include('../partials/foot') %>

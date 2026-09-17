@@ -1,0 +1,11 @@
+<%- include('../partials/head') %>
+<section class="panel panel-medio">
+  <h1>Mis pagos</h1>
+  <% if (!pagos.length) { %><div class="vacio"><p>No hiciste pagos todavía. Publicar es gratis; podés destacar un aviso desde Mis avisos.</p></div><% } else { %>
+  <table class="tabla"><thead><tr><th>Fecha</th><th>Concepto</th><th>Aviso</th><th>Monto</th><th>Estado</th><th>Factura</th></tr></thead><tbody>
+  <% for (const p of pagos) { %><tr><td><%= new Date(p.created_at).toLocaleDateString('es-AR') %></td><td><%= p.concepto.replace('_', ' ') %></td><td><%= p.aviso_titulo || '' %></td><td><%= fmtPrecio(p.monto, p.moneda) %></td><td><span class="estado estado--<%= p.estado %>"><%= p.estado %></span></td><td><% if (p.factura_pdf) { %><a href="<%= p.factura_pdf %>">Descargar</a><% } else if (p.estado === 'aprobado') { %>En emisión<% } %></td></tr><% } %>
+  </tbody></table>
+  <% } %>
+  <p class="secundario">Podés arrepentirte de una compra dentro de los 10 días desde el <a href="/arrepentimiento">botón de arrepentimiento</a>.</p>
+</section>
+<%- include('../partials/foot') %>

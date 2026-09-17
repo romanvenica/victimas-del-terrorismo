@@ -1,0 +1,11 @@
+<%- include('../partials/head') %>
+<section class="panel panel-angosto">
+  <h1>Recuperar contraseña</h1>
+  <p class="secundario">Te enviamos un enlace por email para elegir una contraseña nueva.</p>
+  <form method="post" action="/recuperar" class="formulario">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Email<input type="email" name="email" required></label>
+    <button class="btn btn-primario btn-bloque" type="submit">Enviar enlace</button>
+  </form>
+</section>
+<%- include('../partials/foot') %>

@@ -1,0 +1,12 @@
+<%- include('../partials/head') %>
+<section class="panel panel-angosto">
+  <h1>Ingresar</h1>
+  <form method="post" action="/ingresar" class="formulario">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Email<input type="email" name="email" required autocomplete="email"></label>
+    <label>Contraseña<input type="password" name="contrasena" required autocomplete="current-password"></label>
+    <button class="btn btn-primario btn-bloque" type="submit">Ingresar</button>
+  </form>
+  <p class="secundario"><a href="/recuperar">Olvidé mi contraseña</a> · <a href="/registrarse">Crear cuenta</a></p>
+</section>
+<%- include('../partials/foot') %>

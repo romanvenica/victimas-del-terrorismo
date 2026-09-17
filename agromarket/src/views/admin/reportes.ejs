@@ -1,0 +1,15 @@
+<%- include('../partials/head') %><%- include('_nav') %>
+<h1>Reportes pendientes <small><%= reportes.length %></small></h1>
+<% if (!reportes.length) { %><div class="vacio"><p>No hay reportes pendientes.</p></div><% } %>
+<table class="tabla"><thead><tr><th>Fecha</th><th>Aviso</th><th>Motivo</th><th>Comentario</th><th>Acciones</th></tr></thead><tbody>
+<% for (const r of reportes) { %><tr>
+  <td><%= new Date(r.created_at).toLocaleString('es-AR') %></td>
+  <td><a href="/aviso/<%= r.aviso_id %>/<%= r.slug %>" target="_blank"><%= r.titulo %></a> <span class="estado estado--<%= r.aviso_estado %>"><%= r.aviso_estado %></span></td>
+  <td><%= r.motivo.replaceAll('_', ' ') %></td><td><small><%= r.comentario %></small></td>
+  <td class="acciones-celda">
+    <form method="post" action="/admin/reportes/<%= r.id %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button name="accion" value="descartar" class="enlace">Descartar</button> <button name="accion" value="resolver" class="enlace">Resuelto</button></form>
+    <form method="post" action="/admin/aviso/<%= r.aviso_id %>/decidir"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="motivo" value="Suspendido por reportes de usuarios"><button name="decision" value="suspender" class="enlace enlace-peligro">Suspender aviso</button></form>
+  </td>
+</tr><% } %>
+</tbody></table>
+<%- include('../partials/foot') %>

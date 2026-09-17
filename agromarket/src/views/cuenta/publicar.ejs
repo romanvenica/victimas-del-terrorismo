@@ -1,0 +1,71 @@
+<%- include('../partials/head') %>
+<% const v = valores || {}; const ficha = aviso ? aviso.ficha : {}; const chk = (k) => (aviso ? !!v[k] : true); %>
+<% const ETIQ = { potencia_hp: 'Potencia (HP)', traccion: 'Tracción (4x2 / 4x4)', transmision: 'Transmisión', cabina: 'Cabina (sí/no)', ancho_plataforma_m: 'Ancho de plataforma (m)', capacidad_tolva_l: 'Capacidad de tolva (l)', tipo_trilla: 'Tipo de trilla', cantidad_surcos: 'Cantidad de surcos', distancia_surcos_cm: 'Distancia entre surcos (cm)', tipo_siembra: 'Tipo de siembra', ancho_labor_m: 'Ancho de labor (m)', capacidad_tanque_l: 'Capacidad del tanque (l)', ancho_botalon_m: 'Ancho de botalón (m)', autopropulsada: 'Autopropulsada (sí/no)', tipo: 'Tipo', capacidad_l: 'Capacidad (l)', capacidad: 'Capacidad', ejes: 'Ejes', caudal: 'Caudal', compatible_con: 'Compatible con' }; %>
+<section class="panel panel-medio">
+  <h1><%= titulo %></h1>
+  <form method="post" action="<%= aviso ? '/aviso/' + aviso.id + '/editar' : '/publicar' %>" enctype="multipart/form-data" class="formulario formulario-pasos" id="form-publicar">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <fieldset><legend>1. Qué vendés</legend>
+      <label>Categoría<select name="categoria_id" id="categoria" required data-fichas='<%- JSON.stringify(Object.fromEntries(categorias.map((c) => [c.id, JSON.parse(c.campos_ficha || "[]")]))) %>'>
+        <option value="">Elegir</option><% for (const c of categorias) { %><option value="<%= c.id %>" <%= Number(v.categoria_id) === c.id ? 'selected' : '' %>><%= c.nombre %></option><% } %></select></label>
+      <div class="fila-2">
+        <label>Marca<select name="marca_id"><option value="">Elegir</option><% for (const m of marcas) { %><option value="<%= m.id %>" <%= Number(v.marca_id) === m.id ? 'selected' : '' %>><%= m.nombre %></option><% } %></select></label>
+        <label>Modelo<input type="text" name="modelo" value="<%= v.modelo || '' %>" maxlength="60" placeholder="Ej: 6110J"></label>
+      </div>
+      <label>Título del aviso<input type="text" name="titulo" value="<%= v.titulo || '' %>" required minlength="8" maxlength="90" placeholder="Ej: Tractor John Deere 6110J 2018, 3.200 horas"></label>
+      <div class="fila-3">
+        <label>Año<input type="number" name="anio" value="<%= v.anio || '' %>" min="1950" max="<%= new Date().getFullYear() + 1 %>"></label>
+        <label>Horas de uso<input type="number" name="horas_uso" value="<%= v.horas_uso ?? '' %>" min="0"></label>
+        <label>Estado<select name="estado_maquina"><option value="usado" <%= v.estado_maquina === 'usado' ? 'selected' : '' %>>Usado</option><option value="nuevo" <%= v.estado_maquina === 'nuevo' ? 'selected' : '' %>>Nuevo</option></select></label>
+      </div>
+      <div id="ficha-campos" class="fila-2" data-valores='<%- JSON.stringify(ficha) %>' data-etiquetas='<%- JSON.stringify(ETIQ) %>'></div>
+      <label>Descripción<textarea name="descripcion" rows="6" required minlength="30" maxlength="4000" placeholder="Estado general, mantenimiento, reparaciones, equipamiento, motivo de venta. Cuanto más detalle, más contactos."><%= v.descripcion || '' %></textarea></label>
+    </fieldset>
+
+    <fieldset><legend>2. Fotos</legend>
+      <% if (aviso && aviso.fotos.length) { %>
+        <div class="fotos-actuales"><% for (const f of aviso.fotos) { %><label class="foto-actual"><img src="<%= f.url_miniatura %>" alt=""><input type="checkbox" name="borrar_foto" value="<%= f.id %>"> Quitar</label><% } %></div>
+      <% } %>
+      <label>Subí hasta <%= config.maxFotos %> fotos (JPG, PNG o WebP, máximo <%= config.maxFotoMb %> MB cada una). La primera es la principal.
+        <input type="file" name="fotos" accept="image/jpeg,image/png,image/webp" multiple <%= aviso ? '' : 'required' %> id="input-fotos"></label>
+      <div id="previsualizacion" class="previsualizacion"></div>
+      <p class="secundario">Sacamos los datos de ubicación GPS de las fotos antes de publicarlas.</p>
+    </fieldset>
+
+    <fieldset><legend>3. Precio y ubicación</legend>
+      <div class="fila-3">
+        <label>Precio (vacío = consultar)<input type="number" name="precio" value="<%= v.precio ?? '' %>" min="0" step="1"></label>
+        <label>Moneda<select name="moneda"><option value="USD" <%= v.moneda === 'USD' ? 'selected' : '' %>>Dólares</option><option value="ARS" <%= v.moneda === 'ARS' ? 'selected' : '' %>>Pesos</option></select></label>
+        <label class="check check-alto"><input type="checkbox" name="precio_mas_iva" <%= v.precio_mas_iva ? 'checked' : '' %>> Más IVA</label>
+      </div>
+      <div class="fila-2">
+        <label class="check"><input type="checkbox" name="acepta_permuta" <%= v.acepta_permuta ? 'checked' : '' %>> Acepto permuta</label>
+        <label class="check"><input type="checkbox" name="acepta_financiacion" <%= v.acepta_financiacion ? 'checked' : '' %>> Ofrezco financiación</label>
+      </div>
+      <div class="fila-2">
+        <label>Provincia<select name="provincia_id" required><option value="">Elegir</option><% for (const p of provincias) { %><option value="<%= p.id %>" <%= Number(v.provincia_id || user.provincia_id) === p.id ? 'selected' : '' %>><%= p.nombre %></option><% } %></select></label>
+        <label>Localidad<input type="text" name="localidad" value="<%= v.localidad || user.localidad || '' %>" maxlength="80"></label>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>4. Contacto</legend>
+      <% if (requiereOtp) { %>
+      <label>Teléfono verificado que van a ver los compradores<select name="telefono_id" required>
+        <% for (const t of telefonos) { %><option value="<%= t.id %>" <%= v.telefono_id === t.id ? 'selected' : '' %>><%= t.numero_e164 %><%= t.principal ? ' (principal)' : '' %></option><% } %>
+      </select><small><a href="/verificar-telefono?volver=/publicar">Agregar otro número</a></small></label>
+      <% } else { %>
+      <% const telActual = (aviso && telefonos.find((t) => t.id === aviso.telefono_id)) || telefonos.find((t) => t.principal) || telefonos[0]; %>
+      <label>Tu WhatsApp (el número que van a ver los compradores)<input type="tel" name="whatsapp" value="<%= v.whatsapp || (telActual ? telActual.numero_e164 : '') %>" required placeholder="11 2345 6789" autocomplete="tel-national" maxlength="25"><small>Celular argentino con código de área, sin 0 ni 15. No aparece en el aviso hasta que alguien toca "Ver teléfono".</small></label>
+      <% } %>
+      <div class="fila-2">
+        <label class="check"><input type="checkbox" name="acepta_whatsapp" value="on" <%= chk('acepta_whatsapp') ? 'checked' : '' %>> Acepto WhatsApp</label>
+        <label class="check"><input type="checkbox" name="acepta_llamada" value="on" <%= chk('acepta_llamada') ? 'checked' : '' %>> Acepto llamadas</label>
+      </div>
+    </fieldset>
+
+    <p class="secundario">Al publicar aceptás las <a href="/terminos" target="_blank">reglas de publicación</a>.<% if (config.moderarPrimerAviso) { %> La primera publicación de cada cuenta se revisa antes de aparecer (menos de 24 h).<% } %> El aviso dura <%= config.avisoDias %> días y se renueva gratis.</p>
+    <button class="btn btn-primario btn-bloque" type="submit"><%= aviso ? 'Guardar cambios' : 'Publicar' %></button>
+  </form>
+</section>
+<%- include('../partials/foot') %>

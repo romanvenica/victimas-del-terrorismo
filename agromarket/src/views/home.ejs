@@ -1,0 +1,43 @@
+<%- include('partials/head') %>
+<section class="portada">
+  <div class="portada-texto">
+    <h1>La maquinaria del campo, de mano en mano.</h1>
+    <p><%= total.toLocaleString('es-AR') %> máquinas publicadas por sus dueños y concesionarios. Hablás directo con el vendedor por WhatsApp<%= config.telefonoVerificacion === 'otp' ? ', con teléfono verificado' : ', sin intermediarios' %>.</p>
+  </div>
+  <form class="buscador-grande" action="/buscar" method="get">
+    <input type="search" name="q" placeholder="¿Qué máquina buscás?" aria-label="Qué máquina buscás">
+    <select name="categoria" aria-label="Categoría"><option value="">Todas las categorías</option><% for (const c of categorias) { %><option value="<%= c.slug %>"><%= c.nombre %></option><% } %></select>
+    <select name="provincia" aria-label="Provincia"><option value="">Todo el país</option><% for (const p of provincias) { %><option value="<%= p.slug %>"><%= p.nombre %></option><% } %></select>
+    <button type="submit" class="btn btn-primario">Buscar</button>
+  </form>
+</section>
+
+<section class="categorias">
+  <% for (const c of categorias) { %>
+    <a class="categoria" href="/categoria/<%= c.slug %>"><span class="categoria-icono" aria-hidden="true"><%= c.icono %></span><span><%= c.nombre %></span><small><%= conteo[c.id] || 0 %></small></a>
+  <% } %>
+</section>
+
+<% if (destacados.length) { %>
+<section class="seccion">
+  <h2>Destacados</h2>
+  <div class="grilla"><% for (const a of destacados) { %><%- include('partials/card', { a }) %><% } %></div>
+</section>
+<% } %>
+
+<section class="seccion">
+  <div class="seccion-cab"><h2>Últimas publicadas</h2><a href="/buscar">Ver todas</a></div>
+  <% if (recientes.length) { %>
+    <div class="grilla"><% for (const a of recientes) { %><%- include('partials/card', { a }) %><% } %></div>
+  <% } else { %>
+    <div class="vacio"><p>Todavía no hay avisos publicados.</p><a class="btn btn-primario" href="/publicar">Publicar la primera máquina</a></div>
+  <% } %>
+</section>
+
+<section class="franja-confianza">
+  <% if (config.telefonoVerificacion === 'otp') { %><div><h3>Teléfono verificado</h3><p>Cada vendedor confirma su celular con un código antes de publicar. No hay avisos con números inventados.</p></div>
+  <% } else { %><div><h3>Contacto directo</h3><p>Cada aviso tiene el WhatsApp de quien vende. Escribís, preguntás, coordinás la visita y arreglás entre ustedes.</p></div><% } %>
+  <div><h3>Sin comisión por venta</h3><p>La operación la cerrás vos con el vendedor. Publicar es gratis<%= config.pagosActivos ? '; cobramos solo por destacar' : ' y no cobramos comisión' %>.</p></div>
+  <div><h3>Reportá lo raro</h3><p>Precio irreal, piden seña, no atienden: un toque en Reportar y lo revisamos en horas. <a href="/consejos-de-seguridad">Consejos de seguridad</a></p></div>
+</section>
+<%- include('partials/foot') %>

@@ -1,0 +1,20 @@
+<%- include('../partials/head') %>
+<section class="panel panel-angosto">
+  <h1>Crear cuenta</h1>
+  <p class="secundario">Gratis. Para publicar vas a verificar un celular con un código; para buscar no hace falta cuenta.</p>
+  <form method="post" action="/registrarse" class="formulario">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Nombre o empresa<input type="text" name="nombre" required minlength="2" maxlength="80" autocomplete="name"></label>
+    <label>Email<input type="email" name="email" required maxlength="120" autocomplete="email"></label>
+    <label>Contraseña<input type="password" name="contrasena" required minlength="10" autocomplete="new-password"><small>Mínimo 10 caracteres. Rechazamos contraseñas que aparecieron en filtraciones.</small></label>
+    <fieldset class="radios"><legend>Soy</legend>
+      <label><input type="radio" name="tipo" value="particular" checked> Particular</label>
+      <label><input type="radio" name="tipo" value="profesional"> Concesionario o empresa</label>
+    </fieldset>
+    <label class="check"><input type="checkbox" name="acepta" required> Acepto los <a href="/terminos" target="_blank">términos y condiciones</a> y la <a href="/privacidad" target="_blank">política de privacidad</a>. Soy mayor de 18 años.</label>
+    <div class="turnstile" data-turnstile></div>
+    <button class="btn btn-primario btn-bloque" type="submit">Crear cuenta</button>
+  </form>
+  <p class="secundario">¿Ya tenés cuenta? <a href="/ingresar">Ingresar</a></p>
+</section>
+<%- include('../partials/foot') %>

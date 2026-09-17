@@ -1,0 +1,10 @@
+<%- include('../partials/head') %>
+<section class="panel panel-angosto">
+  <h1>Nueva contraseña</h1>
+  <form method="post" action="/restablecer/<%= token %>" class="formulario">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Contraseña nueva<input type="password" name="contrasena" required minlength="10" autocomplete="new-password"></label>
+    <button class="btn btn-primario btn-bloque" type="submit">Guardar contraseña</button>
+  </form>
+</section>
+<%- include('../partials/foot') %>

@@ -1,0 +1,15 @@
+<%- include('../partials/head') %>
+<section class="panel panel-medio">
+  <h1>Destacar: <%= aviso.titulo %></h1>
+  <p class="secundario">Los avisos destacados aparecen primero en su categoría y provincia, con etiqueta y borde. "Subir al inicio" lo pone arriba como si fuera nuevo, sin etiqueta.</p>
+  <% if (!mpConfigurado) { %><div class="aviso-flash aviso-flash--info">Los pagos todavía no están habilitados en este sitio.</div><% } %>
+  <form method="post" action="/pagos/destacar/<%= aviso.id %>" class="opciones-pago">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <% for (const [k, c] of Object.entries(conceptos)) { %>
+      <label class="opcion-pago"><input type="radio" name="concepto" value="<%= k %>" <%= k === 'destacado_15' ? 'checked' : '' %>><span><strong><%= c.titulo %></strong><em><%= fmtPrecio(c.monto, 'ARS') %></em></span></label>
+    <% } %>
+    <button class="btn btn-primario btn-bloque" type="submit" <%= mpConfigurado ? '' : 'disabled' %>>Pagar con Mercado Pago</button>
+  </form>
+  <p class="secundario">El pago se procesa en Mercado Pago; no guardamos datos de tu tarjeta. Emitimos factura electrónica por cada cobro.</p>
+</section>
+<%- include('../partials/foot') %>

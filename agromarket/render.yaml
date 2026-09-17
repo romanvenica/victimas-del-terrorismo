@@ -1,0 +1,51 @@
+# Blueprint de Render (render.com). Render lo lee solo si está en la raíz del repositorio:
+# si la app vive en la carpeta agromarket/ de un repo más grande, copiá este archivo a la raíz
+# (dejando rootDir: agromarket) o creá el Web Service a mano siguiendo docs/HOSTING-GRATIS.md.
+services:
+  - type: web
+    name: agromarket
+    runtime: node
+    plan: free
+    rootDir: agromarket
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /salud
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SITE_NAME
+        value: AgroMarket
+      - key: BASE_URL
+        sync: false # https://<tu-app>.onrender.com, sin barra final
+      - key: DATABASE_URL
+        sync: false # connection string de Neon (postgresql://...?sslmode=require)
+      - key: TELEFONO_VERIFICACION
+        value: ninguna
+      - key: MODERAR_PRIMER_AVISO
+        value: si
+      - key: STORAGE
+        value: s3
+      - key: S3_ENDPOINT
+        sync: false # https://<id-de-cuenta>.r2.cloudflarestorage.com
+      - key: S3_REGION
+        value: auto
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY
+        sync: false
+      - key: S3_SECRET_KEY
+        sync: false
+      - key: S3_PUBLIC_URL
+        sync: false # https://pub-xxxxxxxx.r2.dev
+      - key: MAX_FOTOS
+        value: "12"
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: EMAIL_PROVIDER
+        value: console

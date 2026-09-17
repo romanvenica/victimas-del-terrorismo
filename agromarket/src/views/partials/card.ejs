@@ -1,0 +1,15 @@
+<% const destacado = a.destacado_hasta && new Date(a.destacado_hasta) > new Date(); %>
+<article class="tarjeta<%= destacado ? ' tarjeta--destacada' : '' %>">
+  <a class="tarjeta-foto" href="/aviso/<%= a.id %>/<%= a.slug %>">
+    <% if (a.foto) { %><img src="<%= a.foto.url_miniatura %>" alt="" loading="lazy" width="480" height="360"><% } else { %><span class="sin-foto">Sin foto</span><% } %>
+    <% if (destacado) { %><span class="etiqueta etiqueta--destacado">Destacado</span><% } %>
+  </a>
+  <div class="tarjeta-cuerpo">
+    <div class="tarjeta-precio"><%= fmtPrecio(a.precio, a.moneda) %><% if (a.precio_mas_iva && a.precio !== null) { %> <small>+ IVA</small><% } %></div>
+    <h3 class="tarjeta-titulo"><a href="/aviso/<%= a.id %>/<%= a.slug %>"><%= a.titulo %></a></h3>
+    <p class="tarjeta-datos">
+      <%= a.categoria %><% if (a.marca) { %> · <%= a.marca %><% } %><% if (a.anio) { %> · <%= a.anio %><% } %><% if (a.horas_uso !== null && a.horas_uso !== undefined) { %> · <%= Number(a.horas_uso).toLocaleString('es-AR') %> h<% } %>
+    </p>
+    <p class="tarjeta-lugar"><%= a.localidad ? a.localidad + ', ' : '' %><%= a.provincia %><% if (a.vendedor_tipo === 'profesional') { %> <span class="sello">Empresa</span><% } %></p>
+  </div>
+</article>

@@ -1,0 +1,34 @@
+<%- include('../partials/head') %>
+<section class="panel panel-angosto">
+  <h1>Verificar teléfono</h1>
+  <p class="secundario">Es el número que van a ver los compradores. Te mandamos un código de 6 dígitos para confirmar que es tuyo. No se muestra hasta que alguien toca "Ver teléfono" en tu aviso.</p>
+  <% if (telefonos.length) { %>
+    <h2>Tus teléfonos</h2>
+    <ul class="lista-telefonos">
+    <% for (const t of telefonos) { const vigente = t.verificado && new Date(t.fecha_verificacion) > new Date(Date.now() - 180*86400000); %>
+      <li><span><%= t.numero_e164 %></span> <span class="sello <%= vigente ? '' : 'sello--gris' %>"><%= vigente ? 'Verificado' : 'Reverificar' %></span>
+        <form method="post" action="/verificar-telefono/quitar"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="id" value="<%= t.id %>"><button class="enlace" type="submit">Quitar</button></form></li>
+    <% } %>
+    </ul>
+  <% } %>
+  <% if (pendiente) { %>
+    <h2>Ingresá el código enviado al <%= pendiente %></h2>
+    <form method="post" action="/verificar-telefono/confirmar" class="formulario">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Código<input type="text" name="codigo" inputmode="numeric" pattern="\d{6}" maxlength="6" required autocomplete="one-time-code" class="input-codigo"></label>
+      <button class="btn btn-primario btn-bloque" type="submit">Confirmar</button>
+    </form>
+    <p class="secundario">¿No llegó? Esperá un minuto y pedí otro más abajo. Podés pedir hasta 3 por hora.</p>
+  <% } %>
+  <h2><%= telefonos.length ? 'Agregar otro número' : 'Tu celular' %></h2>
+  <form method="post" action="/verificar-telefono/enviar" class="formulario">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Celular con código de área, sin 0 ni 15<input type="tel" name="numero" placeholder="11 2345 6789" required autocomplete="tel-national"></label>
+    <fieldset class="radios"><legend>Enviar el código por</legend>
+      <label><input type="radio" name="canal" value="whatsapp" checked> WhatsApp</label>
+      <label><input type="radio" name="canal" value="sms"> SMS</label>
+    </fieldset>
+    <button class="btn btn-primario btn-bloque" type="submit">Enviar código</button>
+  </form>
+</section>
+<%- include('../partials/foot') %>
