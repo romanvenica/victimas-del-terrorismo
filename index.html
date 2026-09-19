@@ -85,6 +85,37 @@
   .lrow .lhueco{width:34px;flex:none}
   .lrow svg{width:15px;height:15px;flex:none}
   .lrow .ly{margin-left:auto;color:var(--dim);font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums}
+  /* boton del listado que abre el muro de retratos */
+  .verfotos{display:block;flex:none;width:calc(100% - 32px);margin:0 16px 12px;
+    background:#1c1712;border:1px solid var(--line);border-radius:4px;color:var(--ink);
+    font-family:var(--sans);font-size:12.5px;font-weight:600;padding:9px 0;cursor:pointer}
+  .verfotos:hover:not(:disabled){background:#241d16;border-color:#5c4d3f}
+  .verfotos:disabled{opacity:.4;cursor:default}
+  /* muro de retratos: pantalla completa, por debajo de la ficha */
+  .galeria{position:fixed;inset:0;z-index:12;background:var(--bg);display:none;flex-direction:column}
+  .galeria.show{display:flex}
+  .galcab{flex:none;display:flex;align-items:center;gap:12px;padding:14px 22px;
+    background:var(--panel);border-bottom:1px solid var(--line)}
+  .galcab h2{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--dim);margin:0}
+  .galcab .x{margin-left:auto;width:34px;height:34px;padding:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:none;border:1px solid var(--line);border-radius:4px;
+    color:var(--dim);font-size:22px;line-height:1;cursor:pointer}
+  .galcab .x:hover{color:var(--ink);background:#241d16}
+  .galgrid{flex:1;min-height:0;overflow-y:auto;padding:20px 22px 40px;
+    display:grid;gap:20px 16px;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));
+    align-content:start}
+  .galitem{margin:0;cursor:pointer}
+  .galitem img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;
+    border:1px solid var(--line);border-radius:4px;background:#0d0a07}
+  .galitem:hover img{border-color:#5c4d3f}
+  .galnom{font-family:var(--serif);font-size:13px;line-height:1.3;color:var(--ink);
+    margin-top:8px;text-align:center}
+  .galanio{display:block;font-family:var(--sans);font-size:11.5px;font-weight:600;
+    color:var(--dim);margin-top:2px}
+  .galvacio{grid-column:1/-1;color:var(--dim);font-family:var(--serif);font-size:16px;
+    text-align:center;margin-top:12vh}
   .plot{flex:1;min-height:0;overflow:auto;padding:14px 30px;cursor:grab;touch-action:none}
   .plot.drag{cursor:grabbing}
   .plot.drag *{cursor:grabbing}
@@ -127,7 +158,7 @@
   .scrim{position:fixed;inset:0;background:rgba(6,4,2,.62);display:none;z-index:9}
   .scrim.show{display:block}
   .card{position:fixed;top:0;right:0;height:100%;width:400px;max-width:92vw;background:var(--panel);
-    border-left:1px solid var(--line);transform:translateX(100%);transition:transform .22s ease;z-index:10;
+    border-left:1px solid var(--line);transform:translateX(100%);transition:transform .22s ease;z-index:14;
     padding:26px 28px;overflow-y:auto}
   .card.show{transform:none}
   /* la × viaja con el scroll: la franja es de alto cero para no correr el texto,
@@ -240,6 +271,10 @@
       color:var(--dim);font-size:20px;line-height:1;cursor:pointer}
     aside.list .cerrarpanel{margin:14px 14px 4px auto}
     aside.list h2{padding:0 20px 8px}
+    .galcab{padding:11px 14px}
+    .galgrid{padding:14px 12px 30px;gap:16px 10px;
+      grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+    .galnom{font-size:12px;margin-top:6px}
 
     /* el gráfico queda siempre a la vista y se come todo el alto que sobra */
     section.stage{display:flex;flex:1;min-height:0}
@@ -255,7 +290,7 @@
     /* ficha: sube desde abajo y se cierra tocándola */
     .card{width:100%;max-width:100%;height:82vh;top:auto;bottom:0;left:0;border-left:none;
       border-top:1px solid var(--line);border-radius:14px 14px 0 0;transform:translateY(100%);
-      z-index:13;cursor:pointer}
+      z-index:14;cursor:pointer}
     .card.show{transform:none}
     .card .grip{display:block;width:38px;height:4px;background:var(--dim);border-radius:2px;margin:2px auto 12px}
     .card .xwrap{margin-top:-30px}
@@ -319,6 +354,7 @@
     <input id="lq" type="text" placeholder="Buscar por nombre…" autocomplete="off">
     <button type="button" class="borrar" id="lqx" aria-label="Borrar la búsqueda">&times;</button>
   </div>
+    <button type="button" class="verfotos" id="btnFotos">Ver fotos</button>
     <div class="listscroll" id="listscroll"></div>
   </aside>
 </main>
@@ -344,6 +380,14 @@
 </aside>
 
 <aside class="card" id="card"></aside>
+
+<aside class="galeria" id="galeria" aria-hidden="true">
+  <div class="galcab">
+    <h2 id="galtit">Fotos</h2>
+    <button type="button" class="x" id="galx" aria-label="Cerrar">&times;</button>
+  </div>
+  <div class="galgrid" id="galgrid"></div>
+</aside>
 
 <script>
 let DATA = [];
@@ -471,7 +515,7 @@ function volverAlInicio(){
   FILTERS.forEach(function(f){ state[f.key].clear(); });
   anioSel=null;
   lq.value=""; marcarBorrar();
-  cerrarPaneles(); closeCard();
+  cerrarPaneles(); closeCard(); cerrarGaleria();
   render();
 }
 const titulo=document.getElementById("inicio");
@@ -511,9 +555,8 @@ function render(){
 function norm(s){
   return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 }
-function drawList(){
-  const head=document.getElementById("listhead");
-  const box=document.getElementById("listscroll");
+// lo que hoy muestra el listado: filtros + año elegido + buscador, ordenado alfabéticamente
+function listadoActual(){
   const q=norm(document.getElementById("lq").value.trim());
   let items=listPool;
   if(anioSel!==null) items=items.filter(function(d){ return grupoDe(d.y)===anioSel; });
@@ -525,11 +568,16 @@ function drawList(){
       return términos.every(function(t){ return n.indexOf(t)!==-1; });
     });
   }
-  head.textContent = (anioSel!==null ? nombreGrupo(anioSel)+" · " : "") +
-                     items.length + (items.length===1?" persona":" personas");
-  const sorted=items.slice().sort(function(a,b){
+  return items.slice().sort(function(a,b){
     return a.n.localeCompare(b.n,"es",{sensitivity:"base"});
   });
+}
+function drawList(){
+  const head=document.getElementById("listhead");
+  const box=document.getElementById("listscroll");
+  const sorted=listadoActual();
+  head.textContent = (anioSel!==null ? nombreGrupo(anioSel)+" · " : "") +
+                     sorted.length + (sorted.length===1?" persona":" personas");
   box.innerHTML="";
   const frag=document.createDocumentFragment();
   sorted.forEach(function(d){
@@ -550,7 +598,53 @@ function drawList(){
   });
   box.appendChild(frag);
   box.scrollTop=0;
+  marcarBotonFotos(sorted);
+  // si el muro está abierto, acompaña lo que quedó filtrado
+  if(galeria.classList.contains("show")) pintarGaleria();
 }
+
+// ---- muro de retratos: todas las fotos juntas, con el nombre abajo ----
+const galeria=document.getElementById("galeria");
+const galgrid=document.getElementById("galgrid");
+const btnFotos=document.getElementById("btnFotos");
+function marcarBotonFotos(sorted){
+  const n=sorted.filter(tieneFoto).length;
+  btnFotos.textContent = n ? "Ver fotos ("+n+")" : "Todavía sin fotos";
+  btnFotos.disabled = n===0;
+}
+function pintarGaleria(){
+  const fotos=listadoActual().filter(tieneFoto);
+  document.getElementById("galtit").textContent =
+    fotos.length + (fotos.length===1 ? " retrato" : " retratos");
+  galgrid.innerHTML="";
+  if(!fotos.length){
+    galgrid.innerHTML='<p class="galvacio">Todavía no hay fotos de estas personas.</p>';
+    return;
+  }
+  const frag=document.createDocumentFragment();
+  fotos.forEach(function(d){
+    const it=document.createElement("figure"); it.className="galitem";
+    it.innerHTML='<img src="'+fotoGrande(d)+'" alt="" loading="lazy">'+
+      '<figcaption class="galnom">'+esc(nombreNormal(d.n))+
+      '<span class="galanio">'+d.y+'</span></figcaption>';
+    // la ficha se abre encima del muro: al cerrarla se sigue mirando caras
+    it.addEventListener("click",function(){ openCard(d,true); });
+    frag.appendChild(it);
+  });
+  galgrid.appendChild(frag);
+  galgrid.scrollTop=0;
+}
+function abrirGaleria(){
+  hideTip(); pintarGaleria();
+  galeria.classList.add("show"); galeria.setAttribute("aria-hidden","false");
+}
+function cerrarGaleria(){
+  galeria.classList.remove("show"); galeria.setAttribute("aria-hidden","true");
+}
+btnFotos.addEventListener("click",abrirGaleria);
+document.getElementById("galx").addEventListener("click",cerrarGaleria);
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarGaleria(); });
+
 const lq=document.getElementById("lq"), lqx=document.getElementById("lqx");
 function marcarBorrar(){ lqx.classList.toggle("show", lq.value!==""); }
 lq.addEventListener("input",function(){ marcarBorrar(); drawList(); });
@@ -1334,7 +1428,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.24";
+const VERSION="v1.25";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
