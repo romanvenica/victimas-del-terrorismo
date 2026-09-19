@@ -19,7 +19,20 @@
   .card::-webkit-scrollbar,.chips::-webkit-scrollbar{width:0;height:0;display:none}
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
   body{display:flex;height:100vh;flex-direction:column;overflow:hidden}
-  header{padding:14px 40px;border-bottom:1px solid var(--line);text-align:center}
+  header{padding:14px 40px;border-bottom:1px solid var(--line);text-align:center;position:relative}
+  /* enlace discreto al costado del título */
+  .sobre{
+    position:absolute;right:26px;top:50%;transform:translateY(-50%);
+    background:none;border:none;padding:4px 2px;cursor:pointer;
+    font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--dim);
+    border-bottom:1px solid transparent;transition:color .12s,border-color .12s
+  }
+  .sobre:hover{color:var(--ink);border-bottom-color:var(--line)}
+  .sobre:focus-visible{outline:2px solid var(--hi);outline-offset:3px}
+  /* el texto de "sobre este sitio" usa el mismo panel que las fichas */
+  .card.texto h2{font-family:var(--serif);font-weight:500;font-size:23px;margin:6px 46px 16px 0}
+  .card.texto p{margin:0 0 15px;font-size:14.5px;line-height:1.65;color:#c9bda9}
+  .card.texto p:last-child{margin-bottom:0}
   .titulo{display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;
     cursor:pointer;transition:opacity .15s}
   .titulo:hover{opacity:.82}
@@ -192,6 +205,7 @@
   @media(max-width:760px){
     body{overflow:hidden;height:100dvh}
     header{padding:10px 14px}
+    .sobre{position:static;transform:none;display:block;margin:7px auto 0;font-size:12px}
     .titulo{display:block}
     h1{display:inline;font-size:16.5px}
     .cruzblanca{display:inline-block;width:13px;height:20px;vertical-align:-3px;margin-left:7px}
@@ -262,6 +276,7 @@
       <rect x="1.6" y="8.6" width="20.8" height="5.6" fill="#fff"></rect>
     </svg>
   </div>
+  <button type="button" class="sobre" id="btnSobre">Sobre este sitio</button>
 </header>
 <main>
   <div class="mobilebar">
@@ -304,6 +319,17 @@
 <button class="fabf" id="fab">Filtros</button>
 <div id="tip"></div>
 <div class="scrim" id="scrim"></div>
+<aside class="card texto" id="sobre">
+  <div class="xwrap"><button class="x" id="sobrex" aria-label="Cerrar">&times;</button></div>
+  <h2>Sobre este sitio</h2>
+  <p>Este es un memorial de las 1050 personas asesinadas por organizaciones
+     terroristas en la Argentina entre 1960 y 1989. Cada figura del gráfico es
+     una persona, ubicada en el año de su muerte.</p>
+  <p>Los datos provienen de <em>Un aporte a la verdad</em>, de Jorge Héctor
+     Di Pasquale, en sus tres tomos. Cada ficha indica el tomo y la página de
+     donde salió.</p>
+</aside>
+
 <aside class="card" id="card"></aside>
 
 <script>
@@ -1151,12 +1177,39 @@ function openCard(d, dejarPanel){
 }
 function closeCard(){
   card.classList.remove("show");
-  // si el listado o los filtros siguen abiertos, el fondo oscuro se queda con ellos
-  const panelAbierto = panelFiltros.classList.contains("abierto") ||
-                       panelLista.classList.contains("abierto");
-  if(!panelAbierto) scrim.classList.remove("show");
+  // si el listado, los filtros o el texto siguen abiertos, el fondo oscuro se queda
+  const otroAbierto = panelFiltros.classList.contains("abierto") ||
+                      panelLista.classList.contains("abierto") ||
+                      sobre.classList.contains("show");
+  if(!otroAbierto) scrim.classList.remove("show");
 }
-scrim.onclick=function(){ cerrarPaneles(); closeCard(); };
+scrim.onclick=function(){ cerrarPaneles(); closeCard(); cerrarSobre(); };
+
+// ---- "sobre este sitio" ----
+const sobre=document.getElementById("sobre");
+function abrirSobre(){
+  cerrarPaneles(); closeCard(); hideTip();
+  sobre.scrollTop=0;
+  sobre.classList.add("show"); scrim.classList.add("show");
+}
+function cerrarSobre(){
+  sobre.classList.remove("show");
+  const otro = card.classList.contains("show") ||
+               panelFiltros.classList.contains("abierto") ||
+               panelLista.classList.contains("abierto");
+  if(!otro) scrim.classList.remove("show");
+}
+document.getElementById("btnSobre").onclick=abrirSobre;
+document.getElementById("sobrex").onclick=cerrarSobre;
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarSobre(); });
+// en celular se cierra tocándolo, igual que la ficha
+sobre.addEventListener("click",function(e){
+  if(e.target.closest("a")) return;
+  if(!window.matchMedia("(max-width:760px)").matches) return;
+  const sel=window.getSelection();
+  if(sel && sel.toString().trim()!=="") return;
+  cerrarSobre();
+});
 // en celular la ficha se cierra tocándola en cualquier parte, sin buscar la ×
 card.addEventListener("click",function(){
   if(window.matchMedia("(max-width:760px)").matches) closeCard();
@@ -1268,7 +1321,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.20";
+const VERSION="v1.21";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
