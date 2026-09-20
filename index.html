@@ -29,10 +29,13 @@
   }
   .sobre:hover{color:var(--ink);border-bottom-color:var(--line)}
   .sobre:focus-visible{outline:2px solid var(--hi);outline-offset:3px}
-  /* el texto de "sobre este sitio" usa el mismo panel que las fichas */
-  .card.texto h2{font-family:var(--serif);font-weight:500;font-size:23px;margin:6px 46px 16px 0}
-  .card.texto p{margin:0 0 15px;font-size:14.5px;line-height:1.65;color:#c9bda9}
+  /* el texto de "sobre este sitio" se lee como el cartel de entrada: serif y centrado */
+  .card.texto p{margin:0 0 16px;font-family:var(--serif);font-size:18.5px;line-height:1.6;
+    color:var(--ink);text-align:center}
+  .card.texto p:first-of-type{margin-top:30px}
   .card.texto p:last-child{margin-bottom:0}
+  /* el enlace repetido adentro del panel de filtros solo existe en el celular */
+  .sobrefiltro{display:none}
   .titulo{display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;
     cursor:pointer;transition:opacity .15s}
   .titulo:hover{opacity:.82}
@@ -236,12 +239,13 @@
   @media(max-width:760px){
     body{overflow:hidden;height:100dvh}
     header{padding:10px 14px}
-    /* en celular va suelto abajo a la derecha, sobre el gráfico */
-    .sobre{
-      position:fixed;right:10px;top:auto;transform:none;z-index:8;
-      bottom:calc(8px + env(safe-area-inset-bottom, 0px));
-      margin:0;font-size:11.5px;padding:5px 9px;
-      background:rgba(20,16,12,.92);border:1px solid var(--line);border-radius:3px
+    /* en celular el enlace del encabezado tapaba los años: vive arriba a la
+       izquierda del panel de filtros */
+    header .sobre{display:none}
+    .sobrefiltro{
+      display:block;position:absolute;left:16px;top:18px;right:auto;bottom:auto;
+      transform:none;margin:0;font-size:12px;padding:6px 10px;color:var(--ink);
+      background:#1c1712;border:1px solid var(--line);border-radius:4px
     }
     .titulo{display:block}
     h1{display:inline;font-size:16.5px}
@@ -271,6 +275,7 @@
       color:var(--dim);font-size:20px;line-height:1;cursor:pointer}
     aside.list .cerrarpanel{margin:14px 14px 4px auto}
     aside.list h2{padding:0 20px 8px}
+    .card.texto p{font-size:16.5px}
     .galcab{padding:11px 14px}
     .galgrid{padding:14px 12px 30px;gap:16px 10px;
       grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
@@ -325,6 +330,7 @@
     <button type="button" id="btnListado">Listado</button>
   </div>
   <aside class="filters" id="side">
+    <button type="button" class="sobre sobrefiltro" id="btnSobre2">Sobre este sitio</button>
     <button type="button" class="cerrarpanel">&times;</button>
     <button class="allbtn" id="all">Ver todos</button>
     <div id="filters"></div>
@@ -363,7 +369,6 @@
 <div class="scrim" id="scrim"></div>
 <aside class="card texto" id="sobre">
   <div class="xwrap"><button class="x" id="sobrex" aria-label="Cerrar">&times;</button></div>
-  <h2>Sobre este sitio</h2>
   <p>El objetivo de este sitio es mostrar la historia que nunca te contaron en
      el colegio ni en la universidad.</p>
   <p>Argentina sufrió ataques terroristas de parte de diversos grupos
@@ -1307,6 +1312,7 @@ function cerrarSobre(){
   if(!otro) scrim.classList.remove("show");
 }
 document.getElementById("btnSobre").onclick=abrirSobre;
+document.getElementById("btnSobre2").onclick=abrirSobre;
 document.getElementById("sobrex").onclick=cerrarSobre;
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarSobre(); });
 // en celular se cierra tocándolo, igual que la ficha
@@ -1428,7 +1434,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.25";
+const VERSION="v1.26";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
