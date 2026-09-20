@@ -631,7 +631,9 @@ function pintarGaleria(){
   const frag=document.createDocumentFragment();
   fotos.forEach(function(d){
     const it=document.createElement("figure"); it.className="galitem";
-    it.innerHTML='<img src="'+fotoGrande(d)+'" alt="" loading="lazy">'+
+    // si todavía no existe el cuadro, cae en la miniatura
+    it.innerHTML='<img src="'+fotoCuadro(d)+'" alt="" loading="lazy" '+
+      'onerror="this.onerror=null;this.src=\''+fotoThumb(d)+'\'">'+
       '<figcaption class="galnom">'+esc(nombreNormal(d.n))+
       '<span class="galanio">'+d.y+'</span></figcaption>';
     // la ficha se abre encima del muro: al cerrarla se sigue mirando caras
@@ -1027,6 +1029,8 @@ function claveFoto(nombre){
 }
 function fotoGrande(d){ return "fotos/"+claveFoto(d.n)+".jpg"; }
 function fotoThumb(d){ return "fotos/"+claveFoto(d.n)+"_thumb.jpg"; }
+// el muro usa el mismo encuadre de la miniatura, pero a 320px
+function fotoCuadro(d){ return "fotos/"+claveFoto(d.n)+"_cuadro.jpg"; }
 function tieneFoto(d){ return FOTOS.has(claveFoto(d.n)); }
 
 // las miniaturas pesan poco; se traen en segundo plano, de a pocas, para que
@@ -1436,7 +1440,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.28";
+const VERSION="v1.29";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
