@@ -32,7 +32,9 @@
   /* el texto de "sobre este sitio" se lee como el cartel de entrada: serif y centrado */
   .card.texto p{margin:0 0 16px;font-family:var(--serif);font-size:18.5px;line-height:1.6;
     color:var(--ink);text-align:center}
-  .card.texto p:first-of-type{margin-top:30px}
+  /* acá el texto va centrado y ocupa todo el ancho: la × no puede flotar
+     encima, así que se queda quieta en su propio renglón arriba */
+  aside.card.texto .xwrap{position:static;height:auto;margin:0 0 10px}
   .card.texto p:last-child{margin-bottom:0}
   /* el enlace repetido adentro del panel de filtros solo existe en el celular */
   .sobrefiltro{display:none}
@@ -1434,7 +1436,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.26";
+const VERSION="v1.27";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
