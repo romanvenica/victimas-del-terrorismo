@@ -91,9 +91,11 @@
   .lrow svg{width:15px;height:15px;flex:none}
   .lrow .ly{margin-left:auto;color:var(--dim);font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums}
   /* boton del listado que abre el muro de retratos */
-  .verfotos{display:block;flex:none;width:calc(100% - 32px);margin:0 16px 12px;
+  .verfotos{display:flex;align-items:center;justify-content:center;gap:8px;
+    flex:none;width:calc(100% - 32px);margin:0 16px 12px;
     background:#1c1712;border:1px solid var(--line);border-radius:4px;color:var(--ink);
     font-family:var(--sans);font-size:12.5px;font-weight:600;padding:9px 0;cursor:pointer}
+  .verfotos svg{width:16px;height:16px;flex:none}
   .verfotos:hover:not(:disabled){background:#241d16;border-color:#5c4d3f}
   .verfotos:disabled{opacity:.4;cursor:default}
   /* muro de retratos: pantalla completa, por debajo de la ficha */
@@ -156,6 +158,7 @@
   .zoombar button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
   .zoombar button:disabled{opacity:.35;cursor:default}
   .zoombar svg{width:19px;height:19px}
+  .zoombar .lupafotos{margin-top:6px}
   /* columna de año: se sombrea al elegirla */
   /* solo marca la columna elegida: no se toca, se elige con el año de abajo */
   rect.yearbg{fill:transparent;pointer-events:none}
@@ -350,6 +353,14 @@
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
           <circle cx="8.6" cy="8.6" r="5.4"></circle><line x1="12.7" y1="12.7" x2="17.2" y2="17.2"></line>
           <line x1="6.1" y1="8.6" x2="11.1" y2="8.6"></line>
+        </svg>
+      </button>
+      <button type="button" id="zfotos" class="lupafotos" title="Ver fotos" aria-label="Ver todas las fotos">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2.6" y="3.8" width="14.8" height="12.4" rx="1.7"></rect>
+          <circle cx="7.1" cy="8.1" r="1.4"></circle>
+          <path d="M3.4 14.6 L8 10.1 L11.3 13.1 L13.5 11.1 L16.6 14"></path>
         </svg>
       </button>
     </div>
@@ -614,10 +625,21 @@ function drawList(){
 const galeria=document.getElementById("galeria");
 const galgrid=document.getElementById("galgrid");
 const btnFotos=document.getElementById("btnFotos");
+const btnZfotos=document.getElementById("zfotos");
+// el mismo dibujo en la barra de la derecha y en el botón del listado
+const ICONO_GALERIA='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" '+
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+  '<rect x="2.6" y="3.8" width="14.8" height="12.4" rx="1.7"></rect>'+
+  '<circle cx="7.1" cy="8.1" r="1.4"></circle>'+
+  '<path d="M3.4 14.6 L8 10.1 L11.3 13.1 L13.5 11.1 L16.6 14"></path></svg>';
 function marcarBotonFotos(sorted){
   const n=sorted.filter(tieneFoto).length;
-  btnFotos.textContent = n ? "Ver fotos ("+n+")" : "Todavía sin fotos";
+  btnFotos.innerHTML = ICONO_GALERIA+"<span>"+(n ? "Ver fotos ("+n+")" : "Todavía sin fotos")+"</span>";
   btnFotos.disabled = n===0;
+  if(btnZfotos){
+    btnZfotos.disabled = n===0;
+    btnZfotos.title = n ? "Ver fotos ("+n+")" : "Todavía sin fotos";
+  }
 }
 function pintarGaleria(){
   const fotos=listadoActual().filter(tieneFoto);
@@ -651,6 +673,7 @@ function cerrarGaleria(){
   galeria.classList.remove("show"); galeria.setAttribute("aria-hidden","true");
 }
 btnFotos.addEventListener("click",abrirGaleria);
+if(btnZfotos) btnZfotos.addEventListener("click",abrirGaleria);
 document.getElementById("galx").addEventListener("click",cerrarGaleria);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarGaleria(); });
 
@@ -1440,7 +1463,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.30";
+const VERSION="v1.31";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
