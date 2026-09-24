@@ -184,7 +184,7 @@
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
   /* display:inline-block a mano: la regla general pone los svg en bloque y la
      cruz se caía al renglón de abajo en vez de quedar pegada al nombre */
-  .card .cruznm{display:inline-block;width:11px;height:17px;margin-left:9px;
+  .card .cruznm,.visornom .cruznm{display:inline-block;width:11px;height:17px;margin-left:9px;
     vertical-align:-2px;flex:none}
   .card .nm .junto{white-space:nowrap}
   .card .meta .cruz{font-weight:800;font-size:15px;color:#c9bda9}
@@ -1556,7 +1556,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.39";
+const VERSION="v1.40";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
