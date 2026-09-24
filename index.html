@@ -192,7 +192,11 @@
   .card .meta dt{color:var(--dim);font-weight:600}
   .card .meta dd{margin:0}
   .card .foto{display:none;width:100%;max-width:260px;border-radius:8px;margin:2px 0 16px;border:1px solid var(--line)}
-  .card .foto.show{cursor:zoom-in}
+  .card .foto.show{display:block;cursor:zoom-in}
+  .card .rel{margin:0;padding-top:17px;border-top:1px solid var(--line);font-family:var(--serif);
+    font-size:14.5px;line-height:1.62;color:#d8cfc0;white-space:pre-wrap}
+  .card .rel + .rel{margin-top:17px}
+  .card .src{margin-top:18px;color:var(--dim);font-size:12.5px;font-weight:500}
   /* ---------- la foto grande: un cartel flotante, como el de entrada ---------- */
   .visor{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;
     background:rgba(6,4,2,.74);padding:22px;cursor:zoom-out}
@@ -238,7 +242,7 @@
   .introfotos img{width:78px;height:78px;object-fit:cover;border-radius:4px;
     border:1px solid var(--line);display:block}
   /* el nombre aparece flotando al pasar el mouse, como en el gráfico */
-  .introfoto{position:relative;display:inline-block;line-height:0}
+  .introfoto{position:relative;display:inline-block;line-height:0;cursor:pointer}
   .introfoto::after{
     content:attr(data-nom);position:absolute;left:50%;bottom:calc(100% + 9px);
     transform:translateX(-50%);white-space:nowrap;z-index:2;
@@ -1527,13 +1531,24 @@ function init(){
 function pintarIntroFotos(){
   const caja=document.getElementById("introfotos");
   if(!caja || !DATA.length || !FOTOS.size) return;
-  caja.innerHTML=DATA.filter(function(d){ return d.nino && tieneFoto(d); })
-    .sort(function(a,b){ return a.y-b.y; })
-    .map(function(d){
-      const nom=esc(nombreNormal(d.n));
-      return '<span class="introfoto" data-nom="'+nom+'">'+
-             '<img src="'+fotoThumb(d)+'" alt="'+nom+'"></span>';
-    }).join("");
+  const chicos=DATA.filter(function(d){ return d.nino && tieneFoto(d); })
+    .sort(function(a,b){ return a.y-b.y; });
+  caja.innerHTML="";
+  chicos.forEach(function(d){
+    const nom=nombreNormal(d.n);
+    const sp=document.createElement("span");
+    sp.className="introfoto";
+    sp.setAttribute("data-nom",nom);
+    sp.title="Ver la ficha de "+nom;
+    sp.innerHTML='<img src="'+fotoThumb(d)+'" alt="'+esc(nom)+'">';
+    // tocar a un chico abre su ficha en vez de solo cerrar el cartel
+    sp.addEventListener("click",function(e){
+      e.stopPropagation();
+      cerrarIntro();
+      openCard(d);
+    });
+    caja.appendChild(sp);
+  });
 }
 const intro=document.getElementById("intro");
 function cerrarIntro(){ intro.classList.add("oculto"); }
@@ -1541,7 +1556,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.38";
+const VERSION="v1.39";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
