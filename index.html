@@ -193,39 +193,28 @@
   .card .meta dd{margin:0}
   .card .foto{display:none;width:100%;max-width:260px;border-radius:8px;margin:2px 0 16px;border:1px solid var(--line)}
   .card .foto.show{cursor:zoom-in}
-  /* ---------- la foto a pantalla completa ---------- */
-  .visor{position:fixed;inset:0;z-index:45;background:#0a0806;display:flex;flex-direction:column}
+  /* ---------- la foto grande: un cartel flotante, como el de entrada ---------- */
+  .visor{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;
+    background:rgba(6,4,2,.74);padding:22px;cursor:zoom-out}
   .visor[hidden]{display:none}
-  .visorcab,.visorpie{flex:none;display:flex;align-items:center;gap:14px;padding:12px 18px;
-    background:rgba(20,16,12,.96)}
-  .visorcab{border-bottom:1px solid var(--line)}
-  .visorpie{border-top:1px solid var(--line);flex-wrap:wrap}
-  .visornom{font-family:var(--serif);font-size:19px;line-height:1.25;min-width:0}
-  .visorcab .x{margin-left:auto;flex:none;width:36px;height:36px;padding:0;
-    display:inline-flex;align-items:center;justify-content:center;
-    background:none;border:1px solid var(--line);border-radius:4px;
-    color:var(--dim);font-size:24px;line-height:1;cursor:pointer}
-  .visorcab .x:hover{color:var(--ink);background:#241d16}
-  .visorcaja{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
-    padding:16px;cursor:zoom-out}
-  .visorcaja img{max-width:100%;max-height:100%;object-fit:contain;display:block;
-    border:1px solid var(--line);border-radius:4px}
+  .visorcaja{margin:0;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:auto;
+    background:rgba(20,16,12,.97);border:1px solid var(--line);border-radius:6px;
+    padding:14px;box-shadow:0 18px 60px rgba(0,0,0,.65);max-width:min(94vw,620px)}
+  .visorcaja img{display:block;max-width:100%;max-height:68vh;object-fit:contain;border-radius:4px}
+  .visorpie{display:flex;flex-direction:column;align-items:center;gap:9px;width:100%}
+  .visornom{font-family:var(--serif);font-size:18px;line-height:1.3;text-align:center}
   .bajar{display:inline-flex;align-items:center;gap:8px;text-decoration:none;
     font-family:var(--sans);font-size:13px;font-weight:600;color:#fff;
-    background:var(--hi);border:1px solid var(--hi);border-radius:3px;padding:9px 15px}
+    background:var(--hi);border:1px solid var(--hi);border-radius:3px;padding:9px 16px}
   .bajar:hover{filter:brightness(1.08)}
   .bajar:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   .bajar svg{width:15px;height:15px}
-  .visorpie .medidas{color:var(--dim);font-size:12.5px;font-variant-numeric:tabular-nums}
+  .visorpie .medidas{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
   @media (max-width:760px){
-    .visorcab,.visorpie{padding:10px 12px;gap:10px}
+    .visor{padding:14px}
+    .visorcaja img{max-height:62vh}
     .visornom{font-size:16px}
   }
-  .card .foto.show{display:block}
-  .card .rel{margin:0;padding-top:17px;border-top:1px solid var(--line);font-family:var(--serif);
-    font-size:14.5px;line-height:1.62;color:#d8cfc0;white-space:pre-wrap}
-  .card .rel + .rel{margin-top:17px}
-  .card .src{margin-top:18px;color:var(--dim);font-size:12.5px;font-weight:500}
   .empty{color:var(--dim);text-align:center;margin-top:26vh;font-family:var(--serif);font-size:16px}
   #tip .cruz{font-weight:800;font-size:17px}
   #tip .tcat{display:block;font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#c9bda9;margin-bottom:4px}
@@ -428,21 +417,20 @@
 
 <aside class="card" id="card"></aside>
 
-<aside class="visor" id="visor" hidden role="dialog" aria-modal="true" aria-label="Foto ampliada">
-  <div class="visorcab">
-    <div class="visornom" id="visorNom"></div>
-    <button type="button" class="x" id="visorX" aria-label="Cerrar">&times;</button>
-  </div>
-  <div class="visorcaja" id="visorCaja"><img id="visorImg" alt=""></div>
-  <div class="visorpie">
-    <a class="bajar" id="visorBajar" download href="#">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M10 3.2 V12.4 M6.2 9 L10 12.8 L13.8 9 M3.6 15.6 H16.4"></path>
-      </svg>Descargar la foto</a>
-    <span class="medidas" id="visorMedidas"></span>
-  </div>
-</aside>
+<div class="visor" id="visor" hidden role="dialog" aria-modal="true" aria-label="Foto ampliada">
+  <figure class="visorcaja" id="visorCaja">
+    <img id="visorImg" alt="">
+    <figcaption class="visorpie">
+      <div class="visornom" id="visorNom"></div>
+      <a class="bajar" id="visorBajar" download href="#">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 3.2 V12.4 M6.2 9 L10 12.8 L13.8 9 M3.6 15.6 H16.4"></path>
+        </svg>Descargar la foto</a>
+      <span class="medidas" id="visorMedidas"></span>
+    </figcaption>
+  </figure>
+</div>
 
 <aside class="galeria" id="galeria" aria-hidden="true">
   <div class="galcab">
@@ -1377,33 +1365,40 @@ function closeCard(){
 }
 scrim.onclick=function(){ cerrarPaneles(); closeCard(); cerrarSobre(); };
 
-// ---- la foto a pantalla completa ----
-// se descarga el mismo archivo que muestra la ficha, que es el de mayor
-// resolucion que existe en el sitio
+// ---- la foto grande ----
+// si la persona tiene version de alta resolucion se muestra y se descarga esa;
+// si no, la misma de la ficha
+let ALTAS=new Set();
+function fotoAlta(d){
+  const c=claveFoto(d.n);
+  return ALTAS.has(c) ? "fotos/"+c+"_grande.jpg" : fotoGrande(d);
+}
 const visor=document.getElementById("visor");
 const visorImg=document.getElementById("visorImg");
 const visorBajar=document.getElementById("visorBajar");
 const visorMedidas=document.getElementById("visorMedidas");
 function abrirVisor(d){
   if(!tieneFoto(d)) return;
-  const ruta=fotoGrande(d);
-  document.getElementById("visorNom").innerHTML=nombreConCruz(d.n)+
-    ' <span class="medidas">'+d.y+'</span>';
+  const ruta=fotoAlta(d);
+  document.getElementById("visorNom").innerHTML=nombreConCruz(d.n)+" · "+d.y;
   visorMedidas.textContent="";
   visorImg.onload=function(){
     visorMedidas.textContent=visorImg.naturalWidth+" × "+visorImg.naturalHeight+" px";
+  };
+  visorImg.onerror=function(){                 // por si falta la version grande
+    if(visorImg.src.indexOf("_grande")!==-1){ visorImg.src=fotoGrande(d); visorBajar.href=fotoGrande(d); }
   };
   visorImg.src=ruta;
   visorBajar.href=ruta;
   visorBajar.setAttribute("download", nombreNormal(d.n)+" ("+d.y+").jpg");
   visor.hidden=false;
-  document.getElementById("visorX").focus();
 }
 function cerrarVisor(){ visor.hidden=true; visorImg.removeAttribute("src"); }
-document.getElementById("visorX").addEventListener("click",cerrarVisor);
-document.getElementById("visorCaja").addEventListener("click",function(e){
-  if(e.target!==visorImg) cerrarVisor();
+// se cierra tocando fuera, como el cartel de entrada
+visor.addEventListener("click",function(e){
+  if(!e.target.closest(".visorcaja") || e.target===visorImg) cerrarVisor();
 });
+visorBajar.addEventListener("click",function(e){ e.stopPropagation(); });
 document.addEventListener("keydown",function(e){
   // con el visor abierto, Escape lo cierra a él y no a la ficha de atrás
   if(e.key==="Escape" && !visor.hidden){ e.stopImmediatePropagation(); cerrarVisor(); }
@@ -1546,7 +1541,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.37";
+const VERSION="v1.38";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
@@ -1560,6 +1555,11 @@ fetch("fotos/indice.json",{cache:"no-cache"})
     setTimeout(precargarMiniaturas,1200);
   })
   .catch(function(){ /* sin índice: simplemente no se muestran fotos */ });
+
+fetch("fotos/altas.json",{cache:"no-cache"})
+  .then(function(r){ return r.json(); })
+  .then(function(j){ ALTAS=new Set(j); })
+  .catch(function(){ /* sin lista: el visor usa la foto de la ficha */ });
 
 fetch("victimas.json",{cache:"no-cache"})
   .then(function(r){ return r.json(); })
