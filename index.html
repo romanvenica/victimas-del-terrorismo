@@ -192,6 +192,35 @@
   .card .meta dt{color:var(--dim);font-weight:600}
   .card .meta dd{margin:0}
   .card .foto{display:none;width:100%;max-width:260px;border-radius:8px;margin:2px 0 16px;border:1px solid var(--line)}
+  .card .foto.show{cursor:zoom-in}
+  /* ---------- la foto a pantalla completa ---------- */
+  .visor{position:fixed;inset:0;z-index:45;background:#0a0806;display:flex;flex-direction:column}
+  .visor[hidden]{display:none}
+  .visorcab,.visorpie{flex:none;display:flex;align-items:center;gap:14px;padding:12px 18px;
+    background:rgba(20,16,12,.96)}
+  .visorcab{border-bottom:1px solid var(--line)}
+  .visorpie{border-top:1px solid var(--line);flex-wrap:wrap}
+  .visornom{font-family:var(--serif);font-size:19px;line-height:1.25;min-width:0}
+  .visorcab .x{margin-left:auto;flex:none;width:36px;height:36px;padding:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:none;border:1px solid var(--line);border-radius:4px;
+    color:var(--dim);font-size:24px;line-height:1;cursor:pointer}
+  .visorcab .x:hover{color:var(--ink);background:#241d16}
+  .visorcaja{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    padding:16px;cursor:zoom-out}
+  .visorcaja img{max-width:100%;max-height:100%;object-fit:contain;display:block;
+    border:1px solid var(--line);border-radius:4px}
+  .bajar{display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+    font-family:var(--sans);font-size:13px;font-weight:600;color:#fff;
+    background:var(--hi);border:1px solid var(--hi);border-radius:3px;padding:9px 15px}
+  .bajar:hover{filter:brightness(1.08)}
+  .bajar:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .bajar svg{width:15px;height:15px}
+  .visorpie .medidas{color:var(--dim);font-size:12.5px;font-variant-numeric:tabular-nums}
+  @media (max-width:760px){
+    .visorcab,.visorpie{padding:10px 12px;gap:10px}
+    .visornom{font-size:16px}
+  }
   .card .foto.show{display:block}
   .card .rel{margin:0;padding-top:17px;border-top:1px solid var(--line);font-family:var(--serif);
     font-size:14.5px;line-height:1.62;color:#d8cfc0;white-space:pre-wrap}
@@ -398,6 +427,22 @@
 </aside>
 
 <aside class="card" id="card"></aside>
+
+<aside class="visor" id="visor" hidden role="dialog" aria-modal="true" aria-label="Foto ampliada">
+  <div class="visorcab">
+    <div class="visornom" id="visorNom"></div>
+    <button type="button" class="x" id="visorX" aria-label="Cerrar">&times;</button>
+  </div>
+  <div class="visorcaja" id="visorCaja"><img id="visorImg" alt=""></div>
+  <div class="visorpie">
+    <a class="bajar" id="visorBajar" download href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10 3.2 V12.4 M6.2 9 L10 12.8 L13.8 9 M3.6 15.6 H16.4"></path>
+      </svg>Descargar la foto</a>
+    <span class="medidas" id="visorMedidas"></span>
+  </div>
+</aside>
 
 <aside class="galeria" id="galeria" aria-hidden="true">
   <div class="galcab">
@@ -1312,6 +1357,12 @@ function openCard(d, dejarPanel){
   html+='<div class="src">Un aporte a la verdad, vol. '+ROM[d.vol]+', pág. '+d.pg+
         ' \u2014 Jorge Héctor Di Pasquale.</div>';
   card.innerHTML=html;
+  const fotoFicha=card.querySelector("img.foto");
+  if(fotoFicha){
+    fotoFicha.title="Ver la foto a pantalla completa";
+    // en el celular un toque en la ficha la cierra: acá no tiene que pasar
+    fotoFicha.addEventListener("click",function(e){ e.stopPropagation(); abrirVisor(d); });
+  }
   card.scrollTop=0;   // siempre desde arriba, no donde quedo la ficha anterior
   document.getElementById("cx").onclick=closeCard;
   card.classList.add("show"); scrim.classList.add("show");
@@ -1325,6 +1376,38 @@ function closeCard(){
   if(!otroAbierto) scrim.classList.remove("show");
 }
 scrim.onclick=function(){ cerrarPaneles(); closeCard(); cerrarSobre(); };
+
+// ---- la foto a pantalla completa ----
+// se descarga el mismo archivo que muestra la ficha, que es el de mayor
+// resolucion que existe en el sitio
+const visor=document.getElementById("visor");
+const visorImg=document.getElementById("visorImg");
+const visorBajar=document.getElementById("visorBajar");
+const visorMedidas=document.getElementById("visorMedidas");
+function abrirVisor(d){
+  if(!tieneFoto(d)) return;
+  const ruta=fotoGrande(d);
+  document.getElementById("visorNom").innerHTML=nombreConCruz(d.n)+
+    ' <span class="medidas">'+d.y+'</span>';
+  visorMedidas.textContent="";
+  visorImg.onload=function(){
+    visorMedidas.textContent=visorImg.naturalWidth+" × "+visorImg.naturalHeight+" px";
+  };
+  visorImg.src=ruta;
+  visorBajar.href=ruta;
+  visorBajar.setAttribute("download", nombreNormal(d.n)+" ("+d.y+").jpg");
+  visor.hidden=false;
+  document.getElementById("visorX").focus();
+}
+function cerrarVisor(){ visor.hidden=true; visorImg.removeAttribute("src"); }
+document.getElementById("visorX").addEventListener("click",cerrarVisor);
+document.getElementById("visorCaja").addEventListener("click",function(e){
+  if(e.target!==visorImg) cerrarVisor();
+});
+document.addEventListener("keydown",function(e){
+  // con el visor abierto, Escape lo cierra a él y no a la ficha de atrás
+  if(e.key==="Escape" && !visor.hidden){ e.stopImmediatePropagation(); cerrarVisor(); }
+});
 
 // ---- "sobre este sitio" ----
 const sobre=document.getElementById("sobre");
@@ -1463,7 +1546,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.36";
+const VERSION="v1.37";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
