@@ -119,6 +119,10 @@
   .galitem:hover img{border-color:#5c4d3f}
   .galnom{font-family:var(--serif);font-size:13px;line-height:1.3;color:var(--ink);
     margin-top:8px;text-align:center}
+  /* la cruz del muro es la misma de la ficha, a escala del nombre chico */
+  .galnom .junto{white-space:nowrap}
+  .galnom .cruznm{display:inline-block;width:7px;height:11px;margin-left:6px;
+    vertical-align:-1px;flex:none}
   .galanio{display:block;font-family:var(--sans);font-size:11.5px;font-weight:600;
     color:var(--dim);margin-top:2px}
   .galvacio{grid-column:1/-1;color:var(--dim);font-family:var(--serif);font-size:16px;
@@ -681,7 +685,7 @@ function pintarGaleria(){
     // si todavía no existe el cuadro, cae en la miniatura
     it.innerHTML='<img src="'+fotoCuadro(d)+'" alt="" loading="lazy" '+
       'onerror="this.onerror=null;this.src=\''+fotoThumb(d)+'\'">'+
-      '<figcaption class="galnom">'+esc(nombreNormal(d.n))+
+      '<figcaption class="galnom">'+nombreConCruz(d.n)+
       '<span class="galanio">'+d.y+'</span></figcaption>';
     // la ficha se abre encima del muro: al cerrarla se sigue mirando caras
     it.addEventListener("click",function(){ openCard(d,true); });
@@ -1535,7 +1539,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.44";
+const VERSION="v1.45";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
