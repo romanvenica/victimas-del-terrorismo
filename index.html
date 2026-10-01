@@ -121,7 +121,17 @@
   .galitem{margin:0;cursor:pointer}
   .galitem img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;
     border:1px solid var(--line);border-radius:4px;background:#0d0a07}
-  .galitem:hover img{border-color:#5c4d3f}
+  .galitem:hover img,.galitem:hover .sinfoto{border-color:#5c4d3f}
+  /* a quien todavia no tiene foto le va una cruz con la bandera en su lugar.
+     Va como imagen de fondo y no como SVG en el documento: son mas de mil
+     cuadros y el sol tiene 32 rayos; asi el dibujo se decodifica una sola vez. */
+  .sinfoto{container-type:inline-size;width:100%;aspect-ratio:1/1;
+    border:1px solid var(--line);border-radius:4px;
+    background:#0d0a07 url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 120%22%3E%3Cdefs%3E%3CclipPath id=%22c%22%3E%3Cpath d=%22M36 0 H64 V28 H96 V56 H64 V120 H36 V56 H4 V28 H36 Z%22/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path=%22url(%23c)%22%3E%3Crect width=%22100%22 height=%2228%22 fill=%22%2375899c%22/%3E%3Crect y=%2228%22 width=%22100%22 height=%2228%22 fill=%22%23d1d1d1%22/%3E%3Crect y=%2256%22 width=%22100%22 height=%2264%22 fill=%22%2375899c%22/%3E%3C/g%3E%3Cg transform=%22translate(20.31 12.31) scale(0.5938)%22%3E%3Cg%3E%3Cg fill=%22%23ad9557%22 stroke=%22%234f3225%22 stroke-width=%220.7%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M48.80 36.85 50.00 18.00 51.20 36.85Z%22/%3E%3Cpath d=%22M51.35 36.87 51.82 35.35 52.37 33.84 52.95 32.34 53.55 30.86 54.13 29.38 54.66 27.89 55.12 26.38 55.50 24.86 55.78 23.32 55.99 21.76 56.13 20.19 56.24 18.61 56.24 18.61 56.98 20.38 57.53 22.13 57.88 23.86 58.01 25.54 57.93 27.17 57.66 28.74 57.22 30.24 56.65 31.70 55.98 33.13 55.26 34.54 54.51 35.94 53.78 37.35Z%22/%3E%3Cpath d=%22M53.93 37.40 62.25 20.44 56.14 38.31Z%22/%3E%3Cpath d=%22M56.27 38.38 57.29 37.16 58.37 35.97 59.48 34.82 60.60 33.67 61.71 32.53 62.77 31.35 63.77 30.14 64.70 28.88 65.55 27.56 66.34 26.20 67.07 24.80 67.78 23.39 67.78 23.39 67.79 25.31 67.63 27.14 67.28 28.87 66.76 30.47 66.06 31.94 65.21 33.29 64.23 34.51 63.14 35.64 61.98 36.70 60.77 37.72 59.55 38.74 58.33 39.76Z%22/%3E%3Cpath d=%22M58.45 39.86 72.63 27.37 60.14 41.55Z%22/%3E%3Cpath d=%22M60.24 41.67 61.65 40.93 63.10 40.25 64.57 39.60 66.04 38.97 67.50 38.33 68.93 37.66 70.32 36.92 71.66 36.11 72.95 35.22 74.20 34.26 75.41 33.25 76.61 32.22 76.61 32.22 75.88 33.99 75.03 35.62 74.05 37.09 72.96 38.37 71.75 39.46 70.45 40.38 69.07 41.13 67.64 41.76 66.16 42.30 64.65 42.78 63.13 43.25 61.62 43.73Z%22/%3E%3Cpath d=%22M61.69 43.86 79.56 37.75 62.60 46.07Z%22/%3E%3Cpath d=%22M62.65 46.22 64.24 46.08 65.84 46.00 67.44 45.97 69.04 45.95 70.63 45.92 72.21 45.84 73.78 45.69 75.33 45.46 76.86 45.13 78.38 44.72 79.89 44.25 81.39 43.76 81.39 43.76 80.04 45.12 78.63 46.30 77.16 47.28 75.66 48.04 74.13 48.59 72.57 48.94 71.01 49.11 69.45 49.14 67.88 49.07 66.30 48.94 64.72 48.79 63.13 48.65Z%22/%3E%3Cpath d=%22M63.15 48.80 82.00 50.00 63.15 51.20Z%22/%3E%3Cpath d=%22M63.13 51.35 64.65 51.82 66.16 52.37 67.66 52.95 69.14 53.55 70.62 54.13 72.11 54.66 73.62 55.12 75.14 55.50 76.68 55.78 78.24 55.99 79.81 56.13 81.39 56.24 81.39 56.24 79.62 56.98 77.87 57.53 76.14 57.88 74.46 58.01 72.83 57.93 71.26 57.66 69.76 57.22 68.30 56.65 66.87 55.98 65.46 55.26 64.06 54.51 62.65 53.78Z%22/%3E%3Cpath d=%22M62.60 53.93 79.56 62.25 61.69 56.14Z%22/%3E%3Cpath d=%22M61.62 56.27 62.84 57.29 64.03 58.37 65.18 59.48 66.33 60.60 67.47 61.71 68.65 62.77 69.86 63.77 71.12 64.70 72.44 65.55 73.80 66.34 75.20 67.07 76.61 67.78 76.61 67.78 74.69 67.79 72.86 67.63 71.13 67.28 69.53 66.76 68.06 66.06 66.71 65.21 65.49 64.23 64.36 63.14 63.30 61.98 62.28 60.77 61.26 59.55 60.24 58.33Z%22/%3E%3Cpath d=%22M60.14 58.45 72.63 72.63 58.45 60.14Z%22/%3E%3Cpath d=%22M58.33 60.24 59.07 61.65 59.75 63.10 60.40 64.57 61.03 66.04 61.67 67.50 62.34 68.93 63.08 70.32 63.89 71.66 64.78 72.95 65.74 74.20 66.75 75.41 67.78 76.61 67.78 76.61 66.01 75.88 64.38 75.03 62.91 74.05 61.63 72.96 60.54 71.75 59.62 70.45 58.87 69.07 58.24 67.64 57.70 66.16 57.22 64.65 56.75 63.13 56.27 61.62Z%22/%3E%3Cpath d=%22M56.14 61.69 62.25 79.56 53.93 62.60Z%22/%3E%3Cpath d=%22M53.78 62.65 53.92 64.24 54.00 65.84 54.03 67.44 54.05 69.04 54.08 70.63 54.16 72.21 54.31 73.78 54.54 75.33 54.87 76.86 55.28 78.38 55.75 79.89 56.24 81.39 56.24 81.39 54.88 80.04 53.70 78.63 52.72 77.16 51.96 75.66 51.41 74.13 51.06 72.57 50.89 71.01 50.86 69.45 50.93 67.88 51.06 66.30 51.21 64.72 51.35 63.13Z%22/%3E%3Cpath d=%22M51.20 63.15 50.00 82.00 48.80 63.15Z%22/%3E%3Cpath d=%22M48.65 63.13 48.18 64.65 47.63 66.16 47.05 67.66 46.45 69.14 45.87 70.62 45.34 72.11 44.88 73.62 44.50 75.14 44.22 76.68 44.01 78.24 43.87 79.81 43.76 81.39 43.76 81.39 43.02 79.62 42.47 77.87 42.12 76.14 41.99 74.46 42.07 72.83 42.34 71.26 42.78 69.76 43.35 68.30 44.02 66.87 44.74 65.46 45.49 64.06 46.22 62.65Z%22/%3E%3Cpath d=%22M46.07 62.60 37.75 79.56 43.86 61.69Z%22/%3E%3Cpath d=%22M43.73 61.62 42.71 62.84 41.63 64.03 40.52 65.18 39.40 66.33 38.29 67.47 37.23 68.65 36.23 69.86 35.30 71.12 34.45 72.44 33.66 73.80 32.93 75.20 32.22 76.61 32.22 76.61 32.21 74.69 32.37 72.86 32.72 71.13 33.24 69.53 33.94 68.06 34.79 66.71 35.77 65.49 36.86 64.36 38.02 63.30 39.23 62.28 40.45 61.26 41.67 60.24Z%22/%3E%3Cpath d=%22M41.55 60.14 27.37 72.63 39.86 58.45Z%22/%3E%3Cpath d=%22M39.76 58.33 38.35 59.07 36.90 59.75 35.43 60.40 33.96 61.03 32.50 61.67 31.07 62.34 29.68 63.08 28.34 63.89 27.05 64.78 25.80 65.74 24.59 66.75 23.39 67.78 23.39 67.78 24.12 66.01 24.97 64.38 25.95 62.91 27.04 61.63 28.25 60.54 29.55 59.62 30.93 58.87 32.36 58.24 33.84 57.70 35.35 57.22 36.87 56.75 38.38 56.27Z%22/%3E%3Cpath d=%22M38.31 56.14 20.44 62.25 37.40 53.93Z%22/%3E%3Cpath d=%22M37.35 53.78 35.76 53.92 34.16 54.00 32.56 54.03 30.96 54.05 29.37 54.08 27.79 54.16 26.22 54.31 24.67 54.54 23.14 54.87 21.62 55.28 20.11 55.75 18.61 56.24 18.61 56.24 19.96 54.88 21.37 53.70 22.84 52.72 24.34 51.96 25.87 51.41 27.43 51.06 28.99 50.89 30.55 50.86 32.12 50.93 33.70 51.06 35.28 51.21 36.87 51.35Z%22/%3E%3Cpath d=%22M36.85 51.20 18.00 50.00 36.85 48.80Z%22/%3E%3Cpath d=%22M36.87 48.65 35.35 48.18 33.84 47.63 32.34 47.05 30.86 46.45 29.38 45.87 27.89 45.34 26.38 44.88 24.86 44.50 23.32 44.22 21.76 44.01 20.19 43.87 18.61 43.76 18.61 43.76 20.38 43.02 22.13 42.47 23.86 42.12 25.54 41.99 27.17 42.07 28.74 42.34 30.24 42.78 31.70 43.35 33.13 44.02 34.54 44.74 35.94 45.49 37.35 46.22Z%22/%3E%3Cpath d=%22M37.40 46.07 20.44 37.75 38.31 43.86Z%22/%3E%3Cpath d=%22M38.38 43.73 37.16 42.71 35.97 41.63 34.82 40.52 33.67 39.40 32.53 38.29 31.35 37.23 30.14 36.23 28.88 35.30 27.56 34.45 26.20 33.66 24.80 32.93 23.39 32.22 23.39 32.22 25.31 32.21 27.14 32.37 28.87 32.72 30.47 33.24 31.94 33.94 33.29 34.79 34.51 35.77 35.64 36.86 36.70 38.02 37.72 39.23 38.74 40.45 39.76 41.67Z%22/%3E%3Cpath d=%22M39.86 41.55 27.37 27.37 41.55 39.86Z%22/%3E%3Cpath d=%22M41.67 39.76 40.93 38.35 40.25 36.90 39.60 35.43 38.97 33.96 38.33 32.50 37.66 31.07 36.92 29.68 36.11 28.34 35.22 27.05 34.26 25.80 33.25 24.59 32.22 23.39 32.22 23.39 33.99 24.12 35.62 24.97 37.09 25.95 38.37 27.04 39.46 28.25 40.38 29.55 41.13 30.93 41.76 32.36 42.30 33.84 42.78 35.35 43.25 36.87 43.73 38.38Z%22/%3E%3Cpath d=%22M43.86 38.31 37.75 20.44 46.07 37.40Z%22/%3E%3Cpath d=%22M46.22 37.35 46.08 35.76 46.00 34.16 45.97 32.56 45.95 30.96 45.92 29.37 45.84 27.79 45.69 26.22 45.46 24.67 45.13 23.14 44.72 21.62 44.25 20.11 43.76 18.61 43.76 18.61 45.12 19.96 46.30 21.37 47.28 22.84 48.04 24.34 48.59 25.87 48.94 27.43 49.11 28.99 49.14 30.55 49.07 32.12 48.94 33.70 48.79 35.28 48.65 36.87Z%22/%3E%3C/g%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2213%22 fill=%22%23ad9557%22 stroke=%22%234f3225%22 stroke-width=%221%22/%3E%3Cg fill=%22none%22 stroke=%22%234f3225%22 stroke-width=%221.15%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M42.0 44.8 Q44.8 42.6 47.4 44.4%22/%3E%3Cpath d=%22M58.0 44.8 Q55.2 42.6 52.6 44.4%22/%3E%3Cpath d=%22M48.6 52.6 Q50.0 48.6 51.4 52.6%22/%3E%3Cpath d=%22M45.8 56.0 Q50.0 59.0 54.2 56.0%22/%3E%3C/g%3E%3Cellipse cx=%2244.8%22 cy=%2248.6%22 rx=%221.9%22 ry=%222.5%22 fill=%22%234f3225%22/%3E%3Cellipse cx=%2255.2%22 cy=%2248.6%22 rx=%221.9%22 ry=%222.5%22 fill=%22%234f3225%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat center 30%/46% auto;
+    display:flex;align-items:flex-end;justify-content:center}
+  .sinfoto .ley{font-family:var(--sans);font-size:8.6cqw;font-weight:600;
+    letter-spacing:.05em;text-transform:uppercase;color:#8e8577;text-align:center;
+    line-height:1.2;padding:0 6cqw 7cqw}
   .galnom{font-family:var(--serif);font-size:13px;line-height:1.3;color:var(--ink);
     margin-top:8px;text-align:center}
   /* la cruz del muro es la misma de la ficha, a escala del nombre chico */
@@ -668,29 +678,42 @@ const ICONO_GALERIA='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" 
   '<circle cx="7.1" cy="8.1" r="1.4"></circle>'+
   '<path d="M3.4 14.6 L8 10.1 L11.3 13.1 L13.5 11.1 L16.6 14"></path></svg>';
 function marcarBotonFotos(sorted){
+  // el muro ya no muestra solo fotos: quien no tiene va con la cruz, asi que
+  // el boton se apaga unicamente cuando no quedo nadie en la seleccion
   const n=sorted.filter(tieneFoto).length;
-  btnFotos.innerHTML = ICONO_GALERIA+"<span>"+(n ? "Ver fotos ("+n+")" : "Todavía sin fotos")+"</span>";
-  btnFotos.disabled = n===0;
+  const rotulo = sorted.length===0 ? "Todavía sin fotos"
+               : n ? "Ver fotos ("+n+")" : "Ver el muro";
+  btnFotos.innerHTML = ICONO_GALERIA+"<span>"+rotulo+"</span>";
+  btnFotos.disabled = sorted.length===0;
   if(btnZfotos){
-    btnZfotos.disabled = n===0;
-    btnZfotos.title = n ? "Ver fotos ("+n+")" : "Todavía sin fotos";
+    btnZfotos.disabled = sorted.length===0;
+    btnZfotos.title = rotulo;
   }
 }
 function pintarGaleria(){
-  const fotos=listadoActual().filter(tieneFoto);
+  // primero los que tienen foto; el resto va con la cruz, sin perder el orden
+  const lista=listadoActual();
+  const conFoto=lista.filter(tieneFoto);
+  const sinFoto=lista.filter(function(d){ return !tieneFoto(d); });
+  const todos=conFoto.concat(sinFoto);
   document.getElementById("galtit").textContent =
-    fotos.length + (fotos.length===1 ? " retrato" : " retratos");
+    todos.length + (todos.length===1 ? " persona · " : " personas · ") +
+    (conFoto.length ? conFoto.length + (conFoto.length===1 ? " con foto" : " con foto")
+                    : "todavía sin fotos");
   galgrid.innerHTML="";
-  if(!fotos.length){
-    galgrid.innerHTML='<p class="galvacio">Todavía no hay fotos de estas personas.</p>';
+  if(!todos.length){
+    galgrid.innerHTML='<p class="galvacio">No hay personas en esta selección.</p>';
     return;
   }
   const frag=document.createDocumentFragment();
-  fotos.forEach(function(d){
+  todos.forEach(function(d){
     const it=document.createElement("figure"); it.className="galitem";
     // si todavía no existe el cuadro, cae en la miniatura
-    it.innerHTML='<img src="'+fotoCuadro(d)+'" alt="" loading="lazy" '+
-      'onerror="this.onerror=null;this.src=\''+fotoThumb(d)+'\'">'+
+    const cuadro = tieneFoto(d)
+      ? '<img src="'+fotoCuadro(d)+'" alt="" loading="lazy" '+
+        'onerror="this.onerror=null;this.src=\''+fotoThumb(d)+'\'">'
+      : '<div class="sinfoto"><span class="ley">Víctima del terrorismo</span></div>';
+    it.innerHTML=cuadro+
       '<figcaption class="galnom">'+nombreConCruz(d.n)+
       '<span class="galanio">'+d.y+'</span></figcaption>';
     // la ficha se abre encima del muro: al cerrarla se sigue mirando caras
@@ -1545,7 +1568,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.48";
+const VERSION="v1.49";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
