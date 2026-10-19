@@ -473,6 +473,8 @@ const FILTERS = [
   {key:"s",  title:"Género", opts:[["M","Hombres"],["F","Mujeres"]]},
   {key:"nino",title:"Edad", opts:[["si","Niños (menores de 18)"],["no","Adultos"]]},
   {key:"tg", title:"Tipo de hecho", opts:[["Explosivo","Explosivo / bomba"],["Arma de fuego","Arma de fuego"],["Enfrentamiento","Enfrentamiento"],["Otro","Otro"]]},
+  // ordenadas de mayor a menor cantidad de victimas, "Sin dato" siempre al final
+  {key:"p",  title:"Provincia", opts:[["Buenos Aires","Buenos Aires"],["Capital Federal","Capital Federal"],["Córdoba","Córdoba"],["Tucumán","Tucumán"],["Santa Fe","Santa Fe"],["Formosa","Formosa"],["Mendoza","Mendoza"],["Jujuy","Jujuy"],["Chaco","Chaco"],["Salta","Salta"],["Corrientes","Corrientes"],["Entre Ríos","Entre Ríos"],["San Juan","San Juan"],["Chubut","Chubut"],["San Luis","San Luis"],["Catamarca","Catamarca"],["Misiones","Misiones"],["Sgo. del Estero","Sgo. del Estero"],["Sin dato","Sin dato"]]},
 ];
 
 const state={};
@@ -1565,7 +1567,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.51";
+const VERSION="v1.52";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
