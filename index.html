@@ -50,6 +50,10 @@
     font-family:var(--serif);font-size:16px;border-radius:2px;cursor:pointer;margin-bottom:22px}
   .allbtn:hover{filter:brightness(1.08)}
   .grp{margin-bottom:20px}
+  .selfiltro{width:100%;background:#100d09;color:var(--ink);border:1px solid #4d4435;
+    border-radius:3px;padding:8px 10px;font-family:var(--sans);font-size:13.5px;cursor:pointer}
+  .selfiltro:hover{border-color:#8a7458}
+  .selfiltro:focus-visible{outline:2px solid var(--hi);outline-offset:1px}
   .grp h2{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--dim);margin:0 0 9px}
   .opt{display:flex;align-items:center;gap:9px;padding:5px 6px;cursor:pointer;border-radius:2px;
@@ -468,13 +472,14 @@ const COL={mil:"#5fae5a", pol:"#5f9fd6", civ:"#e0b93f", nino:"#f2ede4", mujer:"#
 const RAMAS_FFAA = ["Ejército","Armada","Fuerza Aérea","Gendarmería / Prefectura"];
 
 const FILTERS = [
+  // va primero y como lista desplegable: son 19 opciones y abajo de todo no se veia.
+  // Ordenadas de mayor a menor cantidad de victimas, "Sin dato" siempre al final.
+  {key:"p", title:"Provincia", tipo:"lista", opts:[["Buenos Aires","Buenos Aires"],["Capital Federal","Capital Federal"],["Córdoba","Córdoba"],["Tucumán","Tucumán"],["Santa Fe","Santa Fe"],["Formosa","Formosa"],["Mendoza","Mendoza"],["Jujuy","Jujuy"],["Chaco","Chaco"],["Salta","Salta"],["Corrientes","Corrientes"],["Entre Ríos","Entre Ríos"],["San Juan","San Juan"],["Chubut","Chubut"],["San Luis","San Luis"],["Catamarca","Catamarca"],["Misiones","Misiones"],["Sgo. del Estero","Sgo. del Estero"],["Sin dato","Sin dato"]]},
   {key:"cat", title:"Categoría", opts:[["civil","Civiles"],["ffaa","Fuerzas Armadas"],["policia","Policía / Seguridad"]]},
   {key:"rama", title:"Fuerza", opts:[["Ejército","Ejército"],["Armada","Armada"],["Fuerza Aérea","Fuerza Aérea"],["Gendarmería / Prefectura","Gendarmería / Prefectura"],["Policía Federal","Policía Federal"],["Policía provincial","Policía provincial"],["Servicio Penitenciario","Servicio Penitenciario"]]},
   {key:"s",  title:"Género", opts:[["M","Hombres"],["F","Mujeres"]]},
   {key:"nino",title:"Edad", opts:[["si","Niños (menores de 18)"],["no","Adultos"]]},
   {key:"tg", title:"Tipo de hecho", opts:[["Explosivo","Explosivo / bomba"],["Arma de fuego","Arma de fuego"],["Enfrentamiento","Enfrentamiento"],["Otro","Otro"]]},
-  // ordenadas de mayor a menor cantidad de victimas, "Sin dato" siempre al final
-  {key:"p",  title:"Provincia", opts:[["Buenos Aires","Buenos Aires"],["Capital Federal","Capital Federal"],["Córdoba","Córdoba"],["Tucumán","Tucumán"],["Santa Fe","Santa Fe"],["Formosa","Formosa"],["Mendoza","Mendoza"],["Jujuy","Jujuy"],["Chaco","Chaco"],["Salta","Salta"],["Corrientes","Corrientes"],["Entre Ríos","Entre Ríos"],["San Juan","San Juan"],["Chubut","Chubut"],["San Luis","San Luis"],["Catamarca","Catamarca"],["Misiones","Misiones"],["Sgo. del Estero","Sgo. del Estero"],["Sin dato","Sin dato"]]},
 ];
 
 const state={};
@@ -550,6 +555,27 @@ function buildFilters(){
   FILTERS.forEach(function(f){
     const g=document.createElement("div"); g.className="grp";
     const h=document.createElement("h2"); h.textContent=f.title; g.appendChild(h);
+    if(f.tipo==="lista"){
+      const sel=document.createElement("select"); sel.className="selfiltro";
+      sel.setAttribute("aria-label",f.title);
+      const todas=document.createElement("option"); todas.value="";
+      todas.textContent="Todas las provincias"; sel.appendChild(todas);
+      f.opts.forEach(function(pair){
+        const o=document.createElement("option"); o.value=pair[0];
+        o.textContent=pair[1]+"  ·  "+countFor(f.key,pair[0]);
+        if(state[f.key].has(pair[0])) o.selected=true;
+        sel.appendChild(o);
+      });
+      sel.onchange=function(){
+        state[f.key].clear();
+        if(sel.value) state[f.key].add(sel.value);
+        soltarAnio();
+        render();
+      };
+      g.appendChild(sel);
+      fbox.appendChild(g);
+      return;
+    }
     f.opts.forEach(function(pair){
       const val=pair[0], label=pair[1];
       const row=document.createElement("div");
@@ -1463,6 +1489,7 @@ function buildChips(){
   allc.onclick=function(){ FILTERS.forEach(function(f){ state[f.key].clear(); }); render(); };
   box.appendChild(allc);
   FILTERS.forEach(function(f){
+    if(f.tipo==="lista") return;
     f.opts.forEach(function(pair){
       const val=pair[0], label=pair[1];
       const c=document.createElement("div");
@@ -1567,7 +1594,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.52";
+const VERSION="v1.53";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
