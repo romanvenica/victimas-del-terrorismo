@@ -1,0 +1,65 @@
+# Trae el contador de GoatCounter y lo deja en visitas.json.
+# El Taller no puede pedirle datos a otras paginas, asi que el numero
+# tiene que estar en el repositorio para poder llevarlo hasta ahi.
+name: Visitas
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"     # cada 6 horas
+  workflow_dispatch:            # y a mano, desde la pestana Actions
+
+permissions:
+  contents: write
+
+jobs:
+  visitas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Traer los numeros
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, urllib.error, datetime as dt
+
+          BASE = "https://romanvenica.goatcounter.com/counter/TOTAL.json"
+          hoy = dt.datetime.utcnow() - dt.timedelta(hours=3)          # hora argentina
+          def contar(desde=None):
+              url = BASE + (f"?start={desde.isoformat()}" if desde else "")
+              with urllib.request.urlopen(url, timeout=30) as r:
+                  d = json.load(r)
+              num = lambda v: int(str(v).replace(",", "").replace(".", "").strip() or 0)
+              return num(d.get("count", 0)), num(d.get("count_unique", 0))
+
+          try:
+              total, unicos = contar()
+              h, _ = contar(hoy.date())
+              s, _ = contar((hoy - dt.timedelta(days=7)).date())
+              m, _ = contar((hoy - dt.timedelta(days=30)).date())
+          except urllib.error.HTTPError as e:
+              raise SystemExit(f"GoatCounter respondio {e.code}: "
+                               "falta activar el contador publico en Settings")
+
+          nuevo = {"total": total, "unicos": unicos, "hoy": h, "semana": s, "mes": m}
+          try:
+              viejo = json.load(open("visitas.json"))
+          except Exception:
+              viejo = {}
+          print("numeros:", nuevo)
+          if all(viejo.get(k) == v for k, v in nuevo.items()):
+              print("sin cambios")
+          else:
+              nuevo["actualizado"] = dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+              json.dump(nuevo, open("visitas.json", "w"), indent=1)
+              print("visitas.json actualizado")
+          PY
+
+      - name: Guardar si cambio
+        run: |
+          if [ -n "$(git status --porcelain visitas.json)" ]; then
+            git config user.name  "contador de visitas"
+            git config user.email "actions@users.noreply.github.com"
+            git add visitas.json
+            git commit -m "Visitas: actualizar el contador"
+            git push
+          fi
