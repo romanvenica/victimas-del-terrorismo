@@ -474,7 +474,7 @@ const RAMAS_FFAA = ["Ejército","Armada","Fuerza Aérea","Gendarmería / Prefect
 const FILTERS = [
   // va primero y como lista desplegable: son 19 opciones y abajo de todo no se veia.
   // Ordenadas de mayor a menor cantidad de victimas, "Sin dato" siempre al final.
-  {key:"p", title:"Provincia", tipo:"lista", opts:[["Buenos Aires","Buenos Aires"],["Capital Federal","Capital Federal"],["Córdoba","Córdoba"],["Tucumán","Tucumán"],["Santa Fe","Santa Fe"],["Formosa","Formosa"],["Mendoza","Mendoza"],["Jujuy","Jujuy"],["Chaco","Chaco"],["Salta","Salta"],["Corrientes","Corrientes"],["Entre Ríos","Entre Ríos"],["San Juan","San Juan"],["Chubut","Chubut"],["San Luis","San Luis"],["Catamarca","Catamarca"],["Misiones","Misiones"],["Sgo. del Estero","Sgo. del Estero"],["Sin dato","Sin dato"]]},
+  {key:"p", title:"Provincia", tipo:"lista", opts:[["Buenos Aires","Buenos Aires"],["Capital Federal","Capital Federal"],["Córdoba","Córdoba"],["Tucumán","Tucumán"],["Santa Fe","Santa Fe"],["Formosa","Formosa"],["Mendoza","Mendoza"],["Jujuy","Jujuy"],["Chaco","Chaco"],["Salta","Salta"],["Corrientes","Corrientes"],["Entre Ríos","Entre Ríos"],["San Juan","San Juan"],["Chubut","Chubut"],["San Luis","San Luis"],["Catamarca","Catamarca"],["Misiones","Misiones"],["Sgo. del Estero","Sgo. del Estero"]]},
   {key:"cat", title:"Categoría", opts:[["civil","Civiles"],["ffaa","Fuerzas Armadas"],["policia","Policía / Seguridad"]]},
   {key:"rama", title:"Fuerza", opts:[["Ejército","Ejército"],["Armada","Armada"],["Fuerza Aérea","Fuerza Aérea"],["Gendarmería / Prefectura","Gendarmería / Prefectura"],["Policía Federal","Policía Federal"],["Policía provincial","Policía provincial"],["Servicio Penitenciario","Servicio Penitenciario"]]},
   {key:"s",  title:"Género", opts:[["M","Hombres"],["F","Mujeres"]]},
@@ -1594,7 +1594,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.53";
+const VERSION="v1.54";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
