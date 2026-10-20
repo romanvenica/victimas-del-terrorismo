@@ -91,7 +91,10 @@
   .lrow{display:flex;align-items:center;gap:10px;padding:5px 10px;cursor:pointer;border-radius:3px;font-size:13px;line-height:1.25}
   .lrow:hover{background:#241d16}
   .lrow .lfoto{width:34px;height:34px;flex:none;border-radius:3px;object-fit:cover;background:#0d0a07}
-  .lrow .lhueco{width:34px;flex:none}
+  /* la cruz con la bandera va en cualquier lugar donde falte la foto */
+  .sincruz{background:#0d0a07 url("cruz.png") no-repeat center/54% auto;
+    border:1px solid var(--line)}
+  .lrow .lhueco{width:34px;height:34px;flex:none;border-radius:3px}
   .lrow svg{width:15px;height:15px;flex:none}
   .lrow .ly{margin-left:auto;color:var(--dim);font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums}
   /* boton del listado que abre el muro de retratos */
@@ -213,6 +216,7 @@
   .card .meta dd{margin:0}
   .card .foto{display:none;width:100%;max-width:260px;border-radius:8px;margin:2px 0 16px;border:1px solid var(--line)}
   .card .foto.show{display:block;cursor:zoom-in}
+  .card .fotosin{width:100%;max-width:200px;aspect-ratio:1/1;border-radius:8px;margin:2px 0 16px}
   .card .rel{margin:0;padding-top:17px;border-top:1px solid var(--line);font-family:var(--serif);
     font-size:14.5px;line-height:1.62;color:#d8cfc0;white-space:pre-wrap}
   .card .rel + .rel{margin-top:17px}
@@ -673,7 +677,7 @@ function drawList(){
     const row=document.createElement("div"); row.className="lrow";
     row.innerHTML=(tieneFoto(d)
         ? '<img class="lfoto" src="'+fotoThumb(d)+'" alt="" loading="lazy">'
-        : '<span class="lhueco"></span>')+
+        : '<span class="lhueco sincruz"></span>')+
       '<svg viewBox="0 0 16 16" fill="'+personColor(t)+'">'+iconPaths(t)+'</svg>'+
       '<span>'+esc(d.n)+'</span><span class="ly">'+d.y+'</span>';
     // desde el listado la ficha se abre encima: el panel queda como estaba,
@@ -1162,7 +1166,11 @@ function showTip(e,d){
                 ico+'</div>';
   const imgEl=tip.querySelector(".tthumb");
   if(tieneFoto(d)){ imgEl.src=fotoThumb(d); imgEl.style.display="block"; }
-  else imgEl.remove();
+  else {
+    const c=document.createElement("span"); c.className="tthumb sincruz";
+    c.style.display="block";
+    imgEl.replaceWith(c);
+  }
   tip.style.display="block"; moveTip(e);
 }
 function moveTip(e){
@@ -1379,6 +1387,8 @@ function openCard(d, dejarPanel){
         '<div class="nm">'+nombreConCruz(d.n)+'</div></div></div>';
   if(tieneFoto(d)){
     html+='<img class="foto show" src="'+fotoGrande(d)+'" alt="" loading="lazy">';
+  } else {
+    html+='<div class="fotosin sincruz" role="img" aria-label="Sin foto"></div>';
   }
   if(meta.length){
     html+='<dl class="meta">';
@@ -1594,7 +1604,7 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.54";
+const VERSION="v1.55";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
