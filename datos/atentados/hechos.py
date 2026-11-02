@@ -235,7 +235,10 @@ def main():
             primer = t.split("\n\n")[0]
             seg = re.split(r"\.\s+", primer)
             orgs, derecha = organizaciones(seg[0])
-            if orgs is None and (es_lugar(seg[0]) or re.match(r"Secuestros|Enfrentamiento de grupos", seg[0])):
+            # sin organización y empezando por un lugar: es un hecho solo si cuenta un ataque
+            # (antes de 1966 esas entradas son el contexto político de la época)
+            if orgs is None and (es_lugar(seg[0]) or re.match(r"Secuestros|Enfrentamiento de grupos", seg[0])) \
+                    and d["fecha"][:4] >= "1966" and set(tipos(t)) - {"Otro", "Abatido o detenido"}:
                 orgs, derecha = ["No identificada"], False
                 seg = [""] + seg
             h = {"id": "%d-%d" % (d["tomo"], d["orden"]), "f": d["fecha"]}
