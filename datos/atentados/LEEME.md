@@ -23,8 +23,11 @@ Cada entrada del libro empieza con `■` y la fecha. Cada renglón tiene:
 | `pagina` | página del PDF donde empieza (coincide con la impresa) |
 | `anio_capitulo` | el «Año XXXX» bajo el que está la entrada |
 | `fecha_texto` | la fecha exactamente como está impresa |
-| `fecha` | la misma en `AAAA-MM-DD`, `AAAA-MM` o `AAAA`, según lo que diga; vacío si no hay fecha |
+| `fecha` | la misma en `AAAA-MM-DD`, `AAAA-MM` o `AAAA`, según lo que diga. Si el libro no da fecha, el día 1 del mes de la entrada fechada más cercana del mismo capítulo («Fines de AAAA» → diciembre) |
+| `fecha_aprox` | `true` cuando la fecha la puse yo así, no el libro |
 | `texto` | el texto completo de la entrada, sin corregir ni resumir |
+
+Los títulos sueltos sin fecha (como «GUERRA DE MALVINAS») se descartan.
 
 Lo único que se saca es el armado de página: el encabezado que se repite
 («Jorge Héctor Di Pasquale», «Crónica de una guerra negada»), el número de

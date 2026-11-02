@@ -109,7 +109,37 @@ def procesar(ruta_txt, tomo):
         if actual is None: abrir(seccion, pag)
         actual["_l"].append(l)
     cerrar()
+    aproximar(salida)
     return salida
+
+def aproximar(filas):
+    """A las entradas de la cronología sin fecha les pone el día 1 del mes de
+    la entrada fechada más cercana del mismo capítulo, y las marca con
+    fecha_aprox = true. 'Fines de AAAA' va a diciembre de ese año."""
+    # títulos sueltos sin fecha (ej. «GUERRA DE MALVINAS») no son hechos: afuera
+    sueltos = [r for r in filas if r["seccion"] == "cronología" and not r["fecha"]
+               and len(r["texto"]) < 60 and r["texto"] == r["texto"].upper()]
+    for r in sueltos:
+        filas.remove(r)
+    cron = [r for r in filas if r["seccion"] == "cronología"]
+    for i, r in enumerate(cron):
+        r["fecha_aprox"] = False
+        if r["fecha"]:
+            continue
+        m = re.match(r"Fines de (\d{4})", r["texto"])
+        if m:
+            r["fecha"], r["fecha_aprox"] = m.group(1) + "-12-01", True
+            continue
+        mejor = None
+        for j, o in enumerate(cron):
+            if (len(o["fecha"]) >= 7 and not o.get("fecha_aprox")
+                    and o["anio_capitulo"] == r["anio_capitulo"]
+                    and o["fecha"][:4] == str(r["anio_capitulo"])):
+                dist = (abs(j - i), j > i)  # empate: gana la anterior
+                if mejor is None or dist < mejor[0]:
+                    mejor = (dist, o["fecha"][:7])
+        r["fecha"] = (mejor[1] if mejor else str(r["anio_capitulo"]) + "-01") + "-01"
+        r["fecha_aprox"] = True
 
 if __name__ == "__main__":
     tomo, entrada, destino = int(sys.argv[1]), sys.argv[2], sys.argv[3]
@@ -117,6 +147,6 @@ if __name__ == "__main__":
     with open(destino, "w", encoding="utf-8") as f:
         for r in filas: f.write(json.dumps(r, ensure_ascii=False) + "\n")
     cron = [r for r in filas if r["seccion"] == "cronología"]
-    print("tomo %d: %d renglones, %d de cronología, %d con fecha completa, %d sin fecha"
+    print("tomo %d: %d renglones, %d de cronología, %d con fecha completa, %d con fecha aproximada"
           % (tomo, len(filas), len(cron), sum(1 for r in cron if len(r["fecha"]) == 10),
-             sum(1 for r in cron if not r["fecha"])))
+             sum(1 for r in cron if r.get("fecha_aprox"))))
