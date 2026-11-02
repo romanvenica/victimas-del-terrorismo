@@ -3,3 +3,4 @@ LEEME_continuidad.md
 # el repositorio es publico y seria publicar el libro entero
 datos/atentados/originales/*.pdf
 datos/atentados/crudo/*.jsonl
+datos/atentados/crudo/indice.tsv

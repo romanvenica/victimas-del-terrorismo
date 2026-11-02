@@ -41,3 +41,10 @@ que el PDF cortó por el ancho de página se vuelven a juntar.
 
 El resto tiene fecha parcial (mes o año). Quedan 17 sin ninguna fecha,
 que son decretos o resúmenes sin fecha en el libro.
+
+## Índice liviano
+
+`python3 datos/atentados/indice.py` arma `crudo/indice.tsv` (no se sube al repo):
+una línea por hecho de la cronología con `fecha, tomo, pagina, orden, resumen`
+(primeros ~150 caracteres). Pesa un tercio del texto completo y sirve para ubicar
+hechos; el detalle se busca después en los `.jsonl` por `tomo` + `orden`.
