@@ -278,6 +278,21 @@ def main():
 
     sal = AQUI / "web"; sal.mkdir(exist_ok=True)
     json.dump(hechos, open(sal / "hechos.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    # versión liviana para el gráfico (sin texto): el texto se baja al abrir un hecho
+    def grupo(tp):
+        for clave, nombres in (("asesinato", ["Asesinato"]), ("secuestro", ["Secuestro"]),
+                               ("bomba", ["Bomba", "Incendio"]), ("ataque", ["Ataque armado"]),
+                               ("toma", ["Copamiento", "Asalto o robo"])):
+            if any(n in tp for n in nombres): return clave
+        return "otro"
+    liviano = []
+    for h in hechos:
+        x = {"id": h["id"], "f": h["f"], "t": grupo(h["tp"]), "o": h["o"], "p": h["p"], "l": h["l"]}
+        if h.get("a"): x["a"] = 1
+        if h.get("v"): x["v"] = h["v"]
+        liviano.append(x)
+    json.dump(liviano, open(sal / "hechos_grafico.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("grupos del gráfico", collections.Counter(x["t"] for x in liviano).most_common())
     # mapa chico víctima -> hecho, para el botón de la ficha sin cargar todo
     vh = {}
     for h in hechos:

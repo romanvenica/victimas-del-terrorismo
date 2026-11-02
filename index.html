@@ -348,87 +348,28 @@
   }
   .card .grip{display:none}
 
-  /* ===================== CRONOLOGÍA DE ATENTADOS ===================== */
-  .sobre.izq{left:26px;right:auto}
-  .hechos{position:fixed;inset:0;z-index:12;background:var(--bg);display:none;flex-direction:column}
-  .hechos.show{display:flex}
-  .hfiltros{flex:none;display:flex;flex-wrap:wrap;gap:8px;align-items:center;
-    padding:12px 22px;border-bottom:1px solid var(--line)}
-  .hfiltros .selfiltro{width:auto;flex:1 1 150px;max-width:240px}
-  .hfiltros input{flex:2 1 180px;max-width:320px;background:#100d09;color:var(--ink);
-    border:1px solid #4d4435;border-radius:3px;padding:8px 10px;font-family:var(--sans);font-size:13.5px}
-  .hfiltros input:focus-visible{outline:2px solid var(--hi);outline-offset:1px}
-  .hlimpiar{background:none;border:1px solid var(--line);border-radius:3px;color:var(--dim);
-    font-family:var(--sans);font-size:12.5px;font-weight:600;padding:8px 12px;cursor:pointer}
-  .hlimpiar:hover{color:var(--ink);border-color:#5c4d3f}
-  .hcuenta{color:var(--dim);font-size:12.5px;margin-left:auto;font-variant-numeric:tabular-nums}
-  /* barras por año: tocar una filtra ese año */
-  .hbarras{flex:none;display:flex;align-items:flex-end;gap:2px;height:86px;
-    padding:10px 22px 0;border-bottom:1px solid var(--line)}
-  .hbar{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;
-    align-items:center;background:none;border:none;padding:0;cursor:pointer;color:var(--dim)}
-  .hbar i{display:block;width:100%;background:#4d4435;border-radius:2px 2px 0 0;min-height:1px}
-  .hbar:hover i{background:#8a7458}
-  .hbar.on i{background:var(--hi)}
-  .hbar span{font-size:9.5px;line-height:1;padding:4px 0 5px;font-variant-numeric:tabular-nums}
-  .hbar.on span{color:var(--ink);font-weight:700}
-  .hlista{flex:1;min-height:0;overflow-y:auto;padding:4px 22px 60px}
-  .hanio{position:sticky;top:0;z-index:1;background:var(--bg);font-family:var(--serif);
-    font-size:22px;padding:16px 0 8px;border-bottom:1px solid var(--line);margin-bottom:2px}
-  .hanio small{font-family:var(--sans);font-size:12px;color:var(--dim);margin-left:10px}
-  .hecho{border-bottom:1px solid var(--line)}
-  .hfila{display:flex;gap:16px;padding:12px 4px;cursor:pointer}
-  .hfila:hover{background:#1a1510}
-  .hfecha{flex:none;width:62px;color:var(--dim);font-size:13px;font-weight:600;
-    font-variant-numeric:tabular-nums;padding-top:1px}
-  .hfecha em{display:block;font-style:normal;font-weight:400;font-size:11px}
-  .hcuerpo{flex:1;min-width:0}
-  .hmeta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:12.5px;color:var(--dim);margin-bottom:4px}
-  .horg{color:var(--ink);font-weight:700;font-size:13px}
-  .htipo{border:1px solid var(--line);border-radius:10px;padding:1px 8px;font-size:11px}
-  .htipo.mortal{border-color:#7a3426;color:#e8a191}
-  .hvict{color:var(--ink);font-size:12px}
-  .hvict .cruz{font-weight:800}
-  .hres{font-family:var(--serif);font-size:15.5px;line-height:1.45;color:var(--ink)}
-  .hecho.abierto .hres{display:none}
-  .hdet{display:none;padding:0 4px 18px 82px}
-  .hecho.abierto .hdet{display:block}
-  .hdet p{font-family:var(--serif);font-size:16.5px;line-height:1.6;margin:0 0 12px;white-space:pre-line}
-  .hdet h3{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.14em;
+  /* ===================== ATENTADOS EN EL GRÁFICO ===================== */
+  .lgsep{height:1px;background:var(--line);margin:3px 0}
+  .lgbtn{pointer-events:auto;align-self:flex-start;background:#1c1712;border:1px solid #5c4d3f;border-radius:4px;
+    color:var(--ink);font-family:var(--sans);font-size:11.5px;font-weight:600;padding:5px 9px;cursor:pointer}
+  .lgbtn:hover{background:#241d16;border-color:#8a7458}
+  .lgh.off{opacity:.35}
+  #tip .tlug{display:block;font-size:13px;color:#c9bda9;margin-top:3px}
+  .card .htexto p{font-family:var(--serif);font-size:16px;line-height:1.6;margin:0 0 12px;white-space:pre-line}
+  .card h3.hsec{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--dim);margin:18px 0 8px}
-  .hdet ol{margin:0;padding-left:20px;color:var(--dim);font-size:13px;line-height:1.5}
-  .hfuente{color:var(--dim);font-size:13px;margin-top:14px}
-  .hfuente i{font-style:italic}
-  .hpers{display:flex;flex-wrap:wrap;gap:10px}
+  .card ol.hnotas{margin:0;padding-left:20px;color:var(--dim);font-size:12.5px;line-height:1.5}
+  .hpers{display:flex;flex-wrap:wrap;gap:8px}
   .hper{display:flex;align-items:center;gap:9px;background:#1c1712;border:1px solid var(--line);
     border-radius:4px;padding:5px 12px 5px 5px;cursor:pointer;color:var(--ink);font-family:var(--sans);font-size:13px}
   .hper:hover{border-color:#5c4d3f;background:#241d16}
   .hper .junto{white-space:nowrap}
   .hper .cruznm{display:inline-block;width:7px;height:11px;margin-left:6px;vertical-align:-1px}
-  .hper img,.hper .sincruz{width:40px;height:40px;border-radius:3px;object-fit:cover;flex:none}
-  .hmas{display:block;margin:18px auto;background:none;border:1px solid var(--line);color:var(--dim);
-    border-radius:4px;padding:9px 16px;cursor:pointer;font-family:var(--sans);font-size:13px}
-  .hvacio{color:var(--dim);text-align:center;margin-top:12vh;font-family:var(--serif);font-size:16px}
+  .hper img,.hper .sincruz{width:38px;height:38px;border-radius:3px;object-fit:cover;flex:none}
   .verhecho{display:inline-block;margin:4px 0 14px;background:#1c1712;border:1px solid #5c4d3f;
     border-radius:4px;color:var(--ink);font-family:var(--sans);font-size:13px;font-weight:600;
     padding:8px 12px;cursor:pointer}
   .verhecho:hover{background:#241d16;border-color:#8a7458}
-  @media(max-width:760px){
-    .hfiltros{padding:10px 12px;gap:6px}
-    .hfiltros .selfiltro{flex:1 1 45%;max-width:none;font-size:13px;padding:7px 8px}
-    .hfiltros input{flex:1 1 100%;max-width:none}
-    .hcuenta{margin-left:0}
-    .hbarras{height:64px;padding:8px 8px 0;gap:1px}
-    .hbar span{font-size:0}
-    .hbar.on span{font-size:9px}
-    .hlista{padding:0 12px 50px}
-    .hanio{font-size:19px;padding:12px 0 6px}
-    .hfila{gap:10px;padding:11px 0}
-    .hfecha{width:44px;font-size:12px}
-    .hres{font-size:15px}
-    .hdet{padding:0 0 16px}
-    .hdet p{font-size:16px}
-  }
 </style>
 </head>
 <body>
@@ -448,13 +389,11 @@
       <rect x="1.6" y="8.6" width="20.8" height="5.6" fill="#fff"></rect>
     </svg>
   </div>
-  <button type="button" class="sobre izq" id="btnHechos">Cronología de atentados</button>
   <button type="button" class="sobre" id="btnSobre">Sobre este sitio</button>
 </header>
 <main>
   <div class="mobilebar">
     <button type="button" id="btnFiltro">Filtro</button>
-    <button type="button" id="btnHechos2" class="anchob">Atentados</button>
     <button type="button" id="btnListado">Listado</button>
   </div>
   <aside class="filters" id="side">
@@ -542,23 +481,6 @@
 </aside>
 
 
-<aside class="hechos" id="hechos" aria-hidden="true">
-  <div class="galcab">
-    <h2>Cronología de atentados</h2>
-    <button type="button" class="x" id="hx" aria-label="Cerrar la cronología">
-      <span class="equis" aria-hidden="true">&times;</span>Cerrar</button>
-  </div>
-  <div class="hfiltros">
-    <select class="selfiltro" id="hfOrg" aria-label="Organización"></select>
-    <select class="selfiltro" id="hfProv" aria-label="Provincia"></select>
-    <select class="selfiltro" id="hfTipo" aria-label="Tipo de hecho"></select>
-    <input id="hq" type="text" placeholder="Buscar en el texto…" autocomplete="off">
-    <button type="button" class="hlimpiar" id="hlimpiar">Ver todos</button>
-    <span class="hcuenta" id="hcuenta"></span>
-  </div>
-  <div class="hbarras" id="hbarras"></div>
-  <div class="hlista" id="hlista"><p class="hvacio">Cargando…</p></div>
-</aside>
 <script>
 let DATA = [];
 let FOTOS = new Set();   // claves que efectivamente tienen retrato
@@ -709,7 +631,7 @@ function volverAlInicio(){
   FILTERS.forEach(function(f){ state[f.key].clear(); });
   anioSel=null;
   lq.value=""; marcarBorrar();
-  cerrarPaneles(); closeCard(); cerrarGaleria(); cerrarHechos();
+  cerrarPaneles(); closeCard(); cerrarGaleria();
   render();
 }
 const titulo=document.getElementById("inicio");
@@ -730,6 +652,18 @@ function buildLegend(){
     span.innerHTML='<svg viewBox="0 0 16 16" fill="'+personColor(t)+'">'+iconPaths(t)+'</svg>'+label;
     L.appendChild(span);
   });
+  if(!HG) return;
+  const sep=document.createElement("div"); sep.className="lgsep"; L.appendChild(sep);
+  const t2=document.createElement("div"); t2.className="lgtit"; t2.textContent="Atentados"; L.appendChild(t2);
+  HTIPOS.forEach(function(t){
+    const span=document.createElement("span"); span.className="lg lgh"+(VER_HECHOS?"":" off");
+    span.innerHTML='<svg viewBox="0 0 16 16" fill="'+t[2]+'">'+iconHecho(t[0])+'</svg>'+t[1];
+    L.appendChild(span);
+  });
+  const b=document.createElement("button"); b.type="button"; b.className="lgbtn";
+  b.textContent=VER_HECHOS ? "Ocultar atentados" : "Mostrar atentados";
+  b.onclick=function(){ VER_HECHOS=!VER_HECHOS; buildLegend(); drawPlot(DATA.filter(passes)); };
+  L.appendChild(b);
 }
 
 const plot=document.getElementById("plot");
@@ -988,6 +922,7 @@ function soltarAnio(){
 }
 
 function stackRank(d){
+  if(d.__h) return HRANGO[d.t];
   const t=personType(d);
   if(t==="nino") return 0;        // niños abajo de todo
   if(t==="civil") return 1;       // civiles
@@ -996,6 +931,9 @@ function stackRank(d){
 }
 function drawPlot(items){
   plot.innerHTML="";
+  const hv=hechosVisibles();
+  const maxCols=hv.length ? MAXCOLS_H : MAXCOLS;
+  items=items.concat(hv);
   if(items.length===0){
     const e=document.createElement("div"); e.className="empty";
     e.textContent="Ninguna víctima coincide con esos filtros.";
@@ -1025,7 +963,7 @@ function drawPlot(items){
     years.forEach(function(y){
       const c=cntY[y];
       if(c===0){ perRow[y]=1; colW[y]=EMPTYW; ancho+=EMPTYW+2; return; }
-      const pr=Math.min(MAXCOLS,c);
+      const pr=Math.min(maxCols,c);
       perRow[y]=pr; colW[y]=pr*CELL; ancho+=pr*CELL+GAP;
       filas=Math.max(filas,Math.ceil(c/pr));
     });
@@ -1145,13 +1083,19 @@ function drawPlot(items){
       const wide=Math.min(perRow,arr.length);
       const x=cx+(cl-(wide-1)/2)*CELL - S/2;
       const yy=axisY-6-S-rw*CELL;
-      const t=personType(d);
       const gp=document.createElementNS(NS,"g");
-      gp.setAttribute("class","person");
-      gp.setAttribute("data-id", DATA.indexOf(d));
       gp.setAttribute("transform","translate("+x+","+yy+") scale("+(S/16)+")");
-      gp.setAttribute("fill",personColor(t));
-      gp.innerHTML=iconPaths(t);
+      if(d.__h){
+        gp.setAttribute("class","person hechoico");
+        gp.setAttribute("fill",HCOLOR[d.t]);
+        gp.innerHTML=iconHecho(d.t);
+      } else {
+        const t=personType(d);
+        gp.setAttribute("class","person");
+        gp.setAttribute("data-id", DATA.indexOf(d));
+        gp.setAttribute("fill",personColor(t));
+        gp.innerHTML=iconPaths(t);
+      }
       svg.appendChild(gp);
       // área de captación ampliada (toda la celda) para hover y click fáciles
       const hit=document.createElementNS(NS,"rect");
@@ -1160,10 +1104,10 @@ function drawPlot(items){
       hit.setAttribute("class","hit");
       hit.setAttribute("fill","transparent");
       hit.style.cursor="pointer";
-      hit.addEventListener("mouseenter",function(e){ showTip(e,d); });
+      hit.addEventListener("mouseenter",function(e){ if(d.__h) showTipHecho(e,d); else showTip(e,d); });
       hit.addEventListener("mousemove",function(e){ moveTip(e); });
       hit.addEventListener("mouseleave",hideTip);
-      hit.addEventListener("click",function(){ if(!dragMoved) openCard(d); });
+      hit.addEventListener("click",function(){ if(!dragMoved){ if(d.__h) openHecho(d); else openCard(d); } });
       svg.appendChild(hit);
     });
   });
@@ -1501,7 +1445,7 @@ function openCard(d, dejarPanel){
     html+='</dl>';
   }
   const idHecho=HXV[DATA.indexOf(d)];
-  if(idHecho) html+='<button type="button" class="verhecho" id="verhecho">Ver el hecho en la cronología</button>';
+  if(idHecho) html+='<button type="button" class="verhecho" id="verhecho">Ver el atentado</button>';
   const partes=partirRelato(d.d);
   if(partes.semblanza) html+='<div class="rel">'+esc(partes.semblanza)+'</div>';
   if(partes.caso)      html+='<div class="rel">'+esc(partes.caso)+'</div>';
@@ -1518,7 +1462,7 @@ function openCard(d, dejarPanel){
   card.scrollTop=0;   // siempre desde arriba, no donde quedo la ficha anterior
   document.getElementById("cx").onclick=closeCard;
   const vh=document.getElementById("verhecho");
-  if(vh) vh.addEventListener("click",function(e){ e.stopPropagation(); abrirHechos(idHecho); });
+  if(vh) vh.addEventListener("click",function(e){ e.stopPropagation(); abrirHechoPorId(idHecho); });
   card.classList.add("show"); scrim.classList.add("show");
 }
 function closeCard(){
@@ -1710,117 +1654,99 @@ intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 
-/* ===================== CRONOLOGÍA DE ATENTADOS =====================
-   Los hechos están en hechos.json (pesado: se baja recién al abrir la
-   cronología). hechos_victimas.json es chico y dice qué ficha tiene su
-   hecho, para mostrar el botón en la ficha sin bajar todo. */
-let HECHOS=null, HCARGA=null, HXV={};
-const hechosEl=document.getElementById("hechos");
-const hlista=document.getElementById("hlista");
-const hbarras=document.getElementById("hbarras");
-const hcuenta=document.getElementById("hcuenta");
-const hfOrg=document.getElementById("hfOrg"), hfProv=document.getElementById("hfProv"),
-      hfTipo=document.getElementById("hfTipo"), hq=document.getElementById("hq");
-const HF={y:0};                 // año elegido en las barras (0 = todos)
-const MESC=["","ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
-const TANDA=120;                // cuántos hechos se dibujan por vez
-let hFiltrados=[], hDibujados=0;
-
+/* ===================== ATENTADOS EN EL GRÁFICO =====================
+   hechos_grafico.json es liviano (sin texto) y alcanza para dibujar.
+   El texto de cada hecho está en hechos.json y se baja recién al abrir uno.
+   hechos_victimas.json dice qué ficha de víctima tiene su hecho. */
+let HG=null, HTEXTO=null, HTCARGA=null, HXV={}, VER_HECHOS=true;
+const HTIPOS=[   // de abajo hacia arriba en cada columna
+  ["asesinato","Asesinato","#d94f38"],
+  ["secuestro","Secuestro","#a07ad6"],
+  ["bomba","Bomba o incendio","#e8873a"],
+  ["ataque","Ataque armado","#3fb3aa"],
+  ["toma","Copamiento o robo","#c9a27a"],
+  ["otro","Otros","#8c8378"]];
+const HCOLOR={}, HNOMBRE={}, HRANGO={};
+HTIPOS.forEach(function(t,i){ HCOLOR[t[0]]=t[2]; HNOMBRE[t[0]]=t[1]; HRANGO[t[0]]=10+i; });
+const MAXCOLS_H=14;   // con los atentados las columnas tienen que ser más anchas
+function iconHecho(t){
+  switch(t){
+    case "asesinato": // mira
+      return '<path d="M8 1.6a6.4 6.4 0 1 0 0 12.8A6.4 6.4 0 0 0 8 1.6Zm0 2.2a4.2 4.2 0 1 1 0 8.4 4.2 4.2 0 0 1 0-8.4Z"/>'+
+             '<rect x="7.1" y="0.4" width="1.8" height="4.6"/><rect x="7.1" y="11" width="1.8" height="4.6"/>'+
+             '<rect x="0.4" y="7.1" width="4.6" height="1.8"/><rect x="11" y="7.1" width="4.6" height="1.8"/>';
+    case "secuestro": // candado
+      return '<path d="M5 7V5.2a3 3 0 0 1 6 0V7h-1.8V5.2a1.2 1.2 0 0 0-2.4 0V7Z"/>'+
+             '<rect x="3" y="7" width="10" height="7.6" rx="1.2"/>';
+    case "bomba": // bomba con mecha
+      return '<circle cx="7" cy="9.6" r="5"/><rect x="8.6" y="3" width="2.6" height="2.6" transform="rotate(45 9.9 4.3)"/>'+
+             '<path d="M11 3.2 13.2 1l1 1-2.2 2.2Z"/>';
+    case "ataque": // bala
+      return '<path d="M8 1.2c2 1.4 2.9 3.6 2.9 6.2V12H5.1V7.4C5.1 4.8 6 2.6 8 1.2Z"/><rect x="4.6" y="12.8" width="6.8" height="2.4" rx=".6"/>';
+    case "toma": // bandera
+      return '<rect x="2.6" y="1.4" width="1.7" height="13.4" rx=".5"/><path d="M4.3 2.2h9.2l-2.4 3.3 2.4 3.3H4.3Z"/>';
+    default: // rombo
+      return '<path d="M8 2.2 13.8 8 8 13.8 2.2 8Z"/>';
+  }
+}
 fetch("hechos_victimas.json").then(function(r){ return r.json(); })
   .then(function(j){ HXV=j; }).catch(function(){});
-
-function cargarHechos(){
-  if(!HCARGA){
-    HCARGA=fetch("hechos.json").then(function(r){ if(!r.ok) throw r.status; return r.json(); })
-      .then(function(j){
-        j.forEach(function(h){ h.y=+h.f.slice(0,4); });
-        HECHOS=j; armarFiltrosHechos(); return j;
-      })
-      .catch(function(e){ HCARGA=null; throw e; });
+fetch("hechos_grafico.json").then(function(r){ return r.json(); })
+  .then(function(j){
+    j.forEach(function(h){ h.__h=true; h.y=+h.f.slice(0,4); });
+    HG=j;
+    if(DATA.length){ buildLegend(); drawPlot(DATA.filter(passes)); }
+  }).catch(function(){});
+function textosHechos(){
+  if(!HTCARGA){
+    HTCARGA=fetch("hechos.json").then(function(r){ if(!r.ok) throw r.status; return r.json(); })
+      .then(function(j){ HTEXTO={}; j.forEach(function(h){ HTEXTO[h.id]=h; }); return HTEXTO; })
+      .catch(function(e){ HTCARGA=null; throw e; });
   }
-  return HCARGA;
+  return HTCARGA;
 }
-function opciones(sel, titulo, cuenta){
-  const orden=Object.keys(cuenta).filter(Boolean).sort(function(a,b){ return cuenta[b]-cuenta[a]; });
-  sel.innerHTML='<option value="">'+titulo+'</option>'+orden.map(function(k){
-    return '<option value="'+esc(k).replace(/"/g,"&quot;")+'">'+esc(k)+' ('+cuenta[k]+')</option>';
-  }).join("");
-}
-function armarFiltrosHechos(){
-  const co={}, cp={}, ct={};
-  HECHOS.forEach(function(h){
-    h.o.forEach(function(o){ co[o]=(co[o]||0)+1; });
-    cp[h.p]=(cp[h.p]||0)+1;
-    h.tp.forEach(function(t){ ct[t]=(ct[t]||0)+1; });
+// los atentados siguen al filtro de provincia; los demás filtros son de las víctimas
+function hechosVisibles(){
+  if(!HG || !VER_HECHOS) return [];
+  const provs=state["p"];
+  return HG.filter(function(h){
+    if(h.y<MINY || h.y>MAXY) return false;
+    if(provs && provs.size && !provs.has(h.p)) return false;
+    return true;
   });
-  opciones(hfOrg,"Todas las organizaciones",co);
-  opciones(hfProv,"Todas las provincias",cp);
-  opciones(hfTipo,"Todos los tipos de hecho",ct);
 }
-function pasaHecho(h, sinAnio){
-  if(!sinAnio && HF.y && h.y!==HF.y) return false;
-  if(hfOrg.value && h.o.indexOf(hfOrg.value)<0) return false;
-  if(hfProv.value && h.p!==hfProv.value) return false;
-  if(hfTipo.value && h.tp.indexOf(hfTipo.value)<0) return false;
-  const q=norm(hq.value.trim());
-  if(q){
-    if(!h._n) h._n=norm(h.tx);
-    if(h._n.indexOf(q)<0) return false;
-  }
-  return true;
-}
-function pintarBarras(){
-  const porAnio={};
-  let min=9999, max=0;
-  HECHOS.forEach(function(h){ min=Math.min(min,h.y); max=Math.max(max,h.y); });
-  HECHOS.forEach(function(h){ if(pasaHecho(h,true)) porAnio[h.y]=(porAnio[h.y]||0)+1; });
-  const tope=Math.max.apply(null,Object.values(porAnio).concat([1]));
-  let html="";
-  for(let y=min;y<=max;y++){
-    const n=porAnio[y]||0;
-    html+='<button type="button" class="hbar'+(HF.y===y?' on':'')+'" data-y="'+y+'" title="'+y+': '+n+' hechos" aria-label="'+y+', '+n+' hechos">'+
-          '<i style="height:'+(n? Math.max(2,Math.round(n/tope*100)) : 0)+'%"></i><span>'+String(y).slice(2)+'</span></button>';
-  }
-  hbarras.innerHTML=html;
-}
-hbarras.addEventListener("click",function(e){
-  const b=e.target.closest(".hbar"); if(!b) return;
-  const y=+b.dataset.y;
-  HF.y = HF.y===y ? 0 : y;
-  pintarHechos();
-});
-function fechaCorta(h){
-  const p=h.f.split("-");
-  if(h.a) return MESC[+p[1]]+'<em>aprox.</em>';
-  if(p.length===3) return (+p[2])+' '+MESC[+p[1]];
-  if(p.length===2) return MESC[+p[1]];
-  return '<em>s/f</em>';
-}
-function fechaLarga(h){
+function fechaHecho(h){
   const p=h.f.split("-");
   if(p.length===3 && !h.a) return fmtFecha(h.f);
-  if(p.length>=2) return MES[+p[1]]+' de '+p[0]+(h.a?' (fecha aproximada)':'');
+  if(p.length>=2) return MES[+p[1]]+' de '+p[0]+(h.a?' (aprox.)':'');
   return p[0];
 }
-function htmlHecho(h){
-  const lugar=[h.l,h.p].filter(Boolean).filter(function(x,i,a){ return a.indexOf(x)===i; }).join(", ");
-  const relato=h.tx.slice(h.r||0);
-  const res=relato.split("\n")[0];
-  let m='<span class="horg">'+esc(h.o.join(" · "))+'</span>';
-  if(lugar) m+='<span>'+esc(lugar)+'</span>';
-  h.tp.forEach(function(t){ m+='<span class="htipo'+(t==="Asesinato"?' mortal':'')+'">'+esc(t)+'</span>'; });
-  if(h.v) m+='<span class="hvict"><span class="cruz">†</span> '+h.v.length+(h.v.length>1?' víctimas':' víctima')+' del memorial</span>';
-  return '<article class="hecho" data-id="'+h.id+'">'+
-    '<div class="hfila"><div class="hfecha">'+fechaCorta(h)+'</div><div class="hcuerpo">'+
-    '<div class="hmeta">'+m+'</div>'+
-    '<div class="hres">'+esc(res.length>230 ? res.slice(0,230).replace(/\s+\S*$/,"")+"…" : res)+'</div>'+
-    '</div></div><div class="hdet"></div></article>';
+function lugarHecho(h){
+  return [h.l,h.p].filter(Boolean).filter(function(x,i,a){ return a.indexOf(x)===i; }).join(", ");
 }
-function detalleHecho(h){
-  let html='<h3>'+esc(fechaLarga(h))+'</h3>';
-  h.tx.split(/\n\n+/).forEach(function(p){ html+='<p>'+esc(p)+'</p>'; });
+function showTipHecho(e,h){
+  const ico='<svg class="tico" viewBox="0 0 16 16" fill="'+HCOLOR[h.t]+'">'+iconHecho(h.t)+'</svg>';
+  const lug=lugarHecho(h);
+  tip.innerHTML='<div class="trow"><div><span class="tcat">'+esc(HNOMBRE[h.t])+' · '+esc(fechaHecho(h))+'</span>'+
+    '<span class="tnom">'+esc(h.o.join(" · "))+'</span>'+
+    (lug ? '<span class="tlug">'+esc(lug)+'</span>' : '')+'</div>'+ico+'</div>';
+  tip.style.display="block"; moveTip(e);
+}
+function abrirHechoPorId(id){
+  const h=HG && HG.find(function(x){ return x.id===id; });
+  if(h) openHecho(h);
+}
+function openHecho(h){
+  hideTip(); cerrarPaneles();
+  const lug=lugarHecho(h);
+  let html='<div class="grip"></div><div class="xwrap"><button class="x" id="cx">&times;</button></div>';
+  html+='<div class="nmrow"><svg class="nmico" viewBox="0 0 16 16" fill="'+HCOLOR[h.t]+'">'+iconHecho(h.t)+'</svg>'+
+        '<div><div class="nmcat">'+esc(HNOMBRE[h.t])+'</div><div class="nm">'+esc(h.o.join(" · "))+'</div></div></div>';
+  html+='<dl class="meta"><dt>Fecha</dt><dd>'+esc(fechaHecho(h))+'</dd>'+
+        (lug ? '<dt>Lugar</dt><dd>'+esc(lug)+'</dd>' : '')+'</dl>';
+  html+='<div class="htexto" id="htexto"><p>Cargando…</p></div>';
   if(h.v){
-    html+='<h3>Víctimas del memorial</h3><div class="hpers">';
+    html+='<h3 class="hsec">Víctimas del memorial</h3><div class="hpers">';
     h.v.forEach(function(i){
       const d=DATA[i]; if(!d) return;
       html+='<button type="button" class="hper" data-i="'+i+'">'+
@@ -1829,96 +1755,26 @@ function detalleHecho(h){
     });
     html+='</div>';
   }
-  if(h.nt && h.nt.length){
-    html+='<h3>Notas</h3><ol>'+h.nt.map(function(n){ return '<li>'+esc(n)+'</li>'; }).join("")+'</ol>';
-  }
-  html+='<div class="hfuente">Fuente: <i>Crónica de una guerra negada</i>, Jorge Héctor Di Pasquale, tomo '+
-        h.tm+', pág. '+h.pg+'.</div>';
-  return html;
-}
-function pintarHechos(){
-  hFiltrados=HECHOS.filter(function(h){ return pasaHecho(h,false); });
-  hcuenta.textContent=hFiltrados.length.toLocaleString("es-AR")+(hFiltrados.length===1?" hecho":" hechos");
-  pintarBarras();
-  hlista.innerHTML="";
-  hDibujados=0;
-  if(!hFiltrados.length){ hlista.innerHTML='<p class="hvacio">No hay hechos con estos filtros.</p>'; return; }
-  masHechos();
-  hlista.scrollTop=0;
-}
-function masHechos(hasta){
-  const viejo=hlista.querySelector(".hmas"); if(viejo) viejo.remove();
-  const fin=Math.min(hFiltrados.length, Math.max(hDibujados+TANDA, hasta||0));
-  const porAnio={};
-  hFiltrados.forEach(function(h){ porAnio[h.y]=(porAnio[h.y]||0)+1; });
-  let html="", ultimo=hDibujados ? hFiltrados[hDibujados-1].y : null;
-  for(let k=hDibujados;k<fin;k++){
-    const h=hFiltrados[k];
-    if(h.y!==ultimo){
-      html+='<div class="hanio">'+h.y+'<small>'+porAnio[h.y]+(porAnio[h.y]===1?' hecho':' hechos')+'</small></div>';
-      ultimo=h.y;
-    }
-    html+=htmlHecho(h);
-  }
-  hlista.insertAdjacentHTML("beforeend",html);
-  hDibujados=fin;
-  if(hDibujados<hFiltrados.length){
-    hlista.insertAdjacentHTML("beforeend",'<button type="button" class="hmas">Ver más</button>');
-  }
-}
-// al acercarse al final se dibuja la tanda siguiente sola
-hlista.addEventListener("scroll",function(){
-  if(hDibujados<hFiltrados.length && hlista.scrollTop+hlista.clientHeight > hlista.scrollHeight-900) masHechos();
-});
-hlista.addEventListener("click",function(e){
-  if(e.target.closest(".hmas")){ masHechos(); return; }
-  const per=e.target.closest(".hper");
-  if(per){ const d=DATA[+per.dataset.i]; if(d) openCard(d,true); return; }
-  const fila=e.target.closest(".hfila"); if(!fila) return;
-  abrirCerrarHecho(fila.parentNode);
-});
-function abrirCerrarHecho(art, forzar){
-  const abierto = forzar || !art.classList.contains("abierto");
-  if(abierto && !art.querySelector(".hdet").innerHTML){
-    const h=HECHOS.find(function(x){ return x.id===art.dataset.id; });
-    art.querySelector(".hdet").innerHTML=detalleHecho(h);
-  }
-  art.classList.toggle("abierto",abierto);
-}
-[hfOrg,hfProv,hfTipo].forEach(function(s){ s.addEventListener("change",pintarHechos); });
-let hqT; hq.addEventListener("input",function(){ clearTimeout(hqT); hqT=setTimeout(pintarHechos,250); });
-document.getElementById("hlimpiar").onclick=function(){
-  hfOrg.value=hfProv.value=hfTipo.value=hq.value=""; HF.y=0; pintarHechos();
-};
-function abrirHechos(idFoco){
-  cerrarPaneles(); closeCard();
-  hechosEl.classList.add("show"); hechosEl.setAttribute("aria-hidden","false");
-  cargarHechos().then(function(){
-    if(idFoco){ hfOrg.value=hfProv.value=hfTipo.value=hq.value=""; HF.y=0; }
-    if(idFoco || !hDibujados) pintarHechos();
-    if(idFoco){
-      const k=hFiltrados.findIndex(function(h){ return h.id===idFoco; });
-      if(k<0) return;
-      if(k>=hDibujados) masHechos(k+TANDA);
-      const art=hlista.querySelector('.hecho[data-id="'+idFoco+'"]');
-      abrirCerrarHecho(art,true);
-      const anio=art.previousElementSibling;
-      hlista.scrollTop=art.offsetTop-hlista.offsetTop-60;
-    }
+  html+='<div id="hnotas"></div><div class="src" id="hfuente"></div>';
+  card.innerHTML=html;
+  card.scrollTop=0;
+  document.getElementById("cx").onclick=closeCard;
+  card.querySelectorAll(".hper").forEach(function(b){
+    b.addEventListener("click",function(e){ e.stopPropagation(); openCard(DATA[+b.dataset.i],true); });
+  });
+  card.classList.add("show"); scrim.classList.add("show");
+  textosHechos().then(function(T){
+    const x=T[h.id]; if(!x) return;
+    const caja=document.getElementById("htexto"); if(!caja) return;
+    caja.innerHTML=x.tx.split(/\n\n+/).map(function(p){ return '<p>'+esc(p)+'</p>'; }).join("");
+    if(x.nt && x.nt.length) document.getElementById("hnotas").innerHTML=
+      '<h3 class="hsec">Notas</h3><ol class="hnotas">'+x.nt.map(function(n){ return '<li>'+esc(n)+'</li>'; }).join("")+'</ol>';
+    document.getElementById("hfuente").innerHTML='<i>Crónica de una guerra negada</i>, tomo '+ROM[x.tm]+
+      ', pág. '+x.pg+' — Jorge Héctor Di Pasquale.';
   }).catch(function(){
-    hlista.innerHTML='<p class="hvacio">No se pudo cargar la cronología.</p>';
+    const caja=document.getElementById("htexto"); if(caja) caja.innerHTML='<p>No se pudo cargar el texto.</p>';
   });
 }
-function cerrarHechos(){
-  hechosEl.classList.remove("show"); hechosEl.setAttribute("aria-hidden","true");
-}
-document.getElementById("btnHechos").onclick=function(){ abrirHechos(); };
-document.getElementById("btnHechos2").onclick=function(){ abrirHechos(); };
-document.getElementById("hx").onclick=cerrarHechos;
-document.addEventListener("keydown",function(e){
-  if(e.key==="Escape" && hechosEl.classList.contains("show") && !card.classList.contains("show")) cerrarHechos();
-});
-
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
 const VERSION="v1.56";
 console.log("%cVíctimas del terrorismo · "+VERSION,
