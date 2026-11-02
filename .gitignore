@@ -4,3 +4,5 @@ LEEME_continuidad.md
 datos/atentados/originales/*.pdf
 datos/atentados/crudo/*.jsonl
 datos/atentados/crudo/indice.tsv
+datos/atentados/web/
+__pycache__/

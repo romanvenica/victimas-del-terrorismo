@@ -56,14 +56,54 @@ def unir(lineas):
     if actual: parrafos.append(" ".join(actual))
     return "\n\n".join(parrafos)
 
+NOTAS = {}
+NOTA_RE = re.compile(r"^\s*(\d{1,4}) (\S.*)$")
+
+def separar_notas(lineas, ultima):
+    """Las notas al pie estan al final de la pagina: «115 La Razón 29/07/65...».
+    La primera tiene que seguir a la ultima nota vista (con margen por saltos)
+    y debajo no puede haber ningun hecho nuevo (■)."""
+    for k, l in enumerate(lineas):
+        m = NOTA_RE.match(l)
+        if not m or not (ultima < int(m.group(1)) <= ultima + 40): continue
+        if re.match(r"(de|del|al|y|a|años?|personas|hs)\b", m.group(2), re.I): continue   # «12 de abril», «24 años»
+        if any("■" in r for r in lineas[k:]): continue    # debajo de una nota no puede empezar un hecho
+        notas, actual, prev = {}, None, ultima
+        for r in lineas[k:]:
+            m2 = NOTA_RE.match(r)
+            if m2 and prev < int(m2.group(1)) <= prev + 5:
+                actual = prev = int(m2.group(1)); notas[actual] = m2.group(2).strip()
+            elif r.strip() and actual:
+                t = notas[actual]
+                notas[actual] = (t[:-1] if t.endswith("-") else t + " ") + r.strip()
+        return lineas[:k], notas
+    return lineas, {}
+
+def marcar_llamadas(cuerpo, notas):
+    """Cambia la llamada «palabra 115» por «palabra⟦115⟧» (la ultima aparicion en la pagina)."""
+    texto = "\n".join(cuerpo)
+    for n in sorted(notas):
+        pat = re.compile(r"(?<=[^\d\s/,:-])\s?" + str(n) + r"(?![\d/])")
+        ms = list(pat.finditer(texto))
+        if ms:
+            m = ms[-1]
+            texto = texto[:m.start()] + "⟦%d⟧" % n + texto[m.end():]
+    return texto.split("\n")
+
 def procesar(ruta_txt, tomo):
     paginas = open(ruta_txt, encoding="utf-8").read().split("\f")
-    # renglones con su pagina, sin el armado de pagina
-    renglones = []
+    # renglones con su pagina, sin el armado de pagina ni las notas al pie;
+    # las notas quedan en NOTAS[numero] y su llamada en el texto como «⟦n⟧»
+    renglones, ultima = [], 0
+    NOTAS.clear()
     for i, pag in enumerate(paginas, start=1):
-        for l in pag.split("\n"):
-            s = l.strip()
-            if s in ENCABEZADOS or s == str(i): continue
+        lineas = [l for l in pag.split("\n") if l.strip() not in ENCABEZADOS and l.strip() != str(i)]
+        cuerpo, notas = separar_notas(lineas, ultima)
+        if notas:
+            ultima = max(notas)
+            NOTAS.update(notas)
+            cuerpo = marcar_llamadas(cuerpo, notas)
+        for l in cuerpo:
             renglones.append((i, l))
     textos = [l.strip() for _, l in renglones]
     inicio = max(k for k, s in enumerate(textos) if s == "PARTE " + "I" * tomo)   # la ultima: el comienzo real
@@ -73,7 +113,10 @@ def procesar(ruta_txt, tomo):
     def cerrar():
         nonlocal actual
         if actual:
-            actual["texto"] = unir(actual.pop("_l"))
+            t = unir(actual.pop("_l"))
+            nums = [int(x) for x in re.findall(r"⟦(\d+)⟧", t)]
+            actual["texto"] = re.sub(r"\s*⟦\d+⟧", "", t)
+            actual["notas"] = [NOTAS[n] for n in nums if n in NOTAS]
             salida.append(actual)
         actual = None
     def abrir(seccion, pagina, fecha_texto="", fecha="", primera=""):
