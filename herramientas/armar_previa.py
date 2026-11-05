@@ -22,23 +22,6 @@ franja = ('<style>.previa{position:fixed;left:50%;top:env(safe-area-inset-top,0p
           '</style><div class="previa">Vista previa · todavía no está publicado</div>')
 cuerpo = re.sub(r'<!-- contador de visitas:.*?</script>\s*', '', cuerpo, flags=re.S)
 assert "goatcounter" not in cuerpo
-# botones para comparar cómo se ven los atentados en la PC (solo en la vista previa)
-if "PC_OPC" in cuerpo:
-    probar = ('<style>.probarpc{position:fixed;left:14px;bottom:14px;z-index:30;width:244px;flex-direction:column;align-items:stretch !important;'
-              'display:flex;gap:6px;align-items:center;background:#000;border:1px solid #5c4d3f;border-radius:6px;'
-              'padding:6px 8px;font:600 12.5px "Inter","Helvetica Neue",Arial,sans-serif;color:#a99d8b}'
-              '.probarpc button{background:#1c1712;border:1px solid #4d4435;border-radius:4px;color:#e8e0d4;'
-              'font:inherit;padding:6px 10px;cursor:pointer}.probarpc button.on{background:#d94f38;border-color:#d94f38;color:#fff}'
-              '@media(max-width:760px){.probarpc{display:none}}</style>'
-              '<div class="probarpc" id="probarpc">Probar en la PC:'
-              '<button data-o="A" class="on">A · Todo en pantalla</button>'
-              '<button data-o="B">B · Más grandes, con desplazamiento</button>'
-              '<button data-o="C">C · 1 ícono = 5 atentados</button></div>'
-              '<script>document.querySelectorAll("#probarpc button").forEach(function(b){b.onclick=function(){'
-              'document.querySelectorAll("#probarpc button").forEach(function(x){x.classList.toggle("on",x===b);});'
-              'PC_OPC=b.dataset.o;zoomManual=false;closeCard();'
-              'cambiarModo("hechos").then(function(){buildLegend();render();});};});</script>')
-    cuerpo = cuerpo.replace("</body>", probar + "</body>") if "</body>" in cuerpo else cuerpo + probar
 io.open(os.path.join(DEST, "index.html"), "w", encoding="utf-8").write(titulo + estilos + franja + cuerpo)
 
 for f in ("victimas.json", "cruz.png"):

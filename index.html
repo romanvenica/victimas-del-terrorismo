@@ -678,9 +678,7 @@ function buildLegend(){
                ["policia","Policía / Seguridad"],["nino","Niños"]];
   const L=document.getElementById("legend"); L.innerHTML="";
   if(MODO==="hechos"){
-    const t=document.createElement("div"); t.className="lgtit";
-    t.textContent = (PC_OPC==="C" && !window.matchMedia("(max-width:760px)").matches) ? "Cada ícono = "+PC_GRUPO+" atentados" : "Atentados";
-    L.appendChild(t);
+    const t=document.createElement("div"); t.className="lgtit"; t.textContent="Atentados"; L.appendChild(t);
     HTIPOS.forEach(function(x){
       const span=document.createElement("span"); span.className="lg";
       span.innerHTML='<svg viewBox="0 0 16 16" fill="'+x[2]+'">'+iconHecho(x[0])+'</svg>'+x[1];
@@ -852,6 +850,10 @@ const MAXCOLS=5;       // máximo de íconos de ancho por año
 const GAP_BASE=10;     // separación entre columnas
 const EMPTYW_BASE=3;   // ancho de un año sin víctimas
 const ZOOM_MIN=0.3, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
+// los atentados arrancan más chicos que las víctimas (son muchos más): la lupa
+// tiene que poder achicar hasta ahí
+function zoomMin(){ return MODO==="hechos" ? 0.15 : ZOOM_MIN; }
+let colsHPC=null;   // ancho de columna de atentados que eligió el ajuste en la PC
 const ZOOM_AUTO_MAX=2.75;   // tope del agrandado automatico cuando sobra lugar
 let zoom=0.8;
 let zoomManual=false;      // al tocar las lupas o pellizcar, manda el usuario
@@ -913,7 +915,7 @@ function zoomVisual(f){
 function fijarZoom(nuevo, ancla){
   zoomManual=true;
   const previo=zoom;
-  nuevo=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN,nuevo));
+  nuevo=Math.min(ZOOM_MAX,Math.max(zoomMin(),nuevo));
   if(Math.abs(nuevo-previo)<0.001 && !ancla) return;
   // guardar qué punto del contenido está al centro, para no perder de vista dónde estabas
   const centro=(plot.scrollLeft+plot.clientWidth/2)/previo;
@@ -933,7 +935,7 @@ function cambiarZoom(factor){ fijarZoom(zoom*factor); }
 function actualizarLupas(){
   const est=!!lienzo();
   document.getElementById("zmas").disabled   = est ? vz>=VZ_MAX-0.001 : zoom>=ZOOM_MAX-0.001;
-  document.getElementById("zmenos").disabled = est ? vz<=vzMinimo()+0.001 : zoom<=ZOOM_MIN+0.001;
+  document.getElementById("zmenos").disabled = est ? vz<=vzMinimo()+0.001 : zoom<=zoomMin()+0.001;
 }
 function lupa(f){ if(lienzo()) zoomVisual(f); else cambiarZoom(f); }
 document.getElementById("zmas").onclick=function(){ lupa(ZOOM_PASO); };
@@ -972,8 +974,7 @@ function stackRank(d){
 function drawPlot(items){
   plot.innerHTML="";
   const modoH = MODO==="hechos";
-  const pcOpc = modoH && !window.matchMedia("(max-width:760px)").matches ? PC_OPC : "";
-  if(pcOpc==="C") items=agruparHechos(items);
+
   let maxCols = modoH ? MAXCOLS_H : MAXCOLS;
   let sMinH = 0;   // con columnas más angostas los íconos pueden bajar a 3 px
   if(items.length===0){
@@ -1016,6 +1017,9 @@ function drawPlot(items){
   // con pocas personas sobra lugar: agrandar hasta llenar el ancho, sin
   // pasarse de alto ni de un tamaño de figura razonable
   let plan=medidas(zoom);
+  // con la lupa en la PC, los atentados mantienen el ancho de columna del
+  // ajuste: si no, al agrandar las columnas saltaban de golpe a 14 de ancho
+  if(modoH && zoomManual && !isMobile && colsHPC){ maxCols=colsHPC; sMinH=3; plan=medidas(zoom); }
   if(!zoomManual){
     if(isMobile){
       // en celular el ancho no frena, porque se arrastra de costado: manda el alto
@@ -1069,7 +1073,7 @@ function drawPlot(items){
         // queda con el que deja los íconos más grandes entrando enteros
         const guardado=maxCols;
         let mejor=entra ? {plan:entra, cols:guardado} : null;
-        for(let c=(pcOpc==="C"?3:6);c<=30;c++){
+        for(let c=6;c<=30;c++){
           maxCols=c;
           let ok=null;
           for(let e=0.2; e<=ZOOM_AUTO_MAX+0.001; e+=0.025){
@@ -1080,7 +1084,7 @@ function drawPlot(items){
         }
         if(mejor){
           // un ícono menos de ancho por columna: más altas y angostas
-          maxCols = pcOpc==="C" ? mejor.cols : Math.max(4,mejor.cols-1);
+          maxCols=Math.max(4,mejor.cols-1);
           let ok=null;
           for(const minimo of [4,3]){
             sMinH=minimo;
@@ -1093,15 +1097,7 @@ function drawPlot(items){
           plan = ok || medidas(0.15);
         }
         else maxCols=guardado;
-      }
-      if(pcOpc==="B"){
-        // íconos de 8 px y las columnas tan angostas como entren a lo ancho:
-        // el gráfico queda más alto que la pantalla y se recorre hacia arriba
-        sMinH=0;
-        for(let c=4;c<=30;c++){
-          maxCols=c; const t=medidas(0.5);
-          if(t.ancho<=cajaW){ plan=t; break; }
-        }
+        colsHPC=maxCols;
       }
       zoom = plan.escala;    // las lupas arrancan desde lo que se está viendo
     }
@@ -1234,16 +1230,11 @@ function drawPlot(items){
     let sobre=null;
     svg.addEventListener("mousemove",function(e){
       const h=enPunto(e);
-      if(h!==sobre){ sobre=h; svg.style.cursor=h?"pointer":""; if(h){ if(h.__g) showTipGrupo(e,h); else showTipHecho(e,h); } else hideTip(); }
+      if(h!==sobre){ sobre=h; svg.style.cursor=h?"pointer":""; if(h) showTipHecho(e,h); else hideTip(); }
       else if(h) moveTip(e);
     });
     svg.addEventListener("mouseleave",function(){ sobre=null; hideTip(); });
-    svg.addEventListener("click",function(e){
-      if(dragMoved) return; const h=enPunto(e); if(!h) return;
-      // un ícono de 5: el listado muestra los atentados de ese año
-      if(h.__g){ hideTip(); if(anioSel!==grupoDe(h.y)) elegirAnio(grupoDe(h.y)); return; }
-      openHecho(h);
-    });
+    svg.addEventListener("click",function(e){ if(dragMoved) return; const h=enPunto(e); if(h) openHecho(h); });
   }
 
   // personas
@@ -1510,7 +1501,7 @@ plot.addEventListener("pointermove",function(e){
     return;
   }
   // vista previa barata: escalar el dibujo ya hecho, sin volver a armarlo
-  const objetivo=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN, pellizco.zoom*(distDedos()/pellizco.dist)));
+  const objetivo=Math.min(ZOOM_MAX,Math.max(zoomMin(), pellizco.zoom*(distDedos()/pellizco.dist)));
   const svg=plot.querySelector("svg");
   const k=objetivo/pellizco.zoom;
   if(svg){ svg.style.transform="scale("+k+")"; contraescalarEje(k); }
@@ -1863,24 +1854,6 @@ document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntr
    está partido por año en textos/AAAA.json y se baja al abrir un atentado.
    hechos_victimas.json dice qué víctima tiene su atentado identificado. */
 let MODO="victimas";
-// cómo se ven los atentados en la PC (se está probando):
-//  A = todo entra en pantalla  ·  B = íconos más grandes, con desplazamiento
-//  C = cada ícono vale 5 atentados
-let PC_OPC="A";
-const PC_GRUPO=5;
-// para la opción C: por año y tipo, un ícono cada 5 atentados
-function agruparHechos(lista){
-  const g={};
-  lista.forEach(function(h){
-    const k=h.y+"|"+h.t; (g[k]=g[k]||{y:h.y,t:h.t,n:0}).n++;
-  });
-  const out=[];
-  Object.keys(g).forEach(function(k){
-    const x=g[k], m=Math.ceil(x.n/PC_GRUPO);
-    for(let i=0;i<m;i++) out.push({__g:true, y:x.y, t:x.t, f:String(x.y), n:x.n});
-  });
-  return out;
-}
 let HG=null, HGCARGA=null, HXV={};
 const HTXT={}, HTXTCARGA={};
 const HFS={org:"", tipos:new Set()};   // filtros propios de los atentados
@@ -2108,13 +2081,6 @@ function showTipHecho(e,h){
     (lug ? '<span class="tlug">'+esc(lug)+'</span>' : '')+'</div>'+ico+'</div>';
   tip.style.display="block"; moveTip(e);
 }
-function showTipGrupo(e,g){
-  const ico='<svg class="tico" viewBox="0 0 16 16" fill="'+HCOLOR[g.t]+'">'+iconHecho(g.t)+'</svg>';
-  tip.innerHTML='<div class="trow"><div><span class="tcat">'+esc(HNOMBRE[g.t])+' · '+g.y+'</span>'+
-    '<span class="tnom">'+g.n+(g.n===1?' atentado':' atentados')+'</span>'+
-    '<span class="tlug">Cada ícono = '+PC_GRUPO+' atentados</span></div>'+ico+'</div>';
-  tip.style.display="block"; moveTip(e);
-}
 function markHecho(h){
   const prev=document.querySelector("rect.selbox"); if(prev) prev.remove();
   const svg=plot.querySelector("svg");
@@ -2179,7 +2145,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.57";
+const VERSION="v1.58";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
