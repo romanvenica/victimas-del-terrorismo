@@ -208,6 +208,7 @@
   .card .nmcat{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c9bda9;margin-bottom:3px}
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
   /* en la ficha de un atentado el tipo es el título y la organización va debajo */
+  #lienzoHechos{position:absolute;z-index:3;pointer-events:none;display:none}
   .golpe{cursor:pointer}
   .golpe circle{fill:#1c1712;stroke:#c9bda9;stroke-width:1.1}
   .golpe path{fill:#e8e0d4}
@@ -896,6 +897,7 @@ function aplicarVZ(){
   wrap.style.width=anchoW+"px"; wrap.style.height=altoW+"px";
   lien.style.width=lienW+"px";  lien.style.height=lienH+"px";
   lien.style.transform="translate("+((anchoW-w)/2)+"px,"+(altoW-h)+"px) scale("+vz+")";
+  pedirHechosCel();
 }
 // cambia el zoom dejando quieto en pantalla el punto (cx,cy) del dibujo,
 // que tiene que quedar bajo el punto de pantalla (px,py)
@@ -1192,6 +1194,7 @@ function drawPlot(items){
   });
 
   // atentados: un trazo por tipo y una sola capa que calcula qué ícono se tocó
+  hechosCel=null;
   if(modoH){
     const trazos={}; HTIPOS.forEach(function(t){ trazos[t[0]]=""; });
     const columnas=[];
@@ -1206,17 +1209,24 @@ function drawPlot(items){
         const x=cx+(cl-(wide-1)/2)*CELL - S/2;
         const yy=axisY-6-S-rw*CELL;
         h._x=x; h._y=yy; h._s=S;
-        trazos[h.t]+=trazoHecho(h.t,x,yy,k);
+        if(!isMobile) trazos[h.t]+=trazoHecho(h.t,x,yy,k);
       });
     });
     const capa=document.createElementNS(NS,"g");
     capa.setAttribute("class","capahechos");
-    HTIPOS.forEach(function(t){
-      if(!trazos[t[0]]) return;
-      const pa=document.createElementNS(NS,"path");
-      pa.setAttribute("d",trazos[t[0]]); pa.setAttribute("fill",t[2]);
-      capa.appendChild(pa);
-    });
+    if(isMobile){
+      // en el celular el zoom estira el dibujo: miles de íconos vectoriales se
+      // redibujaban enteros en cada paso y el teléfono se ponía lento. Ahí se
+      // pintan sobre una imagen solo los que se ven (ver pintarHechosCel)
+      hechosCel={svg:svg, W:W, items:columnas};
+    } else {
+      HTIPOS.forEach(function(t){
+        if(!trazos[t[0]]) return;
+        const pa=document.createElementNS(NS,"path");
+        pa.setAttribute("d",trazos[t[0]]); pa.setAttribute("fill",t[2]);
+        capa.appendChild(pa);
+      });
+    }
     svg.appendChild(capa);
     const enPunto=function(e){
       const m=svg.getScreenCTM(); if(!m) return null;
@@ -1322,6 +1332,7 @@ function drawPlot(items){
     plot.appendChild(svg);
   }
   plot.scrollTop=plot.scrollHeight;
+  pedirHechosCel();
   // en móvil, abrir mostrando el año con más víctimas (donde el gráfico se ve lleno)
   if(isMobile){
     // columna del medio: aquella donde cae la persona número total/2
@@ -1871,6 +1882,55 @@ const HTIPOS=[   // de abajo hacia arriba en cada columna; cada color tiene que 
 const HCOLOR={}, HNOMBRE={}, HRANGO={};
 HTIPOS.forEach(function(t,i){ HCOLOR[t[0]]=t[2]; HNOMBRE[t[0]]=t[1]; HRANGO[t[0]]=10+i; });
 const MAXCOLS_H=14;   // son muchos más que las víctimas: columnas más anchas
+// ---- celular: atentados pintados sobre una imagen, solo lo que se ve ----
+let hechosCel=null, hcPedido=false;
+const hcSprites={};
+function spriteHecho(t, px){
+  const k=t+"|"+px;
+  if(hcSprites[k]) return hcSprites[k];
+  const c=document.createElement("canvas"); c.width=c.height=px;
+  const x=c.getContext("2d");
+  x.scale(px/16,px/16); x.fillStyle=HCOLOR[t]; x.fill(new Path2D(HFORMA[t]));
+  return (hcSprites[k]=c);
+}
+function lienzoHechos(){
+  let c=document.getElementById("lienzoHechos");
+  if(!c){
+    c=document.createElement("canvas"); c.id="lienzoHechos";
+    document.getElementById("stage").appendChild(c);
+  }
+  return c;
+}
+function pedirHechosCel(){
+  if(hcPedido) return; hcPedido=true;
+  requestAnimationFrame(function(){ hcPedido=false; pintarHechosCel(); });
+}
+function pintarHechosCel(){
+  const c=lienzoHechos();
+  if(!hechosCel || MODO!=="hechos" || !document.body.contains(hechosCel.svg)){ c.style.display="none"; return; }
+  const pr=plot.getBoundingClientRect(), sr=document.getElementById("stage").getBoundingClientRect();
+  const r=hechosCel.svg.getBoundingClientRect();
+  const dpr=Math.min(3, window.devicePixelRatio||1);
+  c.style.display="block";
+  c.style.left=(pr.left-sr.left)+"px"; c.style.top=(pr.top-sr.top)+"px";
+  c.style.width=pr.width+"px"; c.style.height=pr.height+"px";
+  const cw=Math.round(pr.width*dpr), ch=Math.round(pr.height*dpr);
+  if(c.width!==cw || c.height!==ch){ c.width=cw; c.height=ch; }
+  const x=c.getContext("2d");
+  x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,cw,ch);
+  const esc=r.width/hechosCel.W;                 // incluye el zoom del celular
+  const ox=r.left-pr.left, oy=r.top-pr.top;
+  hechosCel.items.forEach(function(co){
+    co.arr.forEach(function(h){
+      const sx=ox+h._x*esc, sy=oy+h._y*esc, sz=h._s*esc;
+      if(sx+sz<0 || sy+sz<0 || sx>pr.width || sy>pr.height) return;
+      const px=Math.max(2,Math.round(sz*dpr));
+      x.drawImage(spriteHecho(h.t,px), Math.round(sx*dpr), Math.round(sy*dpr));
+    });
+  });
+}
+plot.addEventListener("scroll",pedirHechosCel,{passive:true});
+window.addEventListener("resize",pedirHechosCel);
 function iconHecho(t){
   switch(t){
     case "asesinato": // mira
@@ -1880,9 +1940,8 @@ function iconHecho(t){
     case "secuestro": // candado
       return '<path d="M5 7V5.2a3 3 0 0 1 6 0V7h-1.8V5.2a1.2 1.2 0 0 0-2.4 0V7Z"/>'+
              '<rect x="3" y="7" width="10" height="7.6" rx="1.2"/>';
-    case "bomba": // bomba con mecha
-      return '<circle cx="7" cy="9.6" r="5"/><rect x="8.6" y="3" width="2.6" height="2.6" transform="rotate(45 9.9 4.3)"/>'+
-             '<path d="M11 3.2 13.2 1l1 1-2.2 2.2Z"/>';
+    case "bomba": // bomba: cuerpo redondo, cuello inclinado, mecha curva y chispa
+      return '<path d="'+HFORMA.bomba+'"/>';
     case "ataque": // bala
       return '<path d="M8 1.2c2 1.4 2.9 3.6 2.9 6.2V12H5.1V7.4C5.1 4.8 6 2.6 8 1.2Z"/><rect x="4.6" y="12.8" width="6.8" height="2.4" rx=".6"/>';
     case "toma": // bandera
@@ -1902,7 +1961,7 @@ const HFORMA={
   asesinato:"M1.6 8A6.4 6.4 0 1 1 14.4 8A6.4 6.4 0 1 1 1.6 8Z M3.8 8A4.2 4.2 0 1 0 12.2 8A4.2 4.2 0 1 0 3.8 8Z"+
             "M7.1 0.4H8.9V5H7.1Z M7.1 11H8.9V15.6H7.1Z M0.4 7.1H5V8.9H0.4Z M11 7.1H15.6V8.9H11Z",
   secuestro:"M5 7V5.2A3 3 0 0 1 11 5.2V7H9.2V5.2A1.2 1.2 0 0 0 6.8 5.2V7Z M3 7H13V14.6H3Z",
-  bomba:"M2 9.6A5 5 0 1 1 12 9.6A5 5 0 1 1 2 9.6Z M9.9 2.46L11.74 4.3L9.9 6.14L8.06 4.3Z M11 3.2L13.2 1L14.2 2L12 4.2Z",
+  bomba:"M1.5 10.2A5.3 5.3 0 1 1 12.1 10.2A5.3 5.3 0 1 1 1.5 10.2Z M8.76 5.18L10.18 3.76L12.44 6.02L11.02 7.44Z M10.9 4.5C11.4 3.1 12.3 2.3 13.5 1.9L13.8 2.7C12.8 3 12.1 3.7 11.7 4.9Z M14.3 0.1L14.75 1.05L15.7 1.5L14.75 1.95L14.3 2.9L13.85 1.95L12.9 1.5L13.85 1.05Z",
   ataque:"M8 1.2C10 2.6 10.9 4.8 10.9 7.4V12H5.1V7.4C5.1 4.8 6 2.6 8 1.2Z M4.6 12.8H11.4V15.2H4.6Z",
   toma:"M2.6 1.4H4.3V14.8H2.6Z M4.3 2.2H13.5L11.1 5.5L13.5 8.8H4.3Z",
   propaganda:"M1.6 6.2H4.8L11.6 2.4V13.6L4.8 9.8H1.6Z M5.2 10.4H7.6L8.8 14.4H6.4Z M12.8 6.9H15.2V9.1H12.8Z",
