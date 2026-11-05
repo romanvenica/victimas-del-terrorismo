@@ -206,11 +206,11 @@
   .card .nmcat{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c9bda9;margin-bottom:3px}
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
   /* en la ficha de un atentado el tipo es el título y la organización va debajo */
-  .golpe{pointer-events:none}
-  .golpe line{stroke:#c9bda9;stroke-width:1.4;stroke-dasharray:4 3}
-  .golpe path{fill:#c9bda9}
-  .golpe text{fill:#e8e0d4;font-family:var(--sans);font-size:12.5px;font-weight:600;
-    paint-order:stroke;stroke:#14100c;stroke-width:4px;stroke-linejoin:round}
+  .golpe{cursor:pointer}
+  .golpe circle{fill:#1c1712;stroke:#c9bda9;stroke-width:1.3}
+  .golpe path{fill:#e8e0d4}
+  .golpe:hover circle,.golpe:focus circle{fill:#3a2f24}
+  .golpe:focus{outline:none}
   .card .htipotit{font-family:var(--serif);font-size:25px;line-height:1.2;margin:0 0 4px}
   .card .horgsub{font-size:14px;font-weight:600;color:#c9bda9;line-height:1.35}
   /* display:inline-block a mano: la regla general pone los svg en bloque y la
@@ -970,6 +970,7 @@ function drawPlot(items){
   plot.innerHTML="";
   const modoH = MODO==="hechos";
   let maxCols = modoH ? MAXCOLS_H : MAXCOLS;
+  let sMinH = 0;   // con columnas más angostas los íconos pueden bajar a 3 px
   if(items.length===0){
     const e=document.createElement("div"); e.className="empty";
     e.textContent=modoH ? "Ningún atentado coincide con esos filtros." : "Ninguna víctima coincide con esos filtros.";
@@ -990,7 +991,7 @@ function drawPlot(items){
 
   // medidas completas del dibujo para una escala dada
   function medidas(escala){
-    const S=Math.max(modoH?4:6,Math.round(S_BASE*escala));
+    const S=Math.max(modoH?(sMinH||4):6,Math.round(S_BASE*escala));
     const CELL=S+Math.max(modoH?1:2,Math.round(SEP_BASE*escala));
     const GAP=Math.max(4,Math.round(GAP_BASE*escala));
     const EMPTYW=Math.max(2,Math.round(EMPTYW_BASE*escala));
@@ -1041,7 +1042,20 @@ function drawPlot(items){
           }
           if(ok && (!mejor || ok.S>mejor.plan.S)) mejor={plan:ok, cols:c};
         }
-        if(mejor){ maxCols=mejor.cols; plan=medidas(mejor.plan.escala); }
+        if(mejor){
+          // un ícono menos de ancho por columna: más altas y angostas
+          maxCols=Math.max(4,mejor.cols-1);
+          let ok=null;
+          for(const minimo of [4,3]){
+            sMinH=minimo;
+            for(let e=0.15; e<=ZOOM_AUTO_MAX+0.001; e+=0.025){
+              const t=medidas(e);
+              if(t.alto<=cajaH && t.ancho<=cajaW) ok=t; else if(ok) break;
+            }
+            if(ok) break;
+          }
+          plan = ok || medidas(0.15);
+        }
         else maxCols=guardado;
       }
       zoom = plan.escala;    // las lupas arrancan desde lo que se está viendo
@@ -1209,21 +1223,33 @@ function drawPlot(items){
     });
   });
 
-  // flecha entre el '76 y el '77: intervención de los militares
+  // estrella sobre la línea de los años, entre el '76 y el '77: el gobierno militar
   if(centerX[1976]!==undefined && centerX[1977]!==undefined){
     const xg=((centerX[1976]+colWY[1976]/2)+(centerX[1977]-colWY[1977]/2))/2;
-    const topeCol=function(y){ return cntY[y] ? axisY-6-Math.ceil(cntY[y]/perRowY[y])*CELL : axisY; };
-    // el cartel va a la derecha de la línea, arriba de la columna del '77
-    const yTxt=Math.max(64, topeCol(1977)-26);
     const gf=document.createElementNS(NS,"g");
     gf.setAttribute("class","golpe");
-    gf.innerHTML=
-      '<line x1="'+xg+'" y1="'+(yTxt+8)+'" x2="'+xg+'" y2="'+(axisY-9)+'"/>'+
-      '<path d="M'+(xg-4.5)+' '+(axisY-10)+'L'+xg+' '+(axisY-2)+'L'+(xg+4.5)+' '+(axisY-10)+'Z"/>'+
-      '<text x="'+(xg+7)+'" y="'+(yTxt-8)+'"><tspan>Intervención</tspan><tspan dy="1.2em">de los militares</tspan></text>';
-    svg.appendChild(gf);
-    const tx=gf.querySelector("text"), x0=tx.getAttribute("x");
-    gf.querySelectorAll("tspan").forEach(function(t){ t.setAttribute("x",x0); });
+    gf.setAttribute("tabindex","0");
+    gf.setAttribute("aria-label","Proceso de Reorganización Nacional");
+    gf.setAttribute("transform","translate("+xg+" "+axisY+")");
+    gf.innerHTML='<circle r="9"/><path d="M0 -5.6L1.32 -1.8L5.33 -1.73L2.13 0.69L3.29 4.53L0 2.24L-3.29 4.53L-2.13 0.69L-5.33 -1.73L-1.32 -1.8Z"/>';
+    const mostrar=function(e){
+      tip.innerHTML='<span class="tnom">Proceso de Reorganización Nacional</span>';
+      tip.style.display="block"; moveTip(e);
+    };
+    gf.addEventListener("mouseenter",mostrar);
+    gf.addEventListener("mousemove",function(e){ moveTip(e); });
+    // en el celular no hay mouse: tocarla muestra el cartel un rato (el
+    // teléfono avisa enseguida que "el dedo se fue": eso no lo cierra)
+    gf.addEventListener("mouseleave",function(){ if(Date.now()-(gf._toque||0)>2500) hideTip(); });
+    gf.addEventListener("click",function(e){
+      e.stopPropagation(); mostrar(e); gf._toque=Date.now();
+      clearTimeout(gf._t); gf._t=setTimeout(hideTip,2500);
+    });
+    // va dentro de otro grupo: al pellizcar en el celular el eje usa ese
+    // de afuera para no agrandarse, y la estrella conserva su lugar
+    const caja=document.createElementNS(NS,"g");
+    caja.appendChild(gf); svg.appendChild(caja);
+    ejeFijos.push({el:caja, cx:xg});
   }
 
   if(isMobile){
@@ -1234,15 +1260,10 @@ function drawPlot(items){
     lienW=W; lienH=H;
     vz=vzDefecto();          // cada vez que cambian los datos se reencuadra solo
     // el cartel de la flecha no se achica con el dibujo: se ve igual que en la PC
-    const tg=svg.querySelector(".golpe text");
-    if(tg && vz<1){
-      const k=Math.min(1/vz,4);
-      tg.style.fontSize=(12.5*k)+"px"; tg.style.strokeWidth=(4*k)+"px";
-      const nx=+tg.getAttribute("x")+7*(k-1);
-      tg.setAttribute("x", nx);
-      tg.querySelectorAll("tspan").forEach(function(t){ t.setAttribute("x", nx); });
-      tg.setAttribute("y", +tg.getAttribute("y")-12*(k-1));
-      svg.querySelector(".golpe line").style.strokeWidth=(1.4*k)+"px";
+    const est=svg.querySelector(".golpe");
+    if(est && vz<1){
+      const k=Math.min(1/vz,3);
+      est.setAttribute("transform", est.getAttribute("transform")+" scale("+k+")");
     }
     aplicarVZ(); actualizarLupas();
   } else {
