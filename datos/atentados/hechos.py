@@ -218,14 +218,42 @@ TIPOS = [
     ("Incendio", r"incendi|molotov"),
     ("Copamiento", r"\bcop(aron|ó|amiento|ado)\b|tomaron (la|el|un|una)|irrumpi|ocuparon|ocupación"),
     ("Asalto o robo", r"asalt|robaron|\brob[oó]\b|sustraj|despoj|desarmaron|desarmado"),
-    ("Ataque armado", r"ametrall|atac|emboscad|tiroteo|enfrentamiento|balear|balead|dispar|a tiros|lanzacohete|herid|atentado"),
+    ("Ataque armado", r"ametrall|atac|emboscad|tiroteo|enfrentamiento|balear|balead|dispar|a tiros|lanzacohete|herid|atentado|"
+                      r"intento de asesinato|intentaron asesinar|intento de ejecuci"),
     ("Abatido o detenido", r"abatid|detenid|detuvieron|allanamiento|arsenal|incaut"),
     ("Propaganda armada", r"propaganda|pintada|consigna|volante|panflet|repartier|distribuy|"
                           r"comunicado|psicol[oó]gic|bandera|leyendas|acto rel[aá]mpago|emisora|radio"),
 ]
-def tipos(texto):
+# Asesinato se decide aparte y con cuidado (revisado caso por caso): el libro usa
+# «ejecutaron» para cualquier acción («ejecutaron disparos», «ejecutaron una
+# operación de propaganda»), cuenta intentos fallidos y nombra asesinatos de
+# otros hechos dentro del relato. Solo cuenta cuando el relato dice que mataron
+# a alguien; los intentos fallidos o «no hubo víctimas» no cuentan.
+ASESINATO_SI = re.compile(
+    r"^(secuestro y )?(posterior )?asesinato|fue(ron)? (secuestrad[oa]s? y )?(posteriormente )?asesinad|"
+    r"(y|luego|posteriormente) (fue(ron)? )?asesinad|asesinaron|asesin[oó] a|lograron asesinar|"
+    r"despu[eé]s de asesinarl|asesinad[oa]s? y |son asesinad|resultaron? asesinad|"
+    r"dieron muerte|di[oó] muerte|fue(ron)? ejecutad|son ejecutad|y ejecutad|ejecutaron a(l|\s)|"
+    r"procedi(ó|eron) a ejecutar|acribillad|ultimad|mataron a|\b(lo|la|los|las) mataron|"
+    r"ajusticiamiento|ajusticiaron|ajustici[oó]\b|ajusticiar a|"
+    r"apareci(ó|eron) .{0,30}cad[aá]ver|hallad[oa]s? .{0,30}cad[aá]ver|se encontr[oó] el cad[aá]ver de (un|una|el|la)|"
+    r"cad[aá]ver(es)? (calcinad|desfigurad|dinamitad|femenin|carbonizad|con)|"
+    r"muerto a (balazos|tiros)|muerto por disparos|muri[oó] (por acciones|producto de un atentado|a causa de un atentado|v[ií]ctima)")
+ASESINATO_NO = re.compile(
+    r"intento de asesinato|intentaron asesinar|(fracasad|frustrad)[oa]s? intento de asesin|"
+    r"asesinato (fracasado|frustrado)|no hubo v[ií]ctimas|sin v[ií]ctimas|"
+    r"amenaza de asesinar|para no ser asesinad|salv[oó] su vida|salvar su vida|"
+    r"cad[aá]ver .{0,40}(robad|profan)|del terrorista sorprendido")
+
+def es_asesinato(relato):
+    t = relato.lower()[:700]
+    return bool(ASESINATO_SI.search(t)) and not ASESINATO_NO.search(t)
+
+def tipos(texto, relato=None):
     t = texto.lower()
-    out = [n for n, pat in TIPOS if re.search(pat, t)]
+    out = [n for n, pat in TIPOS if n != "Asesinato" and re.search(pat, t)]
+    if es_asesinato(relato if relato is not None else texto):
+        out.insert(0, "Asesinato")
     return out or ["Otro"]
 
 # ---------- armado ----------
@@ -261,7 +289,7 @@ def main():
             p, l = lugar(seg[1:])
             h["r"] = inicio_relato(t, seg)
             if not p: p = provincia_en_texto(primer)
-            h.update({"o": orgs, "p": p, "l": l, "tp": tipos(t), "v": []})
+            h.update({"o": orgs, "p": p, "l": l, "tp": tipos(t, t[h["r"]:]), "v": []})
             hechos.append(h)
 
     # víctimas del memorial: mismo día y el apellido en el texto
