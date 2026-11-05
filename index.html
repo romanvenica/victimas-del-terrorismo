@@ -1966,6 +1966,15 @@ function cambiarModo(m){
   if(m===MODO) return Promise.resolve();
   const listo = m==="hechos" ? cargarHG() : Promise.resolve();
   return listo.then(function(){
+    // la provincia se comparte entre las dos vistas, pero hay provincias con
+    // atentados y sin víctimas del memorial (Río Negro, Neuquén, Exterior...):
+    // si la elegida no tiene nada en la otra vista, se suelta el filtro
+    if(state.p.size){
+      const pv=Array.from(state.p)[0];
+      const hay = m==="hechos" ? HG.some(function(h){ return h.p===pv; })
+                               : DATA.some(function(d){ return d.p===pv; });
+      if(!hay) state.p.clear();
+    }
     MODO=m; anioSel=null; lq.value=""; marcarBorrar();
     closeCard(); cerrarGaleria();
     zoomManual=false;
@@ -2145,7 +2154,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.58";
+const VERSION="v1.59";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
