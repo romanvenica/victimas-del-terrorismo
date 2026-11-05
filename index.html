@@ -1815,6 +1815,7 @@ const HTIPOS=[   // de abajo hacia arriba en cada columna; colores apagados
   ["bomba","Bomba o incendio","#a8834f"],
   ["ataque","Ataque armado","#5f8580"],
   ["toma","Copamiento o robo","#8c7d62"],
+  ["propaganda","Propaganda terrorista","#7b8459"],
   ["otro","Otros","#655d54"]];
 const HCOLOR={}, HNOMBRE={}, HRANGO={};
 HTIPOS.forEach(function(t,i){ HCOLOR[t[0]]=t[2]; HNOMBRE[t[0]]=t[1]; HRANGO[t[0]]=10+i; });
@@ -1835,6 +1836,9 @@ function iconHecho(t){
       return '<path d="M8 1.2c2 1.4 2.9 3.6 2.9 6.2V12H5.1V7.4C5.1 4.8 6 2.6 8 1.2Z"/><rect x="4.6" y="12.8" width="6.8" height="2.4" rx=".6"/>';
     case "toma": // bandera
       return '<rect x="2.6" y="1.4" width="1.7" height="13.4" rx=".5"/><path d="M4.3 2.2h9.2l-2.4 3.3 2.4 3.3H4.3Z"/>';
+    case "propaganda": // megáfono
+      return '<path d="M1.6 6.2H4.8L11.6 2.4V13.6L4.8 9.8H1.6Z"/><path d="M5.2 10.4H7.6L8.8 14.4H6.4Z"/>'+
+             '<rect x="12.8" y="6.9" width="2.4" height="2.2" rx=".6"/>';
     default: // rombo
       return '<path d="M8 2.2 13.8 8 8 13.8 2.2 8Z"/>';
   }
@@ -1850,6 +1854,7 @@ const HFORMA={
   bomba:"M2 9.6A5 5 0 1 1 12 9.6A5 5 0 1 1 2 9.6Z M9.9 2.46L11.74 4.3L9.9 6.14L8.06 4.3Z M11 3.2L13.2 1L14.2 2L12 4.2Z",
   ataque:"M8 1.2C10 2.6 10.9 4.8 10.9 7.4V12H5.1V7.4C5.1 4.8 6 2.6 8 1.2Z M4.6 12.8H11.4V15.2H4.6Z",
   toma:"M2.6 1.4H4.3V14.8H2.6Z M4.3 2.2H13.5L11.1 5.5L13.5 8.8H4.3Z",
+  propaganda:"M1.6 6.2H4.8L11.6 2.4V13.6L4.8 9.8H1.6Z M5.2 10.4H7.6L8.8 14.4H6.4Z M12.8 6.9H15.2V9.1H12.8Z",
   otro:"M8 2.2L13.8 8L8 13.8L2.2 8Z"
 };
 const HPARTES={};

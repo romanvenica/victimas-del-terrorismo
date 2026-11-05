@@ -206,7 +206,13 @@ def provincia_en_texto(t):
 
 # ---------- tipo de hecho ----------
 TIPOS = [
-    ("Asesinato", r"asesin|ejecutad|ejecutaron|dieron muerte|dio muerte|ultimad|acribill|mataron"),
+    # el libro dice «dió muerte», «ajusticiamiento», «apareció un cadáver»,
+    # «murió producto de un atentado»... (las amenazas «de muerte» no cuentan)
+    ("Asesinato", r"asesin|ejecutad|ejecutaron|dieron muerte|di[oó] muerte|ultimad|acribill|mataron|"
+                  r"ajusticiamiento|ajusticiaron|ajustici[oó]|procedi[oó] a ajusticiar|ajusticiaba|"
+                  r"cad[aá]ver|muerto a (balazos|tiros)|"
+                  r"muri[oó] (por|producto|a causa|como consecuencia|v[ií]ctima|al estallar|en el atentado)|"
+                  r"ejecuci[oó]n por parte|fue ejecutad"),
     ("Secuestro", r"secuestr"),
     ("Bomba", r"bomba|explosiv|estall|artefacto|petard|dinamit|deton|voladura|explosi[oó]n"),
     ("Incendio", r"incendi|molotov"),
@@ -214,7 +220,8 @@ TIPOS = [
     ("Asalto o robo", r"asalt|robaron|\brob[oó]\b|sustraj|despoj|desarmaron|desarmado"),
     ("Ataque armado", r"ametrall|atac|emboscad|tiroteo|enfrentamiento|balear|balead|dispar|a tiros|lanzacohete|herid|atentado"),
     ("Abatido o detenido", r"abatid|detenid|detuvieron|allanamiento|arsenal|incaut"),
-    ("Propaganda armada", r"propaganda"),
+    ("Propaganda armada", r"propaganda|pintada|consigna|volante|panflet|repartier|distribuy|"
+                          r"comunicado|psicol[oó]gic|bandera|leyendas|acto rel[aá]mpago|emisora|radio"),
 ]
 def tipos(texto):
     t = texto.lower()
@@ -238,7 +245,7 @@ def main():
             # sin organización y empezando por un lugar: es un hecho solo si cuenta un ataque
             # (antes de 1966 esas entradas son el contexto político de la época)
             if orgs is None and (es_lugar(seg[0]) or re.match(r"Secuestros|Enfrentamiento de grupos", seg[0])) \
-                    and d["fecha"][:4] >= "1966" and set(tipos(t)) - {"Otro", "Abatido o detenido"}:
+                    and d["fecha"][:4] >= "1966" and set(tipos(t)) - {"Otro", "Abatido o detenido", "Propaganda armada"}:
                 orgs, derecha = ["No identificada"], False
                 seg = [""] + seg
             h = {"id": "%d-%d" % (d["tomo"], d["orden"]), "f": d["fecha"]}
@@ -282,7 +289,8 @@ def main():
     def grupo(tp):
         for clave, nombres in (("asesinato", ["Asesinato"]), ("secuestro", ["Secuestro"]),
                                ("bomba", ["Bomba", "Incendio"]), ("ataque", ["Ataque armado"]),
-                               ("toma", ["Copamiento", "Asalto o robo"])):
+                               ("toma", ["Copamiento", "Asalto o robo"]),
+                               ("propaganda", ["Propaganda armada"])):
             if any(n in tp for n in nombres): return clave
         return "otro"
     liviano = []
