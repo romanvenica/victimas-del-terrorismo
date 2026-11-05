@@ -466,7 +466,7 @@
     <button type="button" class="cerrarpanel">&times;</button>
     <h2 id="listhead">Personas</h2>
     <div class="lsearch">
-    <input id="lq" type="text" placeholder="Buscar por nombre…" autocomplete="off">
+    <input id="lq" type="text" placeholder="Buscar en todo…" autocomplete="off">
     <button type="button" class="borrar" id="lqx" aria-label="Borrar la búsqueda">&times;</button>
   </div>
     <button type="button" class="verfotos" id="btnFotos">Ver fotos</button>
@@ -726,17 +726,41 @@ function itemsActuales(){ return MODO==="hechos" ? hechosFiltrados() : DATA.filt
 function norm(s){
   return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 }
+// ---- búsqueda en todos los textos: sin importar tildes, mayúsculas ni el
+// orden de las palabras; cada palabra tiene que aparecer en algún lado ----
+const VACIAS=new Set(["de","del","la","las","el","los","en","y","a","al","por","con","un","una","que","se","lo"]);
+function terminosBusqueda(q){
+  return norm(q).split(/[^a-z0-9]+/).filter(function(t){ return t.length>1 && !VACIAS.has(t); });
+}
+// el texto se guarda así: « palabra palabra palabra » (sin tildes ni signos),
+// para que lo buscado tenga que coincidir con el principio de una palabra:
+// «rucci» no aparece dentro de «construcción»
+function textoBusqueda(s){ return " "+norm(s).replace(/[^a-z0-9]+/g," ")+" "; }
+function coincide(texto, t){
+  if(texto.indexOf(" "+t)!==-1) return true;
+  // plurales: «montoneros» encuentra «montonero», «explosivos» encuentra «explosivo»
+  if(t.length>4 && t.slice(-2)==="es" && texto.indexOf(" "+t.slice(0,-2))!==-1) return true;
+  if(t.length>3 && t.slice(-1)==="s" && texto.indexOf(" "+t.slice(0,-1))!==-1) return true;
+  return false;
+}
 // lo que hoy muestra el listado: filtros + año elegido + buscador, ordenado alfabéticamente
 function listadoActual(){
   const q=norm(document.getElementById("lq").value.trim());
   let items=listPool;
   if(anioSel!==null) items=items.filter(function(d){ return grupoDe(d.y)===anioSel; });
-  if(q){
-    // cada palabra de la búsqueda debe aparecer en el nombre, en cualquier orden
-    const términos=q.split(/\s+/).filter(Boolean);
+  const términos=q ? terminosBusqueda(q) : [];
+  if(términos.length){
+    // busca en todo lo que se sabe de cada persona; primero las que lo tienen en el nombre
     items=items.filter(function(d){
-      const n=norm(d.n);
-      return términos.every(function(t){ return n.indexOf(t)!==-1; });
+      if(!d._b){
+        d._bn=textoBusqueda(d.n);
+        d._b=textoBusqueda([d.n,d.l,d.p,d.o,d.g,d.fu,d.rama,d.t,d.org,d.d,d.y,d.f,categoriaTexto(d)].filter(Boolean).join(" "));
+      }
+      d._pts=términos.filter(function(t){ return coincide(d._bn,t); }).length;
+      return términos.every(function(t){ return coincide(d._b,t); });
+    });
+    return items.slice().sort(function(a,b){
+      return (b._pts-a._pts) || a.n.localeCompare(b.n,"es",{sensitivity:"base"});
     });
   }
   return items.slice().sort(function(a,b){
@@ -846,7 +870,12 @@ document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarGale
 
 const lq=document.getElementById("lq"), lqx=document.getElementById("lqx");
 function marcarBorrar(){ lqx.classList.toggle("show", lq.value!==""); }
-lq.addEventListener("input",function(){ marcarBorrar(); drawList(); });
+let lqT;
+lq.addEventListener("input",function(){
+  marcarBorrar();
+  clearTimeout(lqT);
+  if(MODO==="hechos") lqT=setTimeout(drawList,220); else drawList();
+});
 lqx.addEventListener("click",function(){ lq.value=""; marcarBorrar(); drawList(); lq.focus(); });
 
 const S_BASE=16;       // tamaño del ícono al 100%
@@ -2023,7 +2052,7 @@ function marcarModos(){
     b.setAttribute("aria-pressed", b.dataset.m===MODO ? "true" : "false");
   });
   document.body.classList.toggle("modo-hechos", MODO==="hechos");
-  lq.placeholder = MODO==="hechos" ? "Buscar organización o lugar…" : "Buscar por nombre…";
+  lq.placeholder = MODO==="hechos" ? "Buscar en los textos…" : "Buscar en todo…";
 }
 function cambiarModo(m){
   if(m===MODO) return Promise.resolve();
@@ -2088,21 +2117,44 @@ let hLista=[], hListaN=0;
 function drawListHechos(){
   const head=document.getElementById("listhead");
   const box=document.getElementById("listscroll");
-  const q=norm(lq.value.trim());
+  const ts=terminosBusqueda(lq.value.trim());
   let items=listPool;
   if(anioSel!==null) items=items.filter(function(h){ return grupoDe(h.y)===anioSel; });
-  if(q){
-    const ts=q.split(/\s+/).filter(Boolean);
+  if(ts.length){
+    if(!textosTodos){
+      head.textContent="Buscando en los textos…";
+      box.innerHTML="";
+      cargarTodosLosTextos().then(function(){ if(MODO==="hechos") drawListHechos(); });
+      return;
+    }
+    // busca en tipo, responsable, lugar, fecha y el texto completo con sus notas;
+    // primero los que lo tienen en el tipo, el responsable o el lugar
     items=items.filter(function(h){
-      if(!h._n) h._n=norm(h.o.join(" ")+" "+h.l+" "+h.p+" "+HNOMBRE[h.t]);
-      return ts.every(function(t){ return h._n.indexOf(t)!==-1; });
+      if(!h._n) h._n=textoBusqueda(h.o.join(" ")+" "+h.l+" "+h.p+" "+HNOMBRE[h.t]+" "+HPLURAL[h.t]+" "+h.f.replace(/-/g," "));
+      if(h._b===undefined){
+        const x=(HTXT[h.f.slice(0,4)]||{})[h.id];
+        h._b=h._n+(x ? textoBusqueda(x.tx+" "+(x.nt||[]).join(" ")) : "");
+      }
+      h._pts=ts.filter(function(t){ return coincide(h._n,t); }).length;
+      return ts.every(function(t){ return coincide(h._b,t); });
     });
+    items=items.slice().sort(function(a,b){ return (b._pts-a._pts) || (a.f<b.f?-1:a.f>b.f?1:0); });
   }
   hLista=items; hListaN=0;
   head.textContent=(anioSel!==null ? nombreGrupo(anioSel)+" · " : "")+
     items.length.toLocaleString("es-AR")+(items.length===1?" atentado":" atentados");
   box.innerHTML=""; box.scrollTop=0;
   masListaHechos();
+}
+// para buscar en los textos hacen falta todos los años: se bajan una sola vez
+let textosTodos=false, textosCarga=null;
+function cargarTodosLosTextos(){
+  if(!textosCarga){
+    const anios={}; HG.forEach(function(h){ anios[h.f.slice(0,4)]=1; });
+    textosCarga=Promise.all(Object.keys(anios).map(function(a){ return textoAnio(a).catch(function(){}); }))
+      .then(function(){ textosTodos=true; });
+  }
+  return textosCarga;
 }
 function fechaNum(h){
   const p=h.f.split("-");
