@@ -1863,13 +1863,13 @@ const HTXT={}, HTXTCARGA={};
 const HFS={org:"", tipos:new Set()};   // filtros propios de los atentados
 const HTIPOS=[   // de abajo hacia arriba en cada columna; cada color tiene que ver con
                  // el hecho (se repiten con los de las víctimas, pero nunca se ven juntos)
-  ["asesinato","Asesinato","#e05138"],             // rojo: sangre
-  ["secuestro","Secuestro","#7c7c7c"],             // gris: encierro, cautiverio
-  ["bomba","Bomba o incendio","#a46229"],          // naranja: fuego, explosión
-  ["ataque","Ataque armado","#c4a132"],            // amarillo: bronce de las balas
-  ["toma","Copamiento o robo","#487145"],          // verde: dinero
-  ["propaganda","Propaganda terrorista","#4f84a6"],// azul: tinta de volantes y panfletos
-  ["otro","Otros","#74675a"]];                     // marrón apagado: lo que no entra en lo demás
+  ["asesinato","Asesinato","#e05138"],                 // rojo: sangre
+  ["bomba","Atentado terrorista","#a46229"],           // naranja: bombas, explosivos e incendios
+  ["ataque","Ataque armado","#c4a132"],                // amarillo: bronce de las balas
+  ["secuestro","Secuestro","#7c7c7c"],                 // gris: encierro, cautiverio
+  ["toma","Copamiento o robo","#487145"],              // verde: dinero
+  ["propaganda","Propaganda terrorista","#4f84a6"],    // azul: tinta de volantes y panfletos
+  ["otro","Otros","#74675a"]];                         // marrón apagado: lo que no entra en lo demás
 const HCOLOR={}, HNOMBRE={}, HRANGO={};
 HTIPOS.forEach(function(t,i){ HCOLOR[t[0]]=t[2]; HNOMBRE[t[0]]=t[1]; HRANGO[t[0]]=10+i; });
 const MAXCOLS_H=14;   // son muchos más que las víctimas: columnas más anchas
