@@ -987,12 +987,12 @@ function drawPlot(items){
   const isMobile=window.matchMedia("(max-width:760px)").matches;
   const cajaW=Math.max(280, plot.clientWidth-40);
   const cajaH=Math.max(120, Math.max(220, plot.clientHeight)-44);
-  const AIRE = 30;   // aire libre arriba de la columna más alta
+  const AIRE = modoH ? 12 : 30;   // aire libre arriba de la columna más alta
 
   // medidas completas del dibujo para una escala dada
   function medidas(escala){
     const S=Math.max(modoH?(sMinH||4):6,Math.round(S_BASE*escala));
-    const CELL=S+Math.max(modoH?1:2,Math.round(SEP_BASE*escala));
+    const CELL=S+Math.max(modoH?(sMinH===3?0.6:1):2,Math.round(SEP_BASE*escala));
     const GAP=Math.max(4,Math.round(GAP_BASE*escala));
     const EMPTYW=Math.max(2,Math.round(EMPTYW_BASE*escala));
     const perRow={}, colW={};
@@ -1043,8 +1043,8 @@ function drawPlot(items){
           if(ok && (!mejor || ok.S>mejor.plan.S)) mejor={plan:ok, cols:c};
         }
         if(mejor){
-          // un ícono menos de ancho por columna: más altas y angostas
-          maxCols=Math.max(4,mejor.cols-1);
+          // dos íconos menos de ancho por columna: más altas y angostas
+          maxCols=Math.max(4,mejor.cols-2);
           let ok=null;
           for(const minimo of [4,3]){
             sMinH=minimo;
@@ -1085,7 +1085,14 @@ function drawPlot(items){
   const axisY=isMobile
       ? Math.max(disponible-34, contentH)
       : Math.max(plot.clientHeight-40, contentH);
-  const H=axisY+34;
+  // la estrella del '76-'77 va entre las etiquetas de los años; si las
+  // columnas son tan angostas que no entra, baja a una fila propia
+  let golpeX=null, golpeAbajo=false;
+  if(centerX[1976]!==undefined && centerX[1977]!==undefined){
+    golpeX=((centerX[1976]+colWY[1976]/2)+(centerX[1977]-colWY[1977]/2))/2;
+    golpeAbajo = (golpeX-centerX[1976] < 21) || (centerX[1977]-golpeX < 21);
+  }
+  const H=axisY+34+(golpeAbajo?18:0);
   baseY=axisY;                  // el eje es el piso del dibujo, se usa al pellizcar
 
   const svg=document.createElementNS(NS,"svg");
@@ -1223,14 +1230,14 @@ function drawPlot(items){
     });
   });
 
-  // estrella sobre la línea de los años, entre el '76 y el '77: el gobierno militar
-  if(centerX[1976]!==undefined && centerX[1977]!==undefined){
-    const xg=((centerX[1976]+colWY[1976]/2)+(centerX[1977]-colWY[1977]/2))/2;
+  // estrella en la fila de los años, entre el '76 y el '77 (sin pisar la línea): el gobierno militar
+  if(golpeX!==null){
+    const xg=golpeX;
     const gf=document.createElementNS(NS,"g");
     gf.setAttribute("class","golpe");
     gf.setAttribute("tabindex","0");
     gf.setAttribute("aria-label","Proceso de Reorganización Nacional");
-    gf.setAttribute("transform","translate("+xg+" "+axisY+")");
+    gf.setAttribute("transform","translate("+xg+" "+(axisY+(golpeAbajo?37:15))+")");
     gf.innerHTML='<circle r="6.2"/><path transform="scale(.68)" d="M0 -5.6L1.32 -1.8L5.33 -1.73L2.13 0.69L3.29 4.53L0 2.24L-3.29 4.53L-2.13 0.69L-5.33 -1.73L-1.32 -1.8Z"/>';
     const mostrar=function(e){
       tip.innerHTML='<span class="tnom">Proceso de Reorganización Nacional</span>';
