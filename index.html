@@ -1867,9 +1867,7 @@ const HTIPOS=[   // de abajo hacia arriba en cada columna; cada color tiene que 
   ["bomba","Atentado terrorista","#a46229"],           // naranja: bombas, explosivos e incendios
   ["ataque","Ataque armado","#c4a132"],                // amarillo: bronce de las balas
   ["secuestro","Secuestro","#7c7c7c"],                 // gris: encierro, cautiverio
-  ["toma","Copamiento o robo","#487145"],              // verde: dinero
-  ["propaganda","Propaganda terrorista","#4f84a6"],    // azul: tinta de volantes y panfletos
-  ["otro","Otros","#74675a"]];                         // marrón apagado: lo que no entra en lo demás
+  ["otro","Otros","#74675a"]];                         // marrón apagado: robos, copamientos, propaganda y lo demás
 const HCOLOR={}, HNOMBRE={}, HRANGO={};
 HTIPOS.forEach(function(t,i){ HCOLOR[t[0]]=t[2]; HNOMBRE[t[0]]=t[1]; HRANGO[t[0]]=10+i; });
 const MAXCOLS_H=14;   // son muchos más que las víctimas: columnas más anchas

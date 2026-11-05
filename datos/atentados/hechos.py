@@ -317,8 +317,7 @@ def main():
     def grupo(tp):
         for clave, nombres in (("asesinato", ["Asesinato"]), ("secuestro", ["Secuestro"]),
                                ("bomba", ["Bomba", "Incendio"]), ("ataque", ["Ataque armado"]),
-                               ("toma", ["Copamiento", "Asalto o robo"]),
-                               ("propaganda", ["Propaganda armada"])):
+                               ):   # robo, copamiento y propaganda van a «Otros»
             if any(n in tp for n in nombres): return clave
         return "otro"
     liviano = []
