@@ -293,6 +293,16 @@ def main():
         liviano.append(x)
     json.dump(liviano, open(sal / "hechos_grafico.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("grupos del gráfico", collections.Counter(x["t"] for x in liviano).most_common())
+    # el texto, partido por año: al abrir un hecho se baja solo su año
+    tx_dir = sal / "textos"; tx_dir.mkdir(exist_ok=True)
+    for f in tx_dir.glob("*.json"): f.unlink()
+    por_anio = collections.defaultdict(dict)
+    for h in hechos:
+        x = {"tx": h["tx"], "tm": h["tm"], "pg": h["pg"]}
+        if h.get("nt"): x["nt"] = h["nt"]
+        por_anio[h["f"][:4]][h["id"]] = x
+    for a, d in por_anio.items():
+        json.dump(d, open(tx_dir / (a + ".json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     # mapa chico víctima -> hecho, para el botón de la ficha sin cargar todo
     vh = {}
     for h in hechos:

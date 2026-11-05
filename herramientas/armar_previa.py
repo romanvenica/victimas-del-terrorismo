@@ -27,7 +27,10 @@ io.open(os.path.join(DEST, "index.html"), "w", encoding="utf-8").write(titulo + 
 for f in ("victimas.json", "cruz.png"):
     shutil.copy(os.path.join(REPO, f), DEST)
 # la cronología: si está publicada va en la raíz; si no, sale de datos/atentados/web
-for f in ("hechos.json", "hechos_grafico.json", "hechos_victimas.json"):
+for d in (os.path.join(REPO, "textos"), os.path.join(REPO, "datos", "atentados", "web", "textos")):
+    if os.path.isdir(d):
+        shutil.copytree(d, os.path.join(DEST, "textos")); break
+for f in ("hechos_grafico.json", "hechos_victimas.json"):
     for origen in (os.path.join(REPO, f), os.path.join(REPO, "datos", "atentados", "web", f)):
         if os.path.exists(origen):
             shutil.copy(origen, DEST); break
