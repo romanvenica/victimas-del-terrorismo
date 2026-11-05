@@ -2124,7 +2124,11 @@ function drawListHechos(){
     if(!textosTodos){
       head.textContent="Buscando en los textos…";
       box.innerHTML="";
-      cargarTodosLosTextos().then(function(){ if(MODO==="hechos") drawListHechos(); });
+      // al terminar de bajar, solo si sigue habiendo algo escrito (si no, el
+      // listado saltaría arriba mientras uno lo recorre)
+      cargarTodosLosTextos().then(function(){
+        if(MODO==="hechos" && terminosBusqueda(lq.value.trim()).length) drawListHechos();
+      });
       return;
     }
     // busca en tipo, responsable, lugar, fecha y el texto completo con sus notas;
