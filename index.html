@@ -1858,13 +1858,13 @@ let HG=null, HGCARGA=null, HXV={};
 const HTXT={}, HTXTCARGA={};
 const HFS={org:"", tipos:new Set()};   // filtros propios de los atentados
 const HTIPOS=[   // de abajo hacia arriba en cada columna; colores sobrios
-  ["asesinato","Asesinato","#c47c70"],
-  ["secuestro","Secuestro","#a198b2"],
-  ["bomba","Bomba o incendio","#c3a376"],
-  ["ataque","Ataque armado","#80a7a1"],
-  ["toma","Copamiento o robo","#ac9e85"],
-  ["propaganda","Propaganda terrorista","#9da778"],
-  ["otro","Otros","#8a7e71"]];
+  ["asesinato","Asesinato","#d69b91"],
+  ["secuestro","Secuestro","#bbb4c9"],
+  ["bomba","Bomba o incendio","#d5bb97"],
+  ["ataque","Ataque armado","#9dbdb8"],
+  ["toma","Copamiento o robo","#c2b7a2"],
+  ["propaganda","Propaganda terrorista","#b4bd95"],
+  ["otro","Otros","#a2978c"]];
 const HCOLOR={}, HNOMBRE={}, HRANGO={};
 HTIPOS.forEach(function(t,i){ HCOLOR[t[0]]=t[2]; HNOMBRE[t[0]]=t[1]; HRANGO[t[0]]=10+i; });
 const MAXCOLS_H=14;   // son muchos más que las víctimas: columnas más anchas
