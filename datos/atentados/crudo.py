@@ -47,17 +47,41 @@ def leer_fecha(cab, anio_ctx):
         return m.group(0), m.group(1)
     return "", ""
 
+VINETA = re.compile(r"^[\ue000-\uf8ff•▪●◦\-–]\s*")
+
 def unir(lineas):
-    """Junta los renglones cortados por el ancho de pagina; los parrafos quedan separados."""
-    parrafos, actual = [], []
+    """Junta los renglones cortados por el ancho de pagina; los parrafos quedan separados.
+    Las listas con viñetas quedan un renglón por item («• Roque, Juan Julio»): el PDF
+    a veces trae las viñetas solas y los nombres abajo, así que se vuelven a juntar."""
+    parrafos, actual, lista = [], [], 0
     for l in lineas:
-        if l.strip(): actual.append(l.strip())
-        elif actual: parrafos.append(" ".join(actual)); actual = []
-    if actual: parrafos.append(" ".join(actual))
+        s = l.strip()
+        if s and VINETA.sub("", s) == "":          # una viñeta sola: anuncia un item
+            lista += 1; continue
+        if not s:
+            if actual: parrafos.append(" ".join(actual) if not isinstance(actual[0], tuple) else "\n".join(x[1] for x in actual)); actual = []
+            continue
+        if VINETA.match(s) and len(s) > 2 and s[0] not in "-–":
+            item = "• " + VINETA.sub("", s)
+        elif lista:
+            item = "• " + s; lista -= 1
+        else:
+            item = None
+        if item:
+            if actual and not isinstance(actual[0], tuple):
+                parrafos.append(" ".join(actual)); actual = []
+            actual.append(("i", item))
+        else:
+            if actual and isinstance(actual[0], tuple):
+                # renglón cortado de un item largo: va pegado al item anterior
+                if s[:1].islower(): actual[-1] = ("i", actual[-1][1] + " " + s); continue
+                parrafos.append("\n".join(x[1] for x in actual)); actual = []
+            actual.append(s)
+    if actual: parrafos.append(" ".join(actual) if not isinstance(actual[0], tuple) else "\n".join(x[1] for x in actual))
     return "\n\n".join(parrafos)
 
 NOTAS = {}
-NOTA_RE = re.compile(r"^\s*(\d{1,4}) (\S.*)$")
+NOTA_RE = re.compile(r"^\s*(\d{1,4})(?: (\S.*)|([A-ZÁÉÍÓÚ“].*))$")   # «115 La Razón» o pegado «234Los 70»
 
 def separar_notas(lineas, ultima):
     """Las notas al pie estan al final de la pagina: «115 La Razón 29/07/65...».
@@ -66,13 +90,13 @@ def separar_notas(lineas, ultima):
     for k, l in enumerate(lineas):
         m = NOTA_RE.match(l)
         if not m or not (ultima < int(m.group(1)) <= ultima + 40): continue
-        if re.match(r"(de|del|al|y|a|años?|personas|hs)\b", m.group(2), re.I): continue   # «12 de abril», «24 años»
+        if re.match(r"(de|del|al|y|a|años?|personas|hs)\b", m.group(2) or m.group(3), re.I): continue   # «12 de abril», «24 años»
         if any("■" in r for r in lineas[k:]): continue    # debajo de una nota no puede empezar un hecho
         notas, actual, prev = {}, None, ultima
         for r in lineas[k:]:
             m2 = NOTA_RE.match(r)
             if m2 and prev < int(m2.group(1)) <= prev + 5:
-                actual = prev = int(m2.group(1)); notas[actual] = m2.group(2).strip()
+                actual = prev = int(m2.group(1)); notas[actual] = (m2.group(2) or m2.group(3)).strip()
             elif r.strip() and actual:
                 t = notas[actual]
                 notas[actual] = (t[:-1] if t.endswith("-") else t + " ") + r.strip()

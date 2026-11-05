@@ -205,6 +205,14 @@
   .card .nmico{width:34px;height:34px;flex:none}
   .card .nmcat{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c9bda9;margin-bottom:3px}
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
+  /* en la ficha de un atentado el tipo es el título y la organización va debajo */
+  .golpe{cursor:pointer}
+  .golpe circle{fill:#1c1712;stroke:#c9bda9;stroke-width:1.1}
+  .golpe path{fill:#e8e0d4}
+  .golpe:hover circle,.golpe:focus circle{fill:#3a2f24}
+  .golpe:focus{outline:none}
+  .card .htipotit{font-family:var(--serif);font-size:25px;line-height:1.2;margin:0 0 4px}
+  .card .horgsub{font-size:14px;font-weight:600;color:#c9bda9;line-height:1.35}
   /* display:inline-block a mano: la regla general pone los svg en bloque y la
      cruz se caía al renglón de abajo en vez de quedar pegada al nombre */
   .card .cruznm,.visornom .cruznm{display:inline-block;width:11px;height:17px;margin-left:9px;
@@ -347,6 +355,43 @@
     .card .nmrow{margin-right:40px}
   }
   .card .grip{display:none}
+
+  /* ===================== ATENTADOS EN EL GRÁFICO ===================== */
+  /* selector víctimas | atentados, arriba al medio del gráfico */
+  .modos{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:5;display:flex;
+    background:#100d09;border:1px solid #4d4435;border-radius:6px;padding:3px;gap:3px}
+  .modos button{background:none;border:none;border-radius:4px;color:var(--dim);cursor:pointer;
+    font-family:var(--sans);font-size:13px;font-weight:600;padding:7px 18px}
+  .modos button:hover{color:var(--ink)}
+  .modos button.on{background:#2a221a;color:var(--ink);box-shadow:inset 0 0 0 1px #5c4d3f}
+  .modos button:focus-visible{outline:2px solid var(--hi);outline-offset:1px}
+  .modoscel{display:none}
+  .lrow.lhecho span small{display:block;color:var(--dim);font-size:11.5px;margin-top:2px}
+  .lrow.lhecho{cursor:pointer}
+  body.modo-hechos .verfotos,body.modo-hechos #zfotos{display:none}
+  .card .hcarga{color:var(--dim)}
+  @media(max-width:760px){
+    .stage .modos{display:none}
+    .modoscel{display:flex;position:static;transform:none;padding:2px}
+    .modoscel button{width:auto;background:none;border:none;padding:7px 12px;font-size:12.5px}
+    .modoscel button.on{background:#2a221a}
+  }
+  #tip .tlug{display:block;font-size:13px;color:#c9bda9;margin-top:3px}
+  .card .htexto p{font-family:var(--serif);font-size:16px;line-height:1.6;margin:0 0 12px;white-space:pre-line}
+  .card h3.hsec{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--dim);margin:18px 0 8px}
+  .card ol.hnotas{margin:0;padding-left:20px;color:var(--dim);font-size:12.5px;line-height:1.5}
+  .hpers{display:flex;flex-wrap:wrap;gap:8px}
+  .hper{display:flex;align-items:center;gap:9px;background:#1c1712;border:1px solid var(--line);
+    border-radius:4px;padding:5px 12px 5px 5px;cursor:pointer;color:var(--ink);font-family:var(--sans);font-size:13px}
+  .hper:hover{border-color:#5c4d3f;background:#241d16}
+  .hper .junto{white-space:nowrap}
+  .hper .cruznm{display:inline-block;width:7px;height:11px;margin-left:6px;vertical-align:-1px}
+  .hper img,.hper .sincruz{width:38px;height:38px;border-radius:3px;object-fit:cover;flex:none}
+  .verhecho{display:inline-block;margin:4px 0 14px;background:#1c1712;border:1px solid #5c4d3f;
+    border-radius:4px;color:var(--ink);font-family:var(--sans);font-size:13px;font-weight:600;
+    padding:8px 12px;cursor:pointer}
+  .verhecho:hover{background:#241d16;border-color:#8a7458}
 </style>
 </head>
 <body>
@@ -371,6 +416,10 @@
 <main>
   <div class="mobilebar">
     <button type="button" id="btnFiltro">Filtro</button>
+    <div class="modos modoscel" role="group" aria-label="Qué muestra el gráfico">
+      <button type="button" data-m="victimas" class="on" aria-pressed="true">Víctimas</button>
+      <button type="button" data-m="hechos" aria-pressed="false">Atentados</button>
+    </div>
     <button type="button" id="btnListado">Listado</button>
   </div>
   <aside class="filters" id="side">
@@ -380,6 +429,10 @@
     <div id="filters"></div>
   </aside>
   <section class="stage show" id="stage">
+    <div class="modos" role="group" aria-label="Qué muestra el gráfico">
+      <button type="button" data-m="victimas" class="on" aria-pressed="true">Víctimas</button>
+      <button type="button" data-m="hechos" aria-pressed="false">Atentados</button>
+    </div>
     <div class="plot" id="plot"></div>
     <div class="zoombar" id="zoombar">
       <button type="button" id="zmas" title="Agrandar" aria-label="Agrandar el gráfico">
@@ -456,6 +509,7 @@
   </div>
   <div class="galgrid" id="galgrid"></div>
 </aside>
+
 
 <script>
 let DATA = [];
@@ -599,7 +653,9 @@ function buildFilters(){
   });
 }
 document.getElementById("all").onclick=function(){
-  FILTERS.forEach(function(f){ state[f.key].clear(); }); soltarAnio(); render();
+  FILTERS.forEach(function(f){ state[f.key].clear(); });
+  HFS.org=""; HFS.tipos.clear();
+  soltarAnio(); render();
 };
 
 // tocar el título vuelve al principio: las 1050 otra vez, sin filtros ni búsqueda
@@ -620,6 +676,15 @@ function buildLegend(){
   const items=[["civil","Civiles"],["ffaa","Fuerzas Armadas"],
                ["policia","Policía / Seguridad"],["nino","Niños"]];
   const L=document.getElementById("legend"); L.innerHTML="";
+  if(MODO==="hechos"){
+    const t=document.createElement("div"); t.className="lgtit"; t.textContent="Atentados"; L.appendChild(t);
+    HTIPOS.forEach(function(x){
+      const span=document.createElement("span"); span.className="lg";
+      span.innerHTML='<svg viewBox="0 0 16 16" fill="'+x[2]+'">'+iconHecho(x[0])+'</svg>'+x[1];
+      L.appendChild(span);
+    });
+    return;
+  }
   const tit=document.createElement("div"); tit.className="lgtit"; tit.textContent="Referencias";
   L.appendChild(tit);
   items.forEach(function(it){
@@ -634,15 +699,23 @@ const plot=document.getElementById("plot");
 let listPool=[];   // subconjunto que pasa los filtros (antes del buscador)
 let anioSel=null;  // año elegido al tocar una columna
 function render(){
-  buildFilters();
-  buildChips();
   // en celular el tamaño se reacomoda a lo que quedó filtrado
   if(window.matchMedia("(max-width:760px)").matches) zoomManual=false;
+  if(MODO==="hechos"){
+    buildFiltersHechos();
+    listPool=hechosFiltrados();
+    drawPlot(listPool);
+    drawList();
+    return;
+  }
+  buildFilters();
+  buildChips();
   const shown=DATA.filter(passes);
   drawPlot(shown);
   listPool=shown;
   drawList();
 }
+function itemsActuales(){ return MODO==="hechos" ? hechosFiltrados() : DATA.filter(passes); }
 
 function norm(s){
   return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -665,6 +738,7 @@ function listadoActual(){
   });
 }
 function drawList(){
+  if(MODO==="hechos"){ drawListHechos(); return; }
   const head=document.getElementById("listhead");
   const box=document.getElementById("listscroll");
   const sorted=listadoActual();
@@ -841,7 +915,7 @@ function fijarZoom(nuevo, ancla){
   // guardar qué punto del contenido está al centro, para no perder de vista dónde estabas
   const centro=(plot.scrollLeft+plot.clientWidth/2)/previo;
   zoom=nuevo;
-  drawPlot(DATA.filter(passes));
+  drawPlot(itemsActuales());
   if(ancla){
     // dejar bajo los dedos el mismo punto del dibujo que estaba antes del pellizco
     plot.scrollLeft=Math.max(0, ancla.fx*plot.scrollWidth  - ancla.offX);
@@ -894,9 +968,12 @@ function stackRank(d){
 }
 function drawPlot(items){
   plot.innerHTML="";
+  const modoH = MODO==="hechos";
+  let maxCols = modoH ? MAXCOLS_H : MAXCOLS;
+  let sMinH = 0;   // con columnas más angostas los íconos pueden bajar a 3 px
   if(items.length===0){
     const e=document.createElement("div"); e.className="empty";
-    e.textContent="Ninguna víctima coincide con esos filtros.";
+    e.textContent=modoH ? "Ningún atentado coincide con esos filtros." : "Ninguna víctima coincide con esos filtros.";
     plot.appendChild(e); return;
   }
   const byYear={};
@@ -914,8 +991,8 @@ function drawPlot(items){
 
   // medidas completas del dibujo para una escala dada
   function medidas(escala){
-    const S=Math.max(6,Math.round(S_BASE*escala));
-    const CELL=S+Math.max(2,Math.round(SEP_BASE*escala));
+    const S=Math.max(modoH?(sMinH||4):6,Math.round(S_BASE*escala));
+    const CELL=S+Math.max(modoH?1:2,Math.round(SEP_BASE*escala));
     const GAP=Math.max(4,Math.round(GAP_BASE*escala));
     const EMPTYW=Math.max(2,Math.round(EMPTYW_BASE*escala));
     const perRow={}, colW={};
@@ -923,7 +1000,7 @@ function drawPlot(items){
     years.forEach(function(y){
       const c=cntY[y];
       if(c===0){ perRow[y]=1; colW[y]=EMPTYW; ancho+=EMPTYW+2; return; }
-      const pr=Math.min(MAXCOLS,c);
+      const pr=Math.min(maxCols,c);
       perRow[y]=pr; colW[y]=pr*CELL; ancho+=pr*CELL+GAP;
       filas=Math.max(filas,Math.ceil(c/pr));
     });
@@ -951,6 +1028,36 @@ function drawPlot(items){
         if(t.alto<=cajaH && t.ancho<=cajaW) entra=t; else if(entra) break;
       }
       plan = entra || medidas(ZOOM_MIN);
+      if(modoH){
+        // con los atentados se prueba también el ancho de las columnas y se
+        // queda con el que deja los íconos más grandes entrando enteros
+        const guardado=maxCols;
+        let mejor=entra ? {plan:entra, cols:guardado} : null;
+        for(let c=6;c<=30;c++){
+          maxCols=c;
+          let ok=null;
+          for(let e=0.2; e<=ZOOM_AUTO_MAX+0.001; e+=0.025){
+            const t=medidas(e);
+            if(t.alto<=cajaH && t.ancho<=cajaW) ok=t; else if(ok) break;
+          }
+          if(ok && (!mejor || ok.S>mejor.plan.S)) mejor={plan:ok, cols:c};
+        }
+        if(mejor){
+          // un ícono menos de ancho por columna: más altas y angostas
+          maxCols=Math.max(4,mejor.cols-1);
+          let ok=null;
+          for(const minimo of [4,3]){
+            sMinH=minimo;
+            for(let e=0.15; e<=ZOOM_AUTO_MAX+0.001; e+=0.025){
+              const t=medidas(e);
+              if(t.alto<=cajaH && t.ancho<=cajaW) ok=t; else if(ok) break;
+            }
+            if(ok) break;
+          }
+          plan = ok || medidas(0.15);
+        }
+        else maxCols=guardado;
+      }
       zoom = plan.escala;    // las lupas arrancan desde lo que se está viendo
     }
   }
@@ -1032,8 +1139,58 @@ function drawPlot(items){
     svg.appendChild(bg);
   });
 
+  // atentados: un trazo por tipo y una sola capa que calcula qué ícono se tocó
+  if(modoH){
+    const trazos={}; HTIPOS.forEach(function(t){ trazos[t[0]]=""; });
+    const columnas=[];
+    const k=S/16;
+    years.forEach(function(y){
+      const arr=byYear[y]; if(!arr) return;
+      arr.sort(function(a,b){ const ra=HRANGO[a.t],rb=HRANGO[b.t]; if(ra!==rb) return ra-rb; return a.f<b.f?-1:1; });
+      const cx=centerX[y], perRow=perRowY[y], wide=Math.min(perRow,arr.length);
+      columnas.push({x0:cx-wide*CELL/2, x1:cx+wide*CELL/2, cx:cx, wide:wide, perRow:perRow, arr:arr});
+      arr.forEach(function(h,i){
+        const rw=Math.floor(i/perRow), cl=i%perRow;
+        const x=cx+(cl-(wide-1)/2)*CELL - S/2;
+        const yy=axisY-6-S-rw*CELL;
+        h._x=x; h._y=yy; h._s=S;
+        trazos[h.t]+=trazoHecho(h.t,x,yy,k);
+      });
+    });
+    const capa=document.createElementNS(NS,"g");
+    capa.setAttribute("class","capahechos");
+    HTIPOS.forEach(function(t){
+      if(!trazos[t[0]]) return;
+      const pa=document.createElementNS(NS,"path");
+      pa.setAttribute("d",trazos[t[0]]); pa.setAttribute("fill",t[2]);
+      capa.appendChild(pa);
+    });
+    svg.appendChild(capa);
+    const enPunto=function(e){
+      const m=svg.getScreenCTM(); if(!m) return null;
+      const pt=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());
+      for(let c=0;c<columnas.length;c++){
+        const co=columnas[c];
+        if(pt.x<co.x0 || pt.x>co.x1) continue;
+        const cl=Math.round((pt.x-(co.cx-(co.wide-1)/2*CELL))/CELL);
+        const rw=Math.round((axisY-6-S/2-pt.y)/CELL);
+        if(cl<0 || cl>=co.wide || rw<0) return null;
+        return co.arr[rw*co.perRow+cl] || null;
+      }
+      return null;
+    };
+    let sobre=null;
+    svg.addEventListener("mousemove",function(e){
+      const h=enPunto(e);
+      if(h!==sobre){ sobre=h; svg.style.cursor=h?"pointer":""; if(h) showTipHecho(e,h); else hideTip(); }
+      else if(h) moveTip(e);
+    });
+    svg.addEventListener("mouseleave",function(){ sobre=null; hideTip(); });
+    svg.addEventListener("click",function(e){ if(dragMoved) return; const h=enPunto(e); if(h) openHecho(h); });
+  }
+
   // personas
-  years.forEach(function(y){
+  if(!modoH) years.forEach(function(y){
     const arr=byYear[y]; if(!arr) return;
     arr.sort(function(a,b){ const ra=stackRank(a),rb=stackRank(b); if(ra!==rb) return ra-rb; return a.f<b.f?-1:1; });
     const cx=centerX[y];
@@ -1043,11 +1200,11 @@ function drawPlot(items){
       const wide=Math.min(perRow,arr.length);
       const x=cx+(cl-(wide-1)/2)*CELL - S/2;
       const yy=axisY-6-S-rw*CELL;
-      const t=personType(d);
       const gp=document.createElementNS(NS,"g");
+      gp.setAttribute("transform","translate("+x+","+yy+") scale("+(S/16)+")");
+      const t=personType(d);
       gp.setAttribute("class","person");
       gp.setAttribute("data-id", DATA.indexOf(d));
-      gp.setAttribute("transform","translate("+x+","+yy+") scale("+(S/16)+")");
       gp.setAttribute("fill",personColor(t));
       gp.innerHTML=iconPaths(t);
       svg.appendChild(gp);
@@ -1066,6 +1223,35 @@ function drawPlot(items){
     });
   });
 
+  // estrella sobre la línea de los años, entre el '76 y el '77: el gobierno militar
+  if(centerX[1976]!==undefined && centerX[1977]!==undefined){
+    const xg=((centerX[1976]+colWY[1976]/2)+(centerX[1977]-colWY[1977]/2))/2;
+    const gf=document.createElementNS(NS,"g");
+    gf.setAttribute("class","golpe");
+    gf.setAttribute("tabindex","0");
+    gf.setAttribute("aria-label","Proceso de Reorganización Nacional");
+    gf.setAttribute("transform","translate("+xg+" "+axisY+")");
+    gf.innerHTML='<circle r="6.2"/><path transform="scale(.68)" d="M0 -5.6L1.32 -1.8L5.33 -1.73L2.13 0.69L3.29 4.53L0 2.24L-3.29 4.53L-2.13 0.69L-5.33 -1.73L-1.32 -1.8Z"/>';
+    const mostrar=function(e){
+      tip.innerHTML='<span class="tnom">Proceso de Reorganización Nacional</span>';
+      tip.style.display="block"; moveTip(e);
+    };
+    gf.addEventListener("mouseenter",mostrar);
+    gf.addEventListener("mousemove",function(e){ moveTip(e); });
+    // en el celular no hay mouse: tocarla muestra el cartel un rato (el
+    // teléfono avisa enseguida que "el dedo se fue": eso no lo cierra)
+    gf.addEventListener("mouseleave",function(){ if(Date.now()-(gf._toque||0)>2500) hideTip(); });
+    gf.addEventListener("click",function(e){
+      e.stopPropagation(); mostrar(e); gf._toque=Date.now();
+      clearTimeout(gf._t); gf._t=setTimeout(hideTip,2500);
+    });
+    // va dentro de otro grupo: al pellizcar en el celular el eje usa ese
+    // de afuera para no agrandarse, y la estrella conserva su lugar
+    const caja=document.createElementNS(NS,"g");
+    caja.appendChild(gf); svg.appendChild(caja);
+    ejeFijos.push({el:caja, cx:xg});
+  }
+
   if(isMobile){
     // en celular el dibujo queda congelado dentro de un lienzo y el zoom solo lo estira
     const wrap=document.createElement("div"); wrap.className="zoomwrap";
@@ -1073,6 +1259,12 @@ function drawPlot(items){
     lien.appendChild(svg); wrap.appendChild(lien); plot.appendChild(wrap);
     lienW=W; lienH=H;
     vz=vzDefecto();          // cada vez que cambian los datos se reencuadra solo
+    // el cartel de la flecha no se achica con el dibujo: se ve igual que en la PC
+    const est=svg.querySelector(".golpe");
+    if(est && vz<1){
+      const k=Math.min(1/vz,3);
+      est.setAttribute("transform", est.getAttribute("transform")+" scale("+k+")");
+    }
     aplicarVZ(); actualizarLupas();
   } else {
     plot.appendChild(svg);
@@ -1398,6 +1590,8 @@ function openCard(d, dejarPanel){
     });
     html+='</dl>';
   }
+  const idHecho=HXV[DATA.indexOf(d)];
+  if(idHecho) html+='<button type="button" class="verhecho" id="verhecho">Ver el atentado</button>';
   const partes=partirRelato(d.d);
   if(partes.semblanza) html+='<div class="rel">'+esc(partes.semblanza)+'</div>';
   if(partes.caso)      html+='<div class="rel">'+esc(partes.caso)+'</div>';
@@ -1413,6 +1607,8 @@ function openCard(d, dejarPanel){
   }
   card.scrollTop=0;   // siempre desde arriba, no donde quedo la ficha anterior
   document.getElementById("cx").onclick=closeCard;
+  const vh=document.getElementById("verhecho");
+  if(vh) vh.addEventListener("click",function(e){ e.stopPropagation(); abrirHechoPorId(idHecho); });
   card.classList.add("show"); scrim.classList.add("show");
 }
 function closeCard(){
@@ -1603,8 +1799,305 @@ function cerrarIntro(){ intro.classList.add("oculto"); }
 intro.addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
+
+/* ===================== ATENTADOS =====================
+   Arriba al medio se elige qué muestra el gráfico: víctimas o atentados.
+   hechos_grafico.json (liviano, sin texto) alcanza para dibujar; el texto
+   está partido por año en textos/AAAA.json y se baja al abrir un atentado.
+   hechos_victimas.json dice qué víctima tiene su atentado identificado. */
+let MODO="victimas";
+let HG=null, HGCARGA=null, HXV={};
+const HTXT={}, HTXTCARGA={};
+const HFS={org:"", tipos:new Set()};   // filtros propios de los atentados
+const HTIPOS=[   // de abajo hacia arriba en cada columna; colores apagados
+  ["asesinato","Asesinato","#a8574a"],
+  ["secuestro","Secuestro","#7f7394"],
+  ["bomba","Bomba o incendio","#a8834f"],
+  ["ataque","Ataque armado","#5f8580"],
+  ["toma","Copamiento o robo","#8c7d62"],
+  ["propaganda","Propaganda terrorista","#7b8459"],
+  ["otro","Otros","#655d54"]];
+const HCOLOR={}, HNOMBRE={}, HRANGO={};
+HTIPOS.forEach(function(t,i){ HCOLOR[t[0]]=t[2]; HNOMBRE[t[0]]=t[1]; HRANGO[t[0]]=10+i; });
+const MAXCOLS_H=14;   // son muchos más que las víctimas: columnas más anchas
+function iconHecho(t){
+  switch(t){
+    case "asesinato": // mira
+      return '<path d="M8 1.6a6.4 6.4 0 1 0 0 12.8A6.4 6.4 0 0 0 8 1.6Zm0 2.2a4.2 4.2 0 1 1 0 8.4 4.2 4.2 0 0 1 0-8.4Z"/>'+
+             '<rect x="7.1" y="0.4" width="1.8" height="4.6"/><rect x="7.1" y="11" width="1.8" height="4.6"/>'+
+             '<rect x="0.4" y="7.1" width="4.6" height="1.8"/><rect x="11" y="7.1" width="4.6" height="1.8"/>';
+    case "secuestro": // candado
+      return '<path d="M5 7V5.2a3 3 0 0 1 6 0V7h-1.8V5.2a1.2 1.2 0 0 0-2.4 0V7Z"/>'+
+             '<rect x="3" y="7" width="10" height="7.6" rx="1.2"/>';
+    case "bomba": // bomba con mecha
+      return '<circle cx="7" cy="9.6" r="5"/><rect x="8.6" y="3" width="2.6" height="2.6" transform="rotate(45 9.9 4.3)"/>'+
+             '<path d="M11 3.2 13.2 1l1 1-2.2 2.2Z"/>';
+    case "ataque": // bala
+      return '<path d="M8 1.2c2 1.4 2.9 3.6 2.9 6.2V12H5.1V7.4C5.1 4.8 6 2.6 8 1.2Z"/><rect x="4.6" y="12.8" width="6.8" height="2.4" rx=".6"/>';
+    case "toma": // bandera
+      return '<rect x="2.6" y="1.4" width="1.7" height="13.4" rx=".5"/><path d="M4.3 2.2h9.2l-2.4 3.3 2.4 3.3H4.3Z"/>';
+    case "propaganda": // megáfono
+      return '<path d="M1.6 6.2H4.8L11.6 2.4V13.6L4.8 9.8H1.6Z"/><path d="M5.2 10.4H7.6L8.8 14.4H6.4Z"/>'+
+             '<rect x="12.8" y="6.9" width="2.4" height="2.2" rx=".6"/>';
+    default: // rombo
+      return '<path d="M8 2.2 13.8 8 8 13.8 2.2 8Z"/>';
+  }
+}
+// En el gráfico todos los íconos de un mismo tipo van en UN solo trazo: con
+// miles de atentados, dibujar cada uno por separado hacía muy lenta la página.
+// Mismas formas que iconHecho, escritas solo con comandos absolutos para
+// poder moverlas y escalarlas sumando y multiplicando números.
+const HFORMA={
+  asesinato:"M1.6 8A6.4 6.4 0 1 1 14.4 8A6.4 6.4 0 1 1 1.6 8Z M3.8 8A4.2 4.2 0 1 0 12.2 8A4.2 4.2 0 1 0 3.8 8Z"+
+            "M7.1 0.4H8.9V5H7.1Z M7.1 11H8.9V15.6H7.1Z M0.4 7.1H5V8.9H0.4Z M11 7.1H15.6V8.9H11Z",
+  secuestro:"M5 7V5.2A3 3 0 0 1 11 5.2V7H9.2V5.2A1.2 1.2 0 0 0 6.8 5.2V7Z M3 7H13V14.6H3Z",
+  bomba:"M2 9.6A5 5 0 1 1 12 9.6A5 5 0 1 1 2 9.6Z M9.9 2.46L11.74 4.3L9.9 6.14L8.06 4.3Z M11 3.2L13.2 1L14.2 2L12 4.2Z",
+  ataque:"M8 1.2C10 2.6 10.9 4.8 10.9 7.4V12H5.1V7.4C5.1 4.8 6 2.6 8 1.2Z M4.6 12.8H11.4V15.2H4.6Z",
+  toma:"M2.6 1.4H4.3V14.8H2.6Z M4.3 2.2H13.5L11.1 5.5L13.5 8.8H4.3Z",
+  propaganda:"M1.6 6.2H4.8L11.6 2.4V13.6L4.8 9.8H1.6Z M5.2 10.4H7.6L8.8 14.4H6.4Z M12.8 6.9H15.2V9.1H12.8Z",
+  otro:"M8 2.2L13.8 8L8 13.8L2.2 8Z"
+};
+const HPARTES={};
+Object.keys(HFORMA).forEach(function(t){
+  HPARTES[t]=(HFORMA[t].match(/[MLHVACZ]|-?[\d.]+/g)||[]).map(function(x){ return /[A-Z]/.test(x) ? x : +x; });
+});
+function trazoHecho(t, X, Y, k){
+  const a=HPARTES[t]; let out="", cmd="", n=0;
+  for(let i=0;i<a.length;i++){
+    const v=a[i];
+    if(typeof v==="string"){ cmd=v; n=0; out+=v; continue; }
+    let r;
+    if(cmd==="H") r=X+v*k;
+    else if(cmd==="V") r=Y+v*k;
+    else if(cmd==="A"){ const j=n%7; r = j<2 ? v*k : (j<5 ? v : (j===5 ? X+v*k : Y+v*k)); }
+    else r = n%2===0 ? X+v*k : Y+v*k;
+    out+=(Math.round(r*10)/10)+" "; n++;
+  }
+  return out;
+}
+fetch("hechos_victimas.json").then(function(r){ return r.json(); })
+  .then(function(j){ HXV=j; }).catch(function(){});
+function cargarHG(){
+  if(!HGCARGA){
+    HGCARGA=fetch("hechos_grafico.json").then(function(r){ if(!r.ok) throw r.status; return r.json(); })
+      .then(function(j){
+        j.forEach(function(h,i){ h.__h=true; h.k=i; h.y=+h.f.slice(0,4); });
+        HG=j; return j;
+      }).catch(function(e){ HGCARGA=null; throw e; });
+  }
+  return HGCARGA;
+}
+function textoAnio(a){
+  if(!HTXTCARGA[a]){
+    HTXTCARGA[a]=fetch("textos/"+a+".json").then(function(r){ if(!r.ok) throw r.status; return r.json(); })
+      .then(function(j){ HTXT[a]=j; return j; })
+      .catch(function(e){ delete HTXTCARGA[a]; throw e; });
+  }
+  return HTXTCARGA[a];
+}
+function pasaHecho(h, salvo){
+  if(h.y<MINY || h.y>MAXY) return false;
+  const provs=state["p"];
+  if(salvo!=="p" && provs.size && !provs.has(h.p)) return false;
+  if(salvo!=="org" && HFS.org && h.o.indexOf(HFS.org)<0) return false;
+  if(salvo!=="tipo" && HFS.tipos.size && !HFS.tipos.has(h.t)) return false;
+  return true;
+}
+function hechosFiltrados(){ return HG ? HG.filter(function(h){ return pasaHecho(h); }) : []; }
+
+// ---- cambiar entre víctimas y atentados ----
+function marcarModos(){
+  document.querySelectorAll(".modos button").forEach(function(b){
+    b.classList.toggle("on", b.dataset.m===MODO);
+    b.setAttribute("aria-pressed", b.dataset.m===MODO ? "true" : "false");
+  });
+  document.body.classList.toggle("modo-hechos", MODO==="hechos");
+  lq.placeholder = MODO==="hechos" ? "Buscar organización o lugar…" : "Buscar por nombre…";
+}
+function cambiarModo(m){
+  if(m===MODO) return Promise.resolve();
+  const listo = m==="hechos" ? cargarHG() : Promise.resolve();
+  return listo.then(function(){
+    MODO=m; anioSel=null; lq.value=""; marcarBorrar();
+    closeCard(); cerrarGaleria();
+    zoomManual=false;
+    marcarModos(); buildLegend(); render();
+  });
+}
+document.querySelectorAll(".modos button").forEach(function(b){
+  b.addEventListener("click",function(){ cambiarModo(b.dataset.m); });
+});
+
+// ---- filtros del panel izquierdo en modo atentados ----
+function buildFiltersHechos(){
+  fbox.innerHTML="";
+  // provincia (la misma que en víctimas)
+  let g=document.createElement("div"); g.className="grp";
+  g.innerHTML='<h2>Provincia</h2>';
+  let sel=document.createElement("select"); sel.className="selfiltro"; sel.setAttribute("aria-label","Provincia");
+  const provs={}; HG.forEach(function(h){ if(h.p && pasaHecho(h,"p")) provs[h.p]=(provs[h.p]||0)+1; });
+  sel.innerHTML='<option value="">Todas las provincias</option>'+Object.keys(provs)
+    .sort(function(a,b){ return provs[b]-provs[a]; })
+    .map(function(k){ return '<option value="'+esc(k)+'"'+(state.p.has(k)?' selected':'')+'>'+esc(k)+'  ·  '+provs[k]+'</option>'; }).join("");
+  sel.onchange=function(){ state.p.clear(); if(sel.value) state.p.add(sel.value); anioSel=null; render(); };
+  g.appendChild(sel); fbox.appendChild(g);
+  // organización
+  g=document.createElement("div"); g.className="grp";
+  g.innerHTML='<h2>Organización</h2>';
+  sel=document.createElement("select"); sel.className="selfiltro"; sel.setAttribute("aria-label","Organización");
+  const orgs={}; HG.forEach(function(h){ if(pasaHecho(h,"org")) h.o.forEach(function(o){ orgs[o]=(orgs[o]||0)+1; }); });
+  sel.innerHTML='<option value="">Todas las organizaciones</option>'+Object.keys(orgs)
+    .sort(function(a,b){ return orgs[b]-orgs[a]; })
+    .map(function(k){ return '<option value="'+esc(k)+'"'+(HFS.org===k?' selected':'')+'>'+esc(k)+'  ·  '+orgs[k]+'</option>'; }).join("");
+  sel.onchange=function(){ HFS.org=sel.value; anioSel=null; render(); };
+  g.appendChild(sel); fbox.appendChild(g);
+  // tipo de atentado
+  g=document.createElement("div"); g.className="grp";
+  g.innerHTML='<h2>Tipo de atentado</h2>';
+  const ct={}; HG.forEach(function(h){ if(pasaHecho(h,"tipo")) ct[h.t]=(ct[h.t]||0)+1; });
+  HTIPOS.forEach(function(t){
+    const row=document.createElement("div");
+    row.className="opt"+(HFS.tipos.has(t[0])?" on":"");
+    row.innerHTML='<span class="box"></span><span class="lb">'+esc(t[1])+'</span><span class="ct">'+(ct[t[0]]||0)+'</span>';
+    row.onclick=function(){
+      if(HFS.tipos.has(t[0])) HFS.tipos.delete(t[0]); else HFS.tipos.add(t[0]);
+      anioSel=null; render();
+    };
+    g.appendChild(row);
+  });
+  fbox.appendChild(g);
+}
+
+// ---- listado de la derecha en modo atentados ----
+const LTANDA=200;
+let hLista=[], hListaN=0;
+function drawListHechos(){
+  const head=document.getElementById("listhead");
+  const box=document.getElementById("listscroll");
+  const q=norm(lq.value.trim());
+  let items=listPool;
+  if(anioSel!==null) items=items.filter(function(h){ return grupoDe(h.y)===anioSel; });
+  if(q){
+    const ts=q.split(/\s+/).filter(Boolean);
+    items=items.filter(function(h){
+      if(!h._n) h._n=norm(h.o.join(" ")+" "+h.l+" "+h.p+" "+HNOMBRE[h.t]);
+      return ts.every(function(t){ return h._n.indexOf(t)!==-1; });
+    });
+  }
+  hLista=items; hListaN=0;
+  head.textContent=(anioSel!==null ? nombreGrupo(anioSel)+" · " : "")+
+    items.length.toLocaleString("es-AR")+(items.length===1?" atentado":" atentados");
+  box.innerHTML=""; box.scrollTop=0;
+  masListaHechos();
+}
+function fechaNum(h){
+  const p=h.f.split("-");
+  return p.length===3 && !h.a ? p[2]+"/"+p[1]+"/"+p[0] : (p.length>=2 ? p[1]+"/"+p[0] : p[0]);
+}
+function masListaHechos(){
+  const box=document.getElementById("listscroll");
+  const fin=Math.min(hLista.length, hListaN+LTANDA);
+  let html="";
+  for(let k=hListaN;k<fin;k++){
+    const h=hLista[k];
+    html+='<div class="lrow lhecho" data-k="'+h.k+'"><svg viewBox="0 0 16 16" fill="'+HCOLOR[h.t]+'">'+iconHecho(h.t)+'</svg>'+
+      '<span>'+esc(h.o.join(" · "))+'<small>'+esc(lugarHecho(h)||HNOMBRE[h.t])+'</small></span><span class="ly">'+fechaNum(h)+'</span></div>';
+  }
+  box.insertAdjacentHTML("beforeend",html);
+  hListaN=fin;
+}
+document.getElementById("listscroll").addEventListener("scroll",function(){
+  const box=this;
+  if(MODO==="hechos" && hListaN<hLista.length && box.scrollTop+box.clientHeight>box.scrollHeight-600) masListaHechos();
+});
+document.getElementById("listscroll").addEventListener("click",function(e){
+  if(MODO!=="hechos") return;
+  const row=e.target.closest(".lhecho"); if(row) openHecho(HG[+row.dataset.k],true);
+});
+
+// ---- tooltip, marca y ficha de un atentado ----
+function fechaHecho(h){
+  const p=h.f.split("-");
+  if(p.length===3 && !h.a) return fmtFecha(h.f);
+  if(p.length>=2) return MES[+p[1]]+' de '+p[0]+(h.a?' (aprox.)':'');
+  return p[0];
+}
+function lugarHecho(h){
+  return [h.l,h.p].filter(Boolean).filter(function(x,i,a){ return a.indexOf(x)===i; }).join(", ");
+}
+function showTipHecho(e,h){
+  const ico='<svg class="tico" viewBox="0 0 16 16" fill="'+HCOLOR[h.t]+'">'+iconHecho(h.t)+'</svg>';
+  const lug=lugarHecho(h);
+  tip.innerHTML='<div class="trow"><div><span class="tcat">'+esc(HNOMBRE[h.t])+' · '+esc(fechaHecho(h))+'</span>'+
+    '<span class="tnom">'+esc(h.o.join(" · "))+'</span>'+
+    (lug ? '<span class="tlug">'+esc(lug)+'</span>' : '')+'</div>'+ico+'</div>';
+  tip.style.display="block"; moveTip(e);
+}
+function markHecho(h){
+  const prev=document.querySelector("rect.selbox"); if(prev) prev.remove();
+  const svg=plot.querySelector("svg");
+  if(!svg || MODO!=="hechos" || h._x===undefined || !hechosFiltrados().includes(h)) return;
+  const x=h._x, y=h._y, sz=h._s;
+  const box=document.createElementNS(NS,"rect");
+  box.setAttribute("class","selbox");
+  box.setAttribute("x",x-3); box.setAttribute("y",y-3);
+  box.setAttribute("width",sz+6); box.setAttribute("height",sz+6); box.setAttribute("rx",3);
+  svg.appendChild(box);
+}
+// desde la ficha de una víctima: pasar a los atentados y abrir el suyo
+function abrirHechoPorId(id){
+  cambiarModo("hechos").then(function(){
+    const h=HG.find(function(x){ return x.id===id; });
+    if(h) openHecho(h);
+  });
+}
+// desde la ficha de un atentado: volver a las víctimas y abrir la de la persona
+function abrirVictimaDesdeHecho(i){
+  cambiarModo("victimas").then(function(){ const d=DATA[i]; if(d) openCard(d); });
+}
+function openHecho(h, dejarPanel){
+  hideTip(); if(!dejarPanel) cerrarPaneles();
+  markHecho(h);
+  const lug=lugarHecho(h);
+  let html='<div class="grip"></div><div class="xwrap"><button class="x" id="cx">&times;</button></div>';
+  html+='<div class="nmrow"><svg class="nmico" viewBox="0 0 16 16" fill="'+HCOLOR[h.t]+'">'+iconHecho(h.t)+'</svg>'+
+        '<div><div class="htipotit">'+esc(HNOMBRE[h.t])+'</div><div class="horgsub">'+esc(h.o.join(" · "))+'</div></div></div>';
+  html+='<dl class="meta"><dt>Fecha</dt><dd>'+esc(fechaHecho(h))+'</dd>'+
+        (lug ? '<dt>Lugar</dt><dd>'+esc(lug)+'</dd>' : '')+'</dl>';
+  if(h.v){
+    html+='<h3 class="hsec">Víctimas</h3><div class="hpers">';
+    h.v.forEach(function(i){
+      const d=DATA[i]; if(!d) return;
+      html+='<button type="button" class="hper" data-i="'+i+'">'+
+        (tieneFoto(d) ? '<img src="'+fotoThumb(d)+'" alt="" loading="lazy">' : '<span class="sincruz"></span>')+
+        nombreConCruz(d.n)+'</button>';
+    });
+    html+='</div>';
+  }
+  html+='<div class="htexto" id="htexto"><p class="hcarga">Cargando…</p></div>';
+  html+='<div id="hnotas"></div><div class="src" id="hfuente"></div>';
+  card.innerHTML=html;
+  card.scrollTop=0;
+  document.getElementById("cx").onclick=closeCard;
+  card.querySelectorAll(".hper").forEach(function(b){
+    b.addEventListener("click",function(e){ e.stopPropagation(); abrirVictimaDesdeHecho(+b.dataset.i); });
+  });
+  card.classList.add("show"); scrim.classList.add("show");
+  textoAnio(h.f.slice(0,4)).then(function(T){
+    const x=T[h.id]; const caja=document.getElementById("htexto");
+    if(!x || !caja) return;
+    caja.innerHTML=x.tx.split(/\n\n+/).map(function(p){ return '<p>'+esc(p)+'</p>'; }).join("");
+    if(x.nt && x.nt.length) document.getElementById("hnotas").innerHTML=
+      '<h3 class="hsec">Notas</h3><ol class="hnotas">'+x.nt.map(function(n){ return '<li>'+esc(n)+'</li>'; }).join("")+'</ol>';
+    document.getElementById("hfuente").innerHTML='<i>Crónica de una guerra negada</i>, tomo '+ROM[x.tm]+
+      ', pág. '+x.pg+' — Jorge Héctor Di Pasquale.';
+  }).catch(function(){
+    const caja=document.getElementById("htexto"); if(caja) caja.innerHTML='<p>No se pudo cargar el texto.</p>';
+  });
+}
+
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.55";
+const VERSION="v1.57";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
@@ -1635,7 +2128,7 @@ fetch("victimas.json",{cache:"no-cache"})
       '<div class="empty">No se pudo cargar victimas.json.<br>Abrí la web desde un servidor o desde internet, no con doble clic.</div>';
   });
 let rt;
-window.addEventListener("resize",function(){ clearTimeout(rt); rt=setTimeout(function(){ drawPlot(DATA.filter(passes)); },150); });
+window.addEventListener("resize",function(){ clearTimeout(rt); rt=setTimeout(function(){ drawPlot(itemsActuales()); },150); });
 </script>
 <!-- contador de visitas: sin cookies, sin guardar nada en el navegador.
      el número lo ve solo el dueño en romanvenica.goatcounter.com -->
