@@ -2115,7 +2115,7 @@ function masListaHechos(){
   for(let k=hListaN;k<fin;k++){
     const h=hLista[k];
     html+='<div class="lrow lhecho" data-k="'+h.k+'"><svg viewBox="0 0 16 16" fill="'+HCOLOR[h.t]+'">'+iconHecho(h.t)+'</svg>'+
-      '<span>'+esc(h.o.join(" · "))+'<small>'+esc(lugarHecho(h)||HNOMBRE[h.t])+'</small></span><span class="ly">'+fechaNum(h)+'</span></div>';
+      '<span>'+esc(HNOMBRE[h.t])+'<small>'+esc(h.o.join(" · "))+'</small></span><span class="ly">'+fechaNum(h)+'</span></div>';
   }
   box.insertAdjacentHTML("beforeend",html);
   hListaN=fin;
