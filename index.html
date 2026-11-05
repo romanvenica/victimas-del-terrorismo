@@ -207,7 +207,7 @@
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
   /* en la ficha de un atentado el tipo es el título y la organización va debajo */
   .golpe{cursor:pointer}
-  .golpe circle{fill:#1c1712;stroke:#c9bda9;stroke-width:1.3}
+  .golpe circle{fill:#1c1712;stroke:#c9bda9;stroke-width:1.1}
   .golpe path{fill:#e8e0d4}
   .golpe:hover circle,.golpe:focus circle{fill:#3a2f24}
   .golpe:focus{outline:none}
@@ -1231,7 +1231,7 @@ function drawPlot(items){
     gf.setAttribute("tabindex","0");
     gf.setAttribute("aria-label","Proceso de Reorganización Nacional");
     gf.setAttribute("transform","translate("+xg+" "+axisY+")");
-    gf.innerHTML='<circle r="9"/><path d="M0 -5.6L1.32 -1.8L5.33 -1.73L2.13 0.69L3.29 4.53L0 2.24L-3.29 4.53L-2.13 0.69L-5.33 -1.73L-1.32 -1.8Z"/>';
+    gf.innerHTML='<circle r="6.2"/><path transform="scale(.68)" d="M0 -5.6L1.32 -1.8L5.33 -1.73L2.13 0.69L3.29 4.53L0 2.24L-3.29 4.53L-2.13 0.69L-5.33 -1.73L-1.32 -1.8Z"/>';
     const mostrar=function(e){
       tip.innerHTML='<span class="tnom">Proceso de Reorganización Nacional</span>';
       tip.style.display="block"; moveTip(e);
@@ -2097,7 +2097,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.56";
+const VERSION="v1.57";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
