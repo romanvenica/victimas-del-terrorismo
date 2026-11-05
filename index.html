@@ -371,6 +371,7 @@
   body.modo-hechos .verfotos,body.modo-hechos #zfotos{display:none}
   .card .hcarga{color:var(--dim)}
   @media(max-width:760px){
+    body.modo-hechos footer#legend{background:rgba(20,16,12,.55)}
     .stage .modos{display:none}
     .modoscel{display:flex;position:static;transform:none;padding:2px}
     .modoscel button{width:auto;background:none;border:none;padding:7px 12px;font-size:12.5px}
@@ -1019,6 +1020,37 @@ function drawPlot(items){
         if(t.alto>cajaH) break;
         plan=t;
       }
+      if(modoH){
+        // en el celular el dibujo se achica para mostrar de entrada la mitad de
+        // su ancho: con columnas anchas los atentados quedaban bajitos. Se elige
+        // el ancho de columna que deja los íconos más grandes en pantalla (y,
+        // a igual tamaño, columnas más angostas y altas)
+        // se usa todo el alto: las puntas de algunas columnas pasan por detrás
+        // del cuadro de referencias, que en este modo es casi transparente
+        const altoLibre=cajaH;
+        const ajustar=function(){
+          let p=medidas(0.15);
+          for(let e=0.15; e<=ZOOM_AUTO_MAX+0.001; e+=0.025){
+            const t=medidas(e); if(t.alto>altoLibre) break; p=t;
+          }
+          return p;
+        };
+        const hw=hueco().w;
+        const enPantalla=function(t){
+          const Wt=Math.max(plot.clientWidth-40, t.ancho);
+          const vmin=Math.max(0.12, Math.min(VZ_MIN, (plot.clientWidth-16)/Wt));
+          return t.S*Math.min(1, Math.max(vmin, hw/(0.5*Wt)));
+        };
+        let elegido=null;
+        for(let c=MAXCOLS_H; c>=3; c--){
+          maxCols=c;
+          const t=ajustar(), v=enPantalla(t);
+          if(t.alto>altoLibre) continue;          // no entra ni con los íconos al mínimo
+          if(!elegido || v>=elegido.v-0.01) elegido={p:t, c:c, v:v};
+        }
+        if(elegido){ maxCols=elegido.c; plan=elegido.p; }
+        else { maxCols=MAXCOLS_H; plan=ajustar(); }
+      }
     } else {
       // la escala más grande que entre entera, agrandando o achicando. antes solo
       // podía agrandar: si el tamaño de arranque ya no entraba, quedaba cortado
@@ -1043,8 +1075,8 @@ function drawPlot(items){
           if(ok && (!mejor || ok.S>mejor.plan.S)) mejor={plan:ok, cols:c};
         }
         if(mejor){
-          // dos íconos menos de ancho por columna: más altas y angostas
-          maxCols=Math.max(4,mejor.cols-2);
+          // un ícono menos de ancho por columna: más altas y angostas
+          maxCols=Math.max(4,mejor.cols-1);
           let ok=null;
           for(const minimo of [4,3]){
             sMinH=minimo;
