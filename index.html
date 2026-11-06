@@ -1975,10 +1975,8 @@ plot.addEventListener("scroll",pedirHechosCel,{passive:true});
 window.addEventListener("resize",pedirHechosCel);
 function iconHecho(t){
   switch(t){
-    case "asesinato": // mira
-      return '<path d="M8 1.6a6.4 6.4 0 1 0 0 12.8A6.4 6.4 0 0 0 8 1.6Zm0 2.2a4.2 4.2 0 1 1 0 8.4 4.2 4.2 0 0 1 0-8.4Z"/>'+
-             '<rect x="7.1" y="0.4" width="1.8" height="4.6"/><rect x="7.1" y="11" width="1.8" height="4.6"/>'+
-             '<rect x="0.4" y="7.1" width="4.6" height="1.8"/><rect x="11" y="7.1" width="4.6" height="1.8"/>';
+    case "asesinato": // cruz
+      return '<path d="'+HFORMA.asesinato+'"/>';
     case "secuestro": // candado
       return '<path d="M5 7V5.2a3 3 0 0 1 6 0V7h-1.8V5.2a1.2 1.2 0 0 0-2.4 0V7Z"/>'+
              '<rect x="3" y="7" width="10" height="7.6" rx="1.2"/>';
@@ -2000,8 +1998,7 @@ function iconHecho(t){
 // Mismas formas que iconHecho, escritas solo con comandos absolutos para
 // poder moverlas y escalarlas sumando y multiplicando números.
 const HFORMA={
-  asesinato:"M1.6 8A6.4 6.4 0 1 1 14.4 8A6.4 6.4 0 1 1 1.6 8Z M3.8 8A4.2 4.2 0 1 0 12.2 8A4.2 4.2 0 1 0 3.8 8Z"+
-            "M7.1 0.4H8.9V5H7.1Z M7.1 11H8.9V15.6H7.1Z M0.4 7.1H5V8.9H0.4Z M11 7.1H15.6V8.9H11Z",
+  asesinato:"M6.6 0.8H9.4V15.2H6.6Z M2.6 4.3H13.4V7H2.6Z",
   secuestro:"M5 7V5.2A3 3 0 0 1 11 5.2V7H9.2V5.2A1.2 1.2 0 0 0 6.8 5.2V7Z M3 7H13V14.6H3Z",
   bomba:"M1.5 10.2A5.3 5.3 0 1 1 12.1 10.2A5.3 5.3 0 1 1 1.5 10.2Z M8.76 5.18L10.18 3.76L12.44 6.02L11.02 7.44Z M10.9 4.5C11.4 3.1 12.3 2.3 13.5 1.9L13.8 2.7C12.8 3 12.1 3.7 11.7 4.9Z M14.3 0.1L14.75 1.05L15.7 1.5L14.75 1.95L14.3 2.9L13.85 1.95L12.9 1.5L13.85 1.05Z",
   ataque:"M8 1.2C10 2.6 10.9 4.8 10.9 7.4V12H5.1V7.4C5.1 4.8 6 2.6 8 1.2Z M4.6 12.8H11.4V15.2H4.6Z",
