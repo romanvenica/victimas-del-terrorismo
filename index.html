@@ -887,7 +887,18 @@ const ZOOM_MIN=0.3, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
 // los atentados arrancan más chicos que las víctimas (son muchos más): la lupa
 // tiene que poder achicar hasta ahí
 function zoomMin(){ return MODO==="hechos" ? 0.15 : ZOOM_MIN; }
-let colsHPC=null;   // ancho de columna de atentados que eligió el ajuste en la PC
+let colsHPC=null;
+let centrosX={};
+// en la PC, al entrar a los atentados el gráfico arranca agrandado y
+// centrado en los años más cargados ('73 a '76), con el eje a la vista
+const ZOOM_ENTRADA_H=1.9;
+function encuadreInicialHechos(){
+  if(window.matchMedia("(max-width:760px)").matches || MODO!=="hechos") return;
+  fijarZoom(zoom*ZOOM_ENTRADA_H);
+  const a=centrosX[1974], b=centrosX[1975];
+  if(a!==undefined && b!==undefined) plot.scrollLeft=Math.max(0,(a+b)/2-plot.clientWidth/2);
+  plot.scrollTop=plot.scrollHeight;
+}   // ancho de columna de atentados que eligió el ajuste en la PC
 const ZOOM_AUTO_MAX=2.75;   // tope del agrandado automatico cuando sobra lugar
 let zoom=0.8;
 let zoomManual=false;      // al tocar las lupas o pellizcar, manda el usuario
@@ -1170,6 +1181,7 @@ function drawPlot(items){
   }
   const H=axisY+34+(golpeAbajo?18:0);
   baseY=axisY;                  // el eje es el piso del dibujo, se usa al pellizcar
+  centrosX=centerX;             // para centrar el encuadre en un año
 
   const svg=document.createElementNS(NS,"svg");
   svg.setAttribute("width",W); svg.setAttribute("height",H);
@@ -2065,6 +2077,7 @@ function cambiarModo(m){
     closeCard(); cerrarGaleria();
     zoomManual=false;
     marcarModos(); buildLegend(); render();
+    if(m==="hechos") encuadreInicialHechos();
   });
 }
 document.querySelectorAll(".modos button").forEach(function(b){
@@ -2267,7 +2280,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.67";
+const VERSION="v1.68";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
