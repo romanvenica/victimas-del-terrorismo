@@ -889,11 +889,26 @@ const ZOOM_MIN=0.3, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
 function zoomMin(){ return MODO==="hechos" ? 0.15 : ZOOM_MIN; }
 let colsHPC=null;
 let centrosX={};
+// en el celular, al entrar a los atentados se agranda hasta que entren del
+// '73 al '77 a lo ancho, con el eje abajo: las columnas quedan altas e imponentes
+function encuadreInicialHechosCel(){
+  const lien=lienzo(); if(!lien) return;
+  const a=centrosX[1973], b=centrosX[1977];
+  if(a===undefined || b===undefined) return;
+  const ancho=(b-a)*1.25;                      // de borde a borde de esas columnas
+  vz=Math.min(VZ_MAX, Math.max(vzMinimo(), hueco().w/ancho));
+  aplicarVZ();
+  plot.scrollLeft=Math.max(0, (a+b)/2*vz - plot.clientWidth/2);
+  plot.scrollTop=plot.scrollHeight;
+  actualizarLupas();
+  pedirHechosCel();
+}
 // en la PC, al entrar a los atentados el gráfico arranca agrandado y
 // centrado en los años más cargados ('73 a '76), con el eje a la vista
 const ZOOM_ENTRADA_H=1.9;
 function encuadreInicialHechos(){
-  if(window.matchMedia("(max-width:760px)").matches || MODO!=="hechos") return;
+  if(MODO!=="hechos") return;
+  if(window.matchMedia("(max-width:760px)").matches){ encuadreInicialHechosCel(); return; }
   fijarZoom(zoom*ZOOM_ENTRADA_H);
   const a=centrosX[1974], b=centrosX[1975];
   if(a!==undefined && b!==undefined) plot.scrollLeft=Math.max(0,(a+b)/2-plot.clientWidth/2);
@@ -1332,11 +1347,13 @@ function drawPlot(items){
     const gf=document.createElementNS(NS,"g");
     gf.setAttribute("class","golpe");
     gf.setAttribute("tabindex","0");
-    gf.setAttribute("aria-label","Proceso de Reorganización Nacional");
+    const textoGolpe = "Reducción de los "+(MODO==="hechos" ? "atentados" : "asesinatos")+
+                       " tras la llegada de los militares al gobierno";
+    gf.setAttribute("aria-label",textoGolpe);
     gf.setAttribute("transform","translate("+xg+" "+(axisY+(golpeAbajo?37:15))+")");
     gf.innerHTML='<circle r="6.2"/><path transform="scale(.68)" d="M0 -5.6L1.32 -1.8L5.33 -1.73L2.13 0.69L3.29 4.53L0 2.24L-3.29 4.53L-2.13 0.69L-5.33 -1.73L-1.32 -1.8Z"/>';
     const mostrar=function(e){
-      tip.innerHTML='<span class="tnom">Proceso de Reorganización Nacional</span>';
+      tip.innerHTML='<span class="tnom">'+textoGolpe+'</span>';
       tip.style.display="block"; moveTip(e);
     };
     gf.addEventListener("mouseenter",mostrar);
@@ -1975,10 +1992,8 @@ plot.addEventListener("scroll",pedirHechosCel,{passive:true});
 window.addEventListener("resize",pedirHechosCel);
 function iconHecho(t){
   switch(t){
-    case "asesinato": // mira
-      return '<path d="M8 1.6a6.4 6.4 0 1 0 0 12.8A6.4 6.4 0 0 0 8 1.6Zm0 2.2a4.2 4.2 0 1 1 0 8.4 4.2 4.2 0 0 1 0-8.4Z"/>'+
-             '<rect x="7.1" y="0.4" width="1.8" height="4.6"/><rect x="7.1" y="11" width="1.8" height="4.6"/>'+
-             '<rect x="0.4" y="7.1" width="4.6" height="1.8"/><rect x="11" y="7.1" width="4.6" height="1.8"/>';
+    case "asesinato": // cruz
+      return '<path d="'+HFORMA.asesinato+'"/>';
     case "secuestro": // candado
       return '<path d="M5 7V5.2a3 3 0 0 1 6 0V7h-1.8V5.2a1.2 1.2 0 0 0-2.4 0V7Z"/>'+
              '<rect x="3" y="7" width="10" height="7.6" rx="1.2"/>';
@@ -2000,8 +2015,7 @@ function iconHecho(t){
 // Mismas formas que iconHecho, escritas solo con comandos absolutos para
 // poder moverlas y escalarlas sumando y multiplicando números.
 const HFORMA={
-  asesinato:"M1.6 8A6.4 6.4 0 1 1 14.4 8A6.4 6.4 0 1 1 1.6 8Z M3.8 8A4.2 4.2 0 1 0 12.2 8A4.2 4.2 0 1 0 3.8 8Z"+
-            "M7.1 0.4H8.9V5H7.1Z M7.1 11H8.9V15.6H7.1Z M0.4 7.1H5V8.9H0.4Z M11 7.1H15.6V8.9H11Z",
+  asesinato:"M6.3 0.6H9.7V15.4H6.3Z M2.3 4.1H13.7V7.3H2.3Z",
   secuestro:"M5 7V5.2A3 3 0 0 1 11 5.2V7H9.2V5.2A1.2 1.2 0 0 0 6.8 5.2V7Z M3 7H13V14.6H3Z",
   bomba:"M1.5 10.2A5.3 5.3 0 1 1 12.1 10.2A5.3 5.3 0 1 1 1.5 10.2Z M8.76 5.18L10.18 3.76L12.44 6.02L11.02 7.44Z M10.9 4.5C11.4 3.1 12.3 2.3 13.5 1.9L13.8 2.7C12.8 3 12.1 3.7 11.7 4.9Z M14.3 0.1L14.75 1.05L15.7 1.5L14.75 1.95L14.3 2.9L13.85 1.95L12.9 1.5L13.85 1.05Z",
   ataque:"M8 1.2C10 2.6 10.9 4.8 10.9 7.4V12H5.1V7.4C5.1 4.8 6 2.6 8 1.2Z M4.6 12.8H11.4V15.2H4.6Z",
@@ -2280,7 +2294,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.68";
+const VERSION="v1.69";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
