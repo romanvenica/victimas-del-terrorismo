@@ -210,9 +210,10 @@
   /* en la ficha de un atentado el tipo es el título y la organización va debajo */
   #lienzoHechos{position:absolute;z-index:3;pointer-events:none;display:none}
   .golpe{cursor:pointer}
-  .golpe circle{fill:#1c1712;stroke:#c9bda9;stroke-width:1.1}
-  .golpe path{fill:#e8e0d4}
-  .golpe:hover circle,.golpe:focus circle{fill:#3a2f24}
+  /* verde militar */
+  .golpe circle{fill:#4b5a2a;stroke:#8f9e63;stroke-width:1.1}
+  .golpe path{fill:#eef0dc}
+  .golpe:hover circle,.golpe:focus circle{fill:#5d6f34}
   .golpe:focus{outline:none}
   .card .htipotit{font-family:var(--serif);font-size:25px;line-height:1.2;margin:0 0 4px}
   .card .horgsub{font-size:14px;font-weight:600;color:#c9bda9;line-height:1.35}
@@ -1332,11 +1333,13 @@ function drawPlot(items){
     const gf=document.createElementNS(NS,"g");
     gf.setAttribute("class","golpe");
     gf.setAttribute("tabindex","0");
-    gf.setAttribute("aria-label","Proceso de Reorganización Nacional");
+    const textoGolpe = "Reducción de los "+(MODO==="hechos" ? "atentados" : "asesinatos")+
+                       " tras la llegada de los militares al gobierno";
+    gf.setAttribute("aria-label",textoGolpe);
     gf.setAttribute("transform","translate("+xg+" "+(axisY+(golpeAbajo?37:15))+")");
     gf.innerHTML='<circle r="6.2"/><path transform="scale(.68)" d="M0 -5.6L1.32 -1.8L5.33 -1.73L2.13 0.69L3.29 4.53L0 2.24L-3.29 4.53L-2.13 0.69L-5.33 -1.73L-1.32 -1.8Z"/>';
     const mostrar=function(e){
-      tip.innerHTML='<span class="tnom">Proceso de Reorganización Nacional</span>';
+      tip.innerHTML='<span class="tnom">'+textoGolpe+'</span>';
       tip.style.display="block"; moveTip(e);
     };
     gf.addEventListener("mouseenter",mostrar);
