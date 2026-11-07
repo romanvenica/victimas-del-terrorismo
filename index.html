@@ -900,7 +900,7 @@ let centrosX={}, golpeXActual=null;
 // en el celular el dibujo se agranda y achica: la leyenda de la flecha se
 // compensa para leerse siempre del mismo tamaño
 function ponerFlecha(gf, lx, ly, k){
-  const gx=+gf.dataset.gx, py=+gf.dataset.py;
+  const gx=+gf.dataset.gx+15*k, py=+gf.dataset.py;   // todo el modelo corrido 15px a la derecha
   gf.dataset.lx=lx; gf.dataset.ly=ly;
   const tx=gf.querySelector(".ftexto");
   tx.setAttribute("transform","translate("+lx+" "+ly+") scale("+k+")");
@@ -941,10 +941,10 @@ function ubicarFlechaCel(){
   const minY=(zb+16-sr.top)/vz, maxY=py-(bb.height+bb.y)*k-14*k;
   const ly=Math.max(minY, Math.min(+gf.dataset.ly, maxY));
   // horizontal: a la derecha de la caída; si se sale de la pantalla, se corre
-  let lx=gx+30*k;
+  let lx=gx+45*k;
   const derecha=(pr.right-10-sr.left)/vz;
   // a la derecha de la caída, como en la PC; si no entra, se arrima un poco
-  if(lx+bb.width*k>derecha) lx=Math.max(gx+12*k, derecha-bb.width*k);
+  if(lx+bb.width*k>derecha) lx=Math.max(gx+27*k, derecha-bb.width*k);
   ponerFlecha(gf, lx, ly, k);
 }
 // en el celular, al entrar a los atentados se agranda hasta que entren del
@@ -1441,7 +1441,7 @@ function drawPlot(items){
   if(golpeX!==null){
     const tope77 = cntY[1977] ? axisY-6-Math.ceil(cntY[1977]/perRowY[1977])*CELL : axisY-40;
     const puntaY = tope77-26;
-    const lx = golpeX+46, ly = Math.max(26, tope77-118);
+    const lx = golpeX+61, ly = Math.max(26, tope77-118);
     const gf=document.createElementNS(NS,"g");
     gf.setAttribute("class","flecha");
     gf.dataset.gx=golpeX; gf.dataset.py=puntaY;
@@ -2382,7 +2382,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.71";
+const VERSION="v1.72";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
