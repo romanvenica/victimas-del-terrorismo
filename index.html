@@ -1365,7 +1365,7 @@ function drawPlot(items){
       if(h!==sobre){ sobre=h; svg.style.cursor=h?"pointer":""; if(h) showTipHecho(e,h); else hideTip(); }
       else if(h) moveTip(e);
     });
-    svg.addEventListener("mouseleave",function(){ sobre=null; hideTip(); });
+    svg.addEventListener("mouseleave",function(){ if(sobre){ sobre=null; hideTip(); } });   // solo cierra su propio cartel (no el de la estrella)
     svg.addEventListener("click",function(e){ if(dragMoved) return; const h=enPunto(e); if(h) openHecho(h); });
   }
 
@@ -1409,7 +1409,9 @@ function drawPlot(items){
     const gf=document.createElementNS(NS,"g");
     gf.setAttribute("class","golpe");
     gf.setAttribute("tabindex","0");
-    const textoGolpe = "Reducción de los "+(MODO==="hechos" ? "atentados" : "asesinatos")+
+    // en el celular, al tocarla, dice corto: "Gobierno militar"
+    const textoGolpe = isMobile ? "Gobierno militar" :
+                       "Reducción de los "+(MODO==="hechos" ? "atentados" : "asesinatos")+
                        " tras la llegada de los militares al gobierno";
     gf.setAttribute("aria-label",textoGolpe);
     gf.setAttribute("transform","translate("+xg+" "+(axisY+(golpeAbajo?37:15))+")");
@@ -2382,7 +2384,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.72";
+const VERSION="v1.73";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
