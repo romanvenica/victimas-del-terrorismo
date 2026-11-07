@@ -209,6 +209,11 @@
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
   /* en la ficha de un atentado el tipo es el título y la organización va debajo */
   #lienzoHechos{position:absolute;z-index:3;pointer-events:none;display:none}
+  .flecha{pointer-events:none}
+  .flecha .flinea{fill:none;stroke:#e8e0d4;stroke-width:1.6}
+  .flecha .fpunta{fill:#e8e0d4}
+  .flecha text{fill:#e8e0d4;font-family:var(--sans);font-size:13px;font-weight:700;
+    paint-order:stroke;stroke:#14100c;stroke-width:4px;stroke-linejoin:round}
   .golpe{cursor:pointer}
   .golpe circle{fill:#1c1712;stroke:#c9bda9;stroke-width:1.1}
   .golpe path{fill:#e8e0d4}
@@ -888,7 +893,33 @@ const ZOOM_MIN=0.3, ZOOM_MAX=2.4, ZOOM_PASO=1.25;
 // tiene que poder achicar hasta ahí
 function zoomMin(){ return MODO==="hechos" ? 0.15 : ZOOM_MIN; }
 let colsHPC=null;
-let centrosX={};
+let centrosX={}, golpeXActual=null;
+// en el celular el dibujo se agranda y achica: la leyenda de la flecha se
+// compensa para leerse siempre del mismo tamaño
+function ponerFlecha(gf, lx, ly, k){
+  const gx=+gf.dataset.gx, py=+gf.dataset.py;
+  gf.dataset.lx=lx; gf.dataset.ly=ly;
+  gf.querySelector(".ftexto").setAttribute("transform","translate("+lx+" "+ly+") scale("+k+")");
+  gf.querySelector(".flinea").setAttribute("d",
+    "M"+(lx-5*k)+" "+(ly+2*k)+" Q"+(gx+4)+" "+(ly+4*k)+" "+gx+" "+(py-9));
+}
+function ajustarFlecha(){
+  const gf=plot.querySelector(".flecha"); if(!gf) return;
+  const k = lienzo() ? Math.min(2, Math.max(0.5, 1/vz)) : 1;
+  ponerFlecha(gf, +gf.dataset.lx, +gf.dataset.ly, k);
+}
+// celular: la leyenda va pegada a la derecha de la flecha y por debajo de
+// los botones de la lupa, para que no los tape
+function ubicarFlechaCel(){
+  const gf=plot.querySelector(".flecha"), svg=plot.querySelector("svg");
+  if(!gf || !svg) return;
+  const k=Math.min(2, Math.max(0.5, 1/vz));
+  const pr=plot.getBoundingClientRect(), sr=svg.getBoundingClientRect();
+  const gx=+gf.dataset.gx, py=+gf.dataset.py;
+  const minY=(pr.top+170-sr.top)/vz;             // debajo de la lupa
+  const ly=Math.min(py-56*k, Math.max(+gf.dataset.ly, minY));
+  ponerFlecha(gf, gx+14*k, ly, k);
+}
 // en el celular, al entrar a los atentados se agranda hasta que entren del
 // '73 al '77 a lo ancho, con el eje abajo: las columnas quedan altas e imponentes
 function encuadreInicialHechosCel(){
@@ -898,8 +929,12 @@ function encuadreInicialHechosCel(){
   const ancho=(b-a)*1.25;                      // de borde a borde de esas columnas
   vz=Math.min(VZ_MAX, Math.max(vzMinimo(), hueco().w/ancho));
   aplicarVZ();
-  plot.scrollLeft=Math.max(0, (a+b)/2*vz - plot.clientWidth/2);
+  // la caída del '76 al '77 queda a un poco menos de la mitad, para que la
+  // leyenda de la flecha entre a la derecha
+  const foco = golpeXActual!==null ? golpeXActual : (a+b)/2;
+  plot.scrollLeft=Math.max(0, foco*vz - plot.clientWidth*0.56);
   plot.scrollTop=plot.scrollHeight;
+  ubicarFlechaCel();
   actualizarLupas();
   pedirHechosCel();
 }
@@ -1370,6 +1405,29 @@ function drawPlot(items){
     const caja=document.createElementNS(NS,"g");
     caja.appendChild(gf); svg.appendChild(caja);
     ejeFijos.push({el:caja, cx:xg});
+  }
+  golpeXActual=golpeX;
+
+  // atentados: flecha que señala la caída entre el '76 y el '77, con su leyenda
+  // arriba a la derecha, donde las columnas ya son bajas
+  if(modoH && golpeX!==null){
+    const tope77 = cntY[1977] ? axisY-6-Math.ceil(cntY[1977]/perRowY[1977])*CELL : axisY-40;
+    const puntaY = tope77-6;
+    const lx = golpeX+30, ly = Math.max(26, tope77-92);
+    const gf=document.createElementNS(NS,"g");
+    gf.setAttribute("class","flecha");
+    gf.dataset.gx=golpeX; gf.dataset.py=puntaY;
+    // en el celular, renglones más cortos: hay menos lugar a la derecha
+    const renglones = isMobile
+      ? ["Reducción casi total","de los ataques","terroristas luego","del gobierno militar"]
+      : ["Reducción casi total","de los ataques terroristas","luego del gobierno militar"];
+    gf.innerHTML=
+      '<path class="flinea"/>'+
+      '<path class="fpunta" d="M'+(golpeX-5)+' '+(puntaY-10)+' L'+golpeX+' '+puntaY+' L'+(golpeX+5)+' '+(puntaY-10)+'Z"/>'+
+      '<g class="ftexto"><text>'+renglones.map(function(r,i){
+        return '<tspan x="0" '+(i ? 'dy="1.25em"' : 'y="0"')+'>'+r+'</tspan>'; }).join("")+'</text></g>';
+    svg.appendChild(gf);
+    ponerFlecha(gf, lx, ly, 1);
   }
 
   if(isMobile){
@@ -1965,6 +2023,7 @@ function pedirHechosCel(){
   requestAnimationFrame(function(){ hcPedido=false; pintarHechosCel(); });
 }
 function pintarHechosCel(){
+  ajustarFlecha();
   const c=lienzoHechos();
   if(!hechosCel || MODO!=="hechos" || !document.body.contains(hechosCel.svg)){ c.style.display="none"; return; }
   const pr=plot.getBoundingClientRect(), sr=document.getElementById("stage").getBoundingClientRect();
