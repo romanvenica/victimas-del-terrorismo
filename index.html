@@ -911,8 +911,9 @@ function ponerFlecha(gf, lx, ly, k){
   let y0=abajo+4*k;
   // si la leyenda quedó más abajo que la punta, la flecha sale de su costado de arriba
   if(y0>py-12*k){ x0=izq-6*k; y0=ly+bb.y*k+8*k; }
-  const x1=gx+3, y1=py;
+  let x1=gx+3, y1=py;
   const dx=x1-x0, dy=y1-y0, L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L;
+  x1+=ux*14*k; y1+=uy*14*k;                          // la punta llega un poco más lejos
   const largo=13*k, ancho=7*k;                      // cabeza de la flecha
   const bx=x1-ux*largo, by=y1-uy*largo;
   const ln=gf.querySelector(".flinea");
@@ -2384,7 +2385,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.73";
+const VERSION="v1.74";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
