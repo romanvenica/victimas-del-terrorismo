@@ -941,12 +941,11 @@ function ubicarFlechaCel(){
   const minY=(zb+16-sr.top)/vz, maxY=py-(bb.height+bb.y)*k-14*k;
   const ly=Math.max(minY, Math.min(+gf.dataset.ly, maxY));
   // horizontal: a la derecha de la caída; si se sale de la pantalla, se corre
-  let lx=gx+30*k, y=ly;
+  let lx=gx+30*k;
   const derecha=(pr.right-10-sr.left)/vz;
-  // si no entra a la derecha de la caída, se corre a la izquierda y sube arriba
-  // de las columnas, donde hay lugar libre
-  if(lx+bb.width*k>derecha){ lx=derecha-bb.width*k; y=minY; }
-  ponerFlecha(gf, lx, y, k);
+  // a la derecha de la caída, como en la PC; si no entra, se arrima un poco
+  if(lx+bb.width*k>derecha) lx=Math.max(gx+12*k, derecha-bb.width*k);
+  ponerFlecha(gf, lx, ly, k);
 }
 // en el celular, al entrar a los atentados se agranda hasta que entren del
 // '73 al '77 a lo ancho, con el eje abajo: las columnas quedan altas e imponentes
@@ -1447,9 +1446,9 @@ function drawPlot(items){
     gf.setAttribute("class","flecha");
     gf.dataset.gx=golpeX; gf.dataset.py=puntaY;
     // en el celular, renglones más cortos: hay menos lugar a la derecha
-    const renglones = !modoH ? ["Vuelve la paz luego","del gobierno militar"]
-      : isMobile ? ["Reducción casi total","de los ataques","terroristas luego","del gobierno militar"]
-      : ["Reducción casi total","de los ataques terroristas","luego del gobierno militar"];
+    // el mismo texto en víctimas y en atentados; en el celular, renglones cortos
+    const renglones = isMobile ? ["Comienza a volver","la paz luego del","gobierno militar"]
+                               : ["Comienza a volver la paz","luego del gobierno militar"];
     gf.innerHTML=
       '<path class="flinea"/><path class="fpunta"/>'+
       '<g class="ftexto"><text>'+renglones.map(function(r,i){
@@ -1488,7 +1487,8 @@ function drawPlot(items){
       acum+=cntY[years[i]];
       if(cntY[years[i]] && acum>=total/2){ medio=years[i]; break; }
     }
-    if(medio!==null) plot.scrollLeft=Math.max(0, centerX[medio]*vz-plot.clientWidth/2);
+    if(golpeX!==null && !modoH) plot.scrollLeft=Math.max(0, golpeX*vz-plot.clientWidth*0.55);
+    else if(medio!==null) plot.scrollLeft=Math.max(0, centerX[medio]*vz-plot.clientWidth/2);
   }
 }
 
@@ -2382,7 +2382,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.70";
+const VERSION="v1.71";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
