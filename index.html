@@ -210,7 +210,10 @@
   /* en la ficha de un atentado el tipo es el título y la organización va debajo */
   #lienzoHechos{position:absolute;z-index:3;pointer-events:none;display:none}
   .flecha{pointer-events:none}
-  .flecha .flinea{fill:none;stroke:#e8e0d4;stroke-width:1.6}
+  /* la leyenda de la flecha puede asomar por arriba del dibujo (en el celular,
+     a veces es el único lugar libre) */
+  #plot svg{overflow:visible}
+  .flecha .flinea{fill:none;stroke:#e8e0d4;stroke-width:2.4;stroke-linecap:round}
   .flecha .fpunta{fill:#e8e0d4}
   .flecha text{fill:#e8e0d4;font-family:var(--sans);font-size:13px;font-weight:700;
     paint-order:stroke;stroke:#14100c;stroke-width:4px;stroke-linejoin:round}
@@ -899,26 +902,51 @@ let centrosX={}, golpeXActual=null;
 function ponerFlecha(gf, lx, ly, k){
   const gx=+gf.dataset.gx, py=+gf.dataset.py;
   gf.dataset.lx=lx; gf.dataset.ly=ly;
-  gf.querySelector(".ftexto").setAttribute("transform","translate("+lx+" "+ly+") scale("+k+")");
-  gf.querySelector(".flinea").setAttribute("d",
-    "M"+(lx-5*k)+" "+(ly+2*k)+" Q"+(gx+4)+" "+(ly+4*k)+" "+gx+" "+(py-9));
+  const tx=gf.querySelector(".ftexto");
+  tx.setAttribute("transform","translate("+lx+" "+ly+") scale("+k+")");
+  // la flecha sale de la esquina de abajo de la leyenda más cercana a la caída
+  const bb=tx.querySelector("text").getBBox();
+  const izq=lx+bb.x*k, der=lx+(bb.x+bb.width)*k, abajo=ly+(bb.y+bb.height)*k;
+  let x0=Math.min(der, Math.max(izq, gx)) + (gx<izq ? -4*k : (gx>der ? 4*k : 0));
+  let y0=abajo+4*k;
+  // si la leyenda quedó más abajo que la punta, la flecha sale de su costado de arriba
+  if(y0>py-12*k){ x0=izq-6*k; y0=ly+bb.y*k+8*k; }
+  const x1=gx+3, y1=py;
+  const dx=x1-x0, dy=y1-y0, L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L;
+  const largo=13*k, ancho=7*k;                      // cabeza de la flecha
+  const bx=x1-ux*largo, by=y1-uy*largo;
+  const ln=gf.querySelector(".flinea");
+  ln.setAttribute("d","M"+x0+" "+y0+" L"+bx+" "+by);
+  ln.style.strokeWidth=(2.4*k)+"px";
+  gf.querySelector(".fpunta").setAttribute("d","M"+x1+" "+y1+" L"+(bx-uy*ancho)+" "+(by+ux*ancho)+
+    " L"+(bx+uy*ancho)+" "+(by-ux*ancho)+"Z");
 }
 function ajustarFlecha(){
   const gf=plot.querySelector(".flecha"); if(!gf) return;
   const k = lienzo() ? Math.min(2, Math.max(0.5, 1/vz)) : 1;
   ponerFlecha(gf, +gf.dataset.lx, +gf.dataset.ly, k);
 }
-// celular: la leyenda va pegada a la derecha de la flecha y por debajo de
-// los botones de la lupa, para que no los tape
+// celular: la leyenda queda dentro de la pantalla, por debajo de los botones
+// de la lupa y a la derecha de la caída si entra; si no, se corre a la izquierda
 function ubicarFlechaCel(){
   const gf=plot.querySelector(".flecha"), svg=plot.querySelector("svg");
-  if(!gf || !svg) return;
+  if(!gf || !svg || !lienzo()) return;
   const k=Math.min(2, Math.max(0.5, 1/vz));
   const pr=plot.getBoundingClientRect(), sr=svg.getBoundingClientRect();
+  const zb=document.getElementById("zoombar").getBoundingClientRect().bottom;
   const gx=+gf.dataset.gx, py=+gf.dataset.py;
-  const minY=(pr.top+170-sr.top)/vz;             // debajo de la lupa
-  const ly=Math.min(py-56*k, Math.max(+gf.dataset.ly, minY));
-  ponerFlecha(gf, gx+14*k, ly, k);
+  const bb=gf.querySelector(".ftexto text").getBBox();
+  const anchoPx=bb.width*k*vz, altoPx=bb.height*k*vz;
+  // vertical: la primera línea debajo de la lupa, y la leyenda arriba de la punta si se puede
+  const minY=(zb+16-sr.top)/vz, maxY=py-(bb.height+bb.y)*k-14*k;
+  const ly=Math.max(minY, Math.min(+gf.dataset.ly, maxY));
+  // horizontal: a la derecha de la caída; si se sale de la pantalla, se corre
+  let lx=gx+30*k, y=ly;
+  const derecha=(pr.right-10-sr.left)/vz;
+  // si no entra a la derecha de la caída, se corre a la izquierda y sube arriba
+  // de las columnas, donde hay lugar libre
+  if(lx+bb.width*k>derecha){ lx=derecha-bb.width*k; y=minY; }
+  ponerFlecha(gf, lx, y, k);
 }
 // en el celular, al entrar a los atentados se agranda hasta que entren del
 // '73 al '77 a lo ancho, con el eje abajo: las columnas quedan altas e imponentes
@@ -1408,22 +1436,22 @@ function drawPlot(items){
   }
   golpeXActual=golpeX;
 
-  // atentados: flecha que señala la caída entre el '76 y el '77, con su leyenda
-  // arriba a la derecha, donde las columnas ya son bajas
-  if(modoH && golpeX!==null){
+  // flecha que señala la caída entre el '76 y el '77, con su leyenda arriba a
+  // la derecha, donde las columnas ya son bajas. La punta queda a distancia:
+  // se entiende adónde apunta sin pisar el gráfico
+  if(golpeX!==null){
     const tope77 = cntY[1977] ? axisY-6-Math.ceil(cntY[1977]/perRowY[1977])*CELL : axisY-40;
-    const puntaY = tope77-6;
-    const lx = golpeX+30, ly = Math.max(26, tope77-92);
+    const puntaY = tope77-26;
+    const lx = golpeX+46, ly = Math.max(26, tope77-118);
     const gf=document.createElementNS(NS,"g");
     gf.setAttribute("class","flecha");
     gf.dataset.gx=golpeX; gf.dataset.py=puntaY;
     // en el celular, renglones más cortos: hay menos lugar a la derecha
-    const renglones = isMobile
-      ? ["Reducción casi total","de los ataques","terroristas luego","del gobierno militar"]
+    const renglones = !modoH ? ["Vuelve la paz luego","del gobierno militar"]
+      : isMobile ? ["Reducción casi total","de los ataques","terroristas luego","del gobierno militar"]
       : ["Reducción casi total","de los ataques terroristas","luego del gobierno militar"];
     gf.innerHTML=
-      '<path class="flinea"/>'+
-      '<path class="fpunta" d="M'+(golpeX-5)+' '+(puntaY-10)+' L'+golpeX+' '+puntaY+' L'+(golpeX+5)+' '+(puntaY-10)+'Z"/>'+
+      '<path class="flinea"/><path class="fpunta"/>'+
       '<g class="ftexto"><text>'+renglones.map(function(r,i){
         return '<tspan x="0" '+(i ? 'dy="1.25em"' : 'y="0"')+'>'+r+'</tspan>'; }).join("")+'</text></g>';
     svg.appendChild(gf);
@@ -1437,6 +1465,7 @@ function drawPlot(items){
     lien.appendChild(svg); wrap.appendChild(lien); plot.appendChild(wrap);
     lienW=W; lienH=H;
     vz=vzDefecto();          // cada vez que cambian los datos se reencuadra solo
+    setTimeout(ubicarFlechaCel,0);
     // el cartel de la flecha no se achica con el dibujo: se ve igual que en la PC
     const est=svg.querySelector(".golpe");
     if(est && vz<1){
@@ -2353,7 +2382,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.69";
+const VERSION="v1.70";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
