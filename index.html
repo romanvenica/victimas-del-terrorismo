@@ -257,15 +257,16 @@
   #tip{position:fixed;pointer-events:none;z-index:20;background:#000;border:1px solid var(--line);
     color:var(--ink);font-family:var(--sans);font-size:16px;padding:11px 15px;border-radius:5px;
     white-space:nowrap;display:none;transform:translate(-50%,-118%)}
-  /* cartel de entrada: se va al tocar en cualquier lado */
+  /* pantalla de entrada: tapa todo el sitio hasta tocar "Ir al sitio" */
   .intro{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
-    background:rgba(6,4,2,.55);cursor:pointer;padding:24px;
+    background:var(--bg);padding:24px;overflow-y:auto;
     transition:opacity .45s ease,visibility .45s ease}
   .intro.oculto{opacity:0;visibility:hidden}
-  /* cartel flotante: el gráfico se sigue viendo detrás, apenas velado */
-  .introcaja{max-width:640px;text-align:center;background:rgba(20,16,12,.94);
-    border:1px solid var(--line);border-radius:6px;padding:36px 40px;
-    box-shadow:0 18px 60px rgba(0,0,0,.6)}
+  .introcaja{max-width:640px;text-align:center;padding:36px 40px}
+  .irsitio{margin-top:34px;background:var(--hi);color:#fff;border:none;border-radius:3px;cursor:pointer;
+    font-family:var(--serif);font-size:19px;padding:13px 36px}
+  .irsitio:hover{filter:brightness(1.08)}
+  .irsitio:focus-visible{outline:2px solid #fff;outline-offset:3px}
   .introfotos{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:30px}
   .introfotos img{width:78px;height:78px;object-fit:cover;border-radius:4px;
     border:1px solid var(--line);display:block}
@@ -279,14 +280,12 @@
     padding:7px 11px;opacity:0;pointer-events:none;transition:opacity .12s
   }
   .introfoto:hover::after{opacity:1}
-  .intro p{font-family:var(--serif);color:var(--ink);font-size:20px;line-height:1.6;margin:0 0 15px}
-  .intro p:last-child{margin-bottom:0}
-  .intro p.chica{font-size:17px;color:#c9bda9}
+  .intro p{font-family:var(--serif);color:var(--ink);font-size:20px;line-height:1.6;margin:0}
   @media (max-width:760px){
     .introcaja{padding:26px 20px}
     .introfotos img{width:56px;height:56px}
     .intro p{font-size:17px}
-    .intro p.chica{font-size:15px}
+    .irsitio{font-size:17px;padding:12px 30px}
   }
   .fabf{display:none}
   /* ===================== MÓVIL ===================== */
@@ -403,8 +402,7 @@
   <div class="introcaja">
     <div class="introfotos" id="introfotos"></div>
     <p>En memoria de las miles de víctimas del terrorismo izquierdista de los años 70</p>
-    <p class="chica">Por los militares y policías que dieron su vida por defender a nuestro país.</p>
-    <p class="chica">Y por aquellos que todavía están en prisión.</p>
+    <button type="button" class="irsitio" id="irSitio">Ir al sitio</button>
   </div>
 </div>
 <header>
@@ -1947,7 +1945,7 @@ function pintarIntroFotos(){
 }
 const intro=document.getElementById("intro");
 function cerrarIntro(){ intro.classList.add("oculto"); }
-intro.addEventListener("click",cerrarIntro);
+document.getElementById("irSitio").addEventListener("click",cerrarIntro);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") cerrarIntro(); });
 
 
@@ -2324,7 +2322,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.78";
+const VERSION="v1.79";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
