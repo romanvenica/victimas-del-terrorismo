@@ -401,6 +401,7 @@
     .modoscel button.on{background:#2a221a}
   }
   #tip .tlug{display:block;font-size:13px;color:#c9bda9;margin-top:3px}
+  #tip .torg{display:block;font-size:15px;color:var(--ink);margin-top:3px}
   .card .htexto p{font-family:var(--serif);font-size:16px;line-height:1.6;margin:0 0 12px;white-space:pre-line}
   .card h3.hsec{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--dim);margin:18px 0 8px}
@@ -2294,8 +2295,9 @@ function lugarHecho(h){
 function showTipHecho(e,h){
   const ico='<svg class="tico" viewBox="0 0 16 16" fill="'+HCOLOR[h.t]+'">'+iconHecho(h.t)+'</svg>';
   const lug=lugarHecho(h);
-  tip.innerHTML='<div class="trow"><div><span class="tcat">'+esc(HNOMBRE[h.t])+' · '+esc(fechaHecho(h))+'</span>'+
-    '<span class="tnom">'+esc(h.o.join(" · "))+'</span>'+
+  // lo primero que se lee es qué pasó; debajo, quién fue. Sin la fecha
+  tip.innerHTML='<div class="trow"><div><span class="tnom">'+esc(HNOMBRE[h.t])+'</span>'+
+    '<span class="torg">'+esc(h.o.join(" · "))+'</span>'+
     (lug ? '<span class="tlug">'+esc(lug)+'</span>' : '')+'</div>'+ico+'</div>';
   tip.style.display="block"; moveTip(e);
 }
@@ -2363,7 +2365,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.85";
+const VERSION="v1.86";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 

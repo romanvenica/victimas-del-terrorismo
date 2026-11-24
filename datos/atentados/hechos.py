@@ -51,7 +51,7 @@ ORGS = [
     (r"Comando Argentino Revolucionario", "CARP", False),
     (r"\bCRP\b|Comandos? de la Resistencia Peronista", "Resistencia Peronista", False),
     (r"Nueva Era", "Movimiento Nueva Era", False),
-    (r"marxista|izquierda|subversiv", "Marxista no identificada", False),
+    (r"marxista|izquierda|subversiv", "Grupo marxista no identificado", False),
     (r"[Nn]o [Ii]dentificad", "No identificada", False),
 ]
 
@@ -61,8 +61,8 @@ def organizaciones(cab):
     for pat, nombre, der in ORGS:
         if re.search(pat, cab) and nombre not in encontradas:
             # «Organización marxista» y «no identificada» no se suman a una con nombre
-            if nombre in ("Marxista no identificada", "No identificada") and encontradas: continue
-            if nombre == "No identificada" and "Marxista no identificada" in encontradas: continue
+            if nombre in ("Grupo marxista no identificado", "No identificada") and encontradas: continue
+            if nombre == "No identificada" and "Grupo marxista no identificado" in encontradas: continue
             encontradas.append(nombre); derecha = derecha or der
     if not encontradas: return None, None
     return encontradas, derecha
