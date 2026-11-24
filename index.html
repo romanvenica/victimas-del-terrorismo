@@ -906,7 +906,7 @@ function encuadreInicialHechosCel(){
   const ancho=Math.max(1,(b-a))*1.18;          // de borde a borde de esas columnas
   vz=Math.min(VZ_MAX, Math.max(vzMinimo(), hueco().w/ancho));
   aplicarVZ();
-  plot.scrollLeft=Math.max(0, centrosX[y]*vz - plot.clientWidth/2);
+  plot.scrollLeft=Math.max(0, centrosX[y]*vz - plot.clientWidth*0.62);
   plot.scrollTop=plot.scrollHeight;
   actualizarLupas();
   pedirHechosCel();
@@ -1415,7 +1415,7 @@ function drawPlot(items){
       acum+=cntY[years[i]];
       if(cntY[years[i]] && acum>=total/2){ medio=years[i]; break; }
     }
-    if(golpeX!==null && !modoH) plot.scrollLeft=Math.max(0, golpeX*vz-plot.clientWidth*0.55);
+    if(golpeX!==null && !modoH) plot.scrollLeft=Math.max(0, golpeX*vz-plot.clientWidth*0.70);
     else if(medio!==null) plot.scrollLeft=Math.max(0, centerX[medio]*vz-plot.clientWidth/2);
   }
 }
@@ -2309,7 +2309,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.75";
+const VERSION="v1.76";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
