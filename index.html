@@ -263,8 +263,8 @@
     transition:opacity .45s ease,visibility .45s ease}
   .intro.oculto{opacity:0;visibility:hidden}
   /* cartel rectangular encima del muro: los chicos, el texto y el botón */
-  .introcaja{position:relative;z-index:1;max-width:640px;text-align:center;padding:36px 40px;
-    background:rgba(20,16,12,.96);border:1px solid #4d4435;border-radius:4px;
+  .introcaja{position:relative;z-index:1;max-width:800px;text-align:center;padding:40px 44px;
+    background:rgba(20,16,12,.96);border-radius:4px;
     box-shadow:0 18px 60px rgba(0,0,0,.7)}
   /* detrás, el muro de retratos quieto y velado: más oscuro en el centro,
      donde van las fotos de los chicos, el texto y el botón */
@@ -284,7 +284,7 @@
   .irsitio:hover{filter:brightness(1.08)}
   .irsitio:focus-visible{outline:2px solid #fff;outline-offset:3px}
   .introfotos{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:30px}
-  .introfotos img{width:78px;height:78px;object-fit:cover;border-radius:4px;
+  .introfotos img{width:110px;height:110px;object-fit:cover;border-radius:4px;
     border:1px solid var(--line);display:block}
   /* el nombre aparece flotando al pasar el mouse, como en el gráfico */
   .introfoto{position:relative;display:inline-block;line-height:0;cursor:pointer}
@@ -303,7 +303,8 @@
     .introfondo figcaption{font-size:10.5px;margin-top:5px}
     .introfondo figcaption span{font-size:10px}
     .introfondo::after{background:rgba(20,16,12,.8)}
-    .introfotos img{width:56px;height:56px}
+    .introfotos{max-width:300px;margin-left:auto;margin-right:auto}
+    .introfotos img{width:86px;height:86px}
     .intro p{font-size:17px}
     .irsitio{font-size:17px;padding:12px 30px}
   }
@@ -1971,7 +1972,9 @@ function pintarIntroFotos(){
     sp.className="introfoto";
     sp.setAttribute("data-nom",nom);
     sp.title="Ver la ficha de "+nom;
-    sp.innerHTML='<img src="'+fotoThumb(d)+'" alt="'+esc(nom)+'">';
+    // la versión de 320px: a este tamaño la miniatura se vería borrosa
+    sp.innerHTML='<img src="'+fotoCuadro(d)+'" alt="'+esc(nom)+'" '+
+      'onerror="this.onerror=null;this.src=\''+fotoThumb(d)+'\'">';
     // tocar a un chico abre su ficha en vez de solo cerrar el cartel
     sp.addEventListener("click",function(e){
       e.stopPropagation();
@@ -2360,7 +2363,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.84";
+const VERSION="v1.85";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
