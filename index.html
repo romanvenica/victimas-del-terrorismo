@@ -262,7 +262,23 @@
     background:var(--bg);padding:24px;overflow-y:auto;
     transition:opacity .45s ease,visibility .45s ease}
   .intro.oculto{opacity:0;visibility:hidden}
-  .introcaja{max-width:640px;text-align:center;padding:36px 40px}
+  .introcaja{position:relative;z-index:1;max-width:640px;text-align:center;padding:36px 40px}
+  /* sombra oscura y suave detrás de los chicos, el texto y el botón */
+  .introcaja::before{content:"";position:absolute;inset:-70px -110px;z-index:-1;pointer-events:none;
+    background:radial-gradient(closest-side,rgba(20,16,12,.97) 0%,rgba(20,16,12,.95) 62%,rgba(20,16,12,0) 100%)}
+  /* detrás, el muro de retratos quieto y velado: más oscuro en el centro,
+     donde van las fotos de los chicos, el texto y el botón */
+  .introfondo{position:fixed;inset:0;overflow:hidden;pointer-events:none;
+    display:grid;gap:20px 16px;padding:14px;align-content:start;
+    grid-template-columns:repeat(auto-fill,minmax(132px,1fr))}
+  .introfondo::after{content:"";position:fixed;inset:0;
+    background:radial-gradient(ellipse 60% 55% at 50% 50%,rgba(20,16,12,.9) 0%,rgba(20,16,12,.8) 55%,rgba(20,16,12,.6) 100%)}
+  .introfondo figure{margin:0}
+  .introfondo img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:4px}
+  .introfondo figcaption{font-family:var(--serif);font-size:13px;line-height:1.3;color:var(--ink);
+    margin-top:8px;text-align:center}
+  .introfondo figcaption span{display:block;font-family:var(--sans);font-size:11.5px;font-weight:600;
+    color:var(--dim);margin-top:2px}
   .irsitio{margin-top:34px;background:var(--hi);color:#fff;border:none;border-radius:3px;cursor:pointer;
     font-family:var(--serif);font-size:19px;padding:13px 36px}
   .irsitio:hover{filter:brightness(1.08)}
@@ -283,6 +299,11 @@
   .intro p{font-family:var(--serif);color:var(--ink);font-size:20px;line-height:1.6;margin:0}
   @media (max-width:760px){
     .introcaja{padding:26px 20px}
+    .introfondo{grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:12px 8px;padding:8px}
+    .introfondo figcaption{font-size:10.5px;margin-top:5px}
+    .introfondo figcaption span{font-size:10px}
+    .introcaja::before{inset:-60px -40px}
+    .introfondo::after{background:rgba(20,16,12,.8)}
     .introfotos img{width:56px;height:56px}
     .intro p{font-size:17px}
     .irsitio{font-size:17px;padding:12px 30px}
@@ -399,6 +420,7 @@
 </head>
 <body>
 <div class="intro" id="intro">
+  <div class="introfondo" id="introfondo" aria-hidden="true"></div>
   <div class="introcaja">
     <div class="introfotos" id="introfotos"></div>
     <p>En memoria de las miles de víctimas del terrorismo izquierdista de los años 70</p>
@@ -1920,8 +1942,25 @@ function init(){
   actualizarLupas();
   render();
 }
+// el fondo de la entrada: todas las víctimas con foto, como en el muro. Se
+// repiten si hace falta para llenar pantallas grandes
+function pintarIntroFondo(){
+  const fondo=document.getElementById("introfondo");
+  if(!fondo || !DATA.length || !FOTOS.size) return;
+  const con=DATA.filter(tieneFoto).sort(function(a,b){ return a.n<b.n ? -1 : 1; });
+  if(!con.length) return;
+  const cols=Math.ceil(window.innerWidth/120), filas=Math.ceil(window.innerHeight/170)+1;
+  let html="";
+  for(let i=0;i<Math.max(con.length, cols*filas);i++){
+    const d=con[i%con.length];
+    html+='<figure><img src="'+fotoThumb(d)+'" alt=""><figcaption>'+esc(nombreNormal(d.n))+
+          '<span>'+d.y+'</span></figcaption></figure>';
+  }
+  fondo.innerHTML=html;
+}
 // arriba del cartel de entrada van los chicos de los que tenemos foto
 function pintarIntroFotos(){
+  pintarIntroFondo();
   const caja=document.getElementById("introfotos");
   if(!caja || !DATA.length || !FOTOS.size) return;
   const chicos=DATA.filter(function(d){ return d.nino && tieneFoto(d); })
@@ -2322,7 +2361,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.79";
+const VERSION="v1.80";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
