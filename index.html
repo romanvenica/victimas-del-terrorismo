@@ -921,7 +921,7 @@ function anioMasCargado(){
 // en el celular se ve de un golpe de ojo la forma del gráfico: entran a lo
 // ancho todos los años con muchos casos (al menos un 10% del año máximo) y
 // hasta el '79, para que se vea la caída después del '76
-function encuadreGeneralCel(){
+function encuadreGeneralCel(extra){
   const lien=lienzo(); if(!lien) return;
   const ys=Object.keys(conteosY).filter(function(y){ return centrosX[y]!==undefined && /^\d{4}$/.test(y); })
                 .map(Number).sort(function(p,q){ return p-q; });
@@ -935,14 +935,15 @@ function encuadreGeneralCel(){
   const n=ys.filter(function(y){ return y>=desde && y<=hasta; }).length;
   const paso=n>1 ? (b-a)/(n-1) : hueco().w;
   const ancho=(b-a)+paso*1.1;                  // de borde a borde de esas columnas
-  vz=Math.min(VZ_MAX, Math.max(vzMinimo(), hueco().w/ancho));
+  vz=Math.min(VZ_MAX, Math.max(vzMinimo(), hueco().w/ancho*(extra||1)));
   aplicarVZ();
   plot.scrollLeft=Math.max(0, (a+b)/2*vz - plot.clientWidth/2);
   plot.scrollTop=plot.scrollHeight;
   actualizarLupas();
   pedirHechosCel();
 }
-function encuadreInicialHechosCel(){ encuadreGeneralCel(); }
+// los atentados arrancan con un paso de lupa más que las víctimas
+function encuadreInicialHechosCel(){ encuadreGeneralCel(1.25); }
 // en la PC los atentados se dibujan hasta 1,5 veces más anchos que la pantalla
 // (columnas más anchas, íconos más grandes, ninguna cortada arriba) y al
 // entrar se ven centrados en el año con más atentados, con el eje a la vista
@@ -2365,7 +2366,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.86";
+const VERSION="v1.87";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
