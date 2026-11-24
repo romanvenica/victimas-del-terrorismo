@@ -930,6 +930,7 @@ const ANCHO_H_PC=1.5;
 function encuadreInicialHechos(){
   if(MODO!=="hechos") return;
   if(window.matchMedia("(max-width:760px)").matches){ encuadreInicialHechosCel(); return; }
+  fijarZoom(zoom*ZOOM_PASO);          // en la PC arranca con un toque de lupa
   const y=anioMasCargado();
   if(y!==null && centrosX[y]!==undefined) plot.scrollLeft=Math.max(0, centrosX[y]-plot.clientWidth/2);
   plot.scrollTop=plot.scrollHeight;
@@ -2323,7 +2324,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.77";
+const VERSION="v1.78";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
