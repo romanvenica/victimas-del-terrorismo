@@ -1158,7 +1158,8 @@ function drawPlot(items){
           if(t.alto>altoLibre) continue;          // no entra ni con los íconos al mínimo
           if(!elegido || v>=elegido.v-0.01) elegido={p:t, c:c, v:v};
         }
-        if(elegido){ maxCols=elegido.c; plan=elegido.p; }
+        // un ícono menos de ancho que el elegido: columnas más angostas y altas
+        if(elegido){ maxCols=Math.max(3,elegido.c-1); plan=ajustar(); window.colsHCel=maxCols; }
         else { maxCols=MAXCOLS_H; plan=ajustar(); }
       }
     } else {
@@ -2359,7 +2360,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.83";
+const VERSION="v1.84";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
