@@ -262,10 +262,10 @@
     background:var(--bg);padding:24px;overflow-y:auto;
     transition:opacity .45s ease,visibility .45s ease}
   .intro.oculto{opacity:0;visibility:hidden}
-  .introcaja{position:relative;z-index:1;max-width:640px;text-align:center;padding:36px 40px}
-  /* sombra oscura y suave detrás de los chicos, el texto y el botón */
-  .introcaja::before{content:"";position:absolute;inset:-70px -110px;z-index:-1;pointer-events:none;
-    background:radial-gradient(closest-side,rgba(20,16,12,.97) 0%,rgba(20,16,12,.95) 62%,rgba(20,16,12,0) 100%)}
+  /* cartel rectangular encima del muro: los chicos, el texto y el botón */
+  .introcaja{position:relative;z-index:1;max-width:640px;text-align:center;padding:36px 40px;
+    background:rgba(20,16,12,.96);border:1px solid #4d4435;border-radius:4px;
+    box-shadow:0 18px 60px rgba(0,0,0,.7)}
   /* detrás, el muro de retratos quieto y velado: más oscuro en el centro,
      donde van las fotos de los chicos, el texto y el botón */
   .introfondo{position:fixed;inset:0;overflow:hidden;pointer-events:none;
@@ -302,7 +302,6 @@
     .introfondo{grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:12px 8px;padding:8px}
     .introfondo figcaption{font-size:10.5px;margin-top:5px}
     .introfondo figcaption span{font-size:10px}
-    .introcaja::before{inset:-60px -40px}
     .introfondo::after{background:rgba(20,16,12,.8)}
     .introfotos img{width:56px;height:56px}
     .intro p{font-size:17px}
@@ -2360,7 +2359,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.81";
+const VERSION="v1.82";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
