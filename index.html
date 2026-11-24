@@ -567,7 +567,10 @@ function personColor(t){
 }
 
 // ---- íconos (viewBox 0..16), devuelven markup interno ----
+// víctimas como cruces del color de su categoría (false: vuelven las figuras)
+const CRUCES_VICTIMAS=true;
 function iconPaths(t){
+  if(CRUCES_VICTIMAS) return '<path d="M6.3 0.6H9.7V15.4H6.3Z M2.3 4.1H13.7V7.3H2.3Z"/>';
   switch(t){
     case "ffaa": // casco militar
       return '<path d="M8 2.4c-3.4 0-5.6 2.4-5.6 6.1H13.6C13.6 4.8 11.4 2.4 8 2.4Z"/>'+
@@ -895,22 +898,31 @@ function anioMasCargado(){
   Object.keys(conteosY).forEach(function(y){ if(mejor===null || conteosY[y]>conteosY[mejor]) mejor=y; });
   return mejor;
 }
-// en el celular, al entrar a los atentados se agranda hasta que entren unos
-// siete años a lo ancho, con el año más cargado en el medio y el eje abajo
-function encuadreInicialHechosCel(){
+// en el celular se ve de un golpe de ojo la forma del gráfico: entran a lo
+// ancho todos los años con muchos casos (al menos un 10% del año máximo) y
+// hasta el '79, para que se vea la caída después del '76
+function encuadreGeneralCel(){
   const lien=lienzo(); if(!lien) return;
-  const y=anioMasCargado(); if(y===null) return;
-  const xs=Object.keys(centrosX).map(function(k){ return centrosX[k]; }).sort(function(p,q){ return p-q; });
-  const i=xs.indexOf(centrosX[y]);
-  const a=xs[Math.max(0,i-3)], b=xs[Math.min(xs.length-1,i+3)];
-  const ancho=Math.max(1,(b-a))*1.18;          // de borde a borde de esas columnas
+  const ys=Object.keys(conteosY).filter(function(y){ return centrosX[y]!==undefined && /^\d{4}$/.test(y); })
+                .map(Number).sort(function(p,q){ return p-q; });
+  if(!ys.length) return;
+  let max=0; ys.forEach(function(y){ max=Math.max(max,conteosY[y]); });
+  const imp=ys.filter(function(y){ return conteosY[y]>=max*0.1; });
+  const desde=imp[0];
+  let hasta=imp[imp.length-1];
+  ys.forEach(function(y){ if(y>hasta && y<=1979) hasta=y; });
+  const a=centrosX[desde], b=centrosX[hasta];
+  const n=ys.filter(function(y){ return y>=desde && y<=hasta; }).length;
+  const paso=n>1 ? (b-a)/(n-1) : hueco().w;
+  const ancho=(b-a)+paso*1.1;                  // de borde a borde de esas columnas
   vz=Math.min(VZ_MAX, Math.max(vzMinimo(), hueco().w/ancho));
   aplicarVZ();
-  plot.scrollLeft=Math.max(0, centrosX[y]*vz - plot.clientWidth*0.62);
+  plot.scrollLeft=Math.max(0, (a+b)/2*vz - plot.clientWidth/2);
   plot.scrollTop=plot.scrollHeight;
   actualizarLupas();
   pedirHechosCel();
 }
+function encuadreInicialHechosCel(){ encuadreGeneralCel(); }
 // en la PC los atentados se dibujan hasta 1,5 veces más anchos que la pantalla
 // (columnas más anchas, íconos más grandes, ninguna cortada arriba) y al
 // entrar se ven centrados en el año con más atentados, con el eje a la vista
@@ -1044,7 +1056,9 @@ function drawPlot(items){
   plot.innerHTML="";
   const modoH = MODO==="hechos";
 
-  let maxCols = modoH ? MAXCOLS_H : MAXCOLS;
+  // en el celular las víctimas van de a 4 por fila: columnas más altas y angostas,
+  // para que al ver todos los años de un vistazo el gráfico llene la pantalla
+  let maxCols = modoH ? MAXCOLS_H : (window.matchMedia("(max-width:760px)").matches ? 4 : MAXCOLS);
   let sMinH = 0;   // con columnas más angostas los íconos pueden bajar a 3 px
   if(items.length===0){
     const e=document.createElement("div"); e.className="empty";
@@ -1415,7 +1429,7 @@ function drawPlot(items){
       acum+=cntY[years[i]];
       if(cntY[years[i]] && acum>=total/2){ medio=years[i]; break; }
     }
-    if(golpeX!==null && !modoH) plot.scrollLeft=Math.max(0, golpeX*vz-plot.clientWidth*0.70);
+    if(!modoH) encuadreGeneralCel();
     else if(medio!==null) plot.scrollLeft=Math.max(0, centerX[medio]*vz-plot.clientWidth/2);
   }
 }
@@ -2309,7 +2323,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.76";
+const VERSION="v1.77";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
