@@ -940,15 +940,11 @@ function encuadreGeneralCel(extra){
   vz=Math.min(VZ_MAX, Math.max(vzMinimo(), hueco().w/ancho*(extra||1)));
   aplicarVZ();
   // la leyenda de los períodos se lee siempre del mismo tamaño y entra en la pantalla
-  const ley=lien.querySelector(".pleyenda");
-  if(ley){
-    const gx=+ley.dataset.gx, gy=+ley.dataset.gy;
-    const poner=function(k){ ley.setAttribute("transform","translate("+gx+" "+gy+") scale("+k+") translate("+(-gx)+" "+(-gy)+")"); };
-    const kl=Math.min(1/vz,1.1); poner(kl);
-    const r=ley.getBoundingClientRect(), borde=plot.getBoundingClientRect().right-6;
-    const xg=lien.getBoundingClientRect().left+gx*vz;
-    if(r.right>borde && r.right>xg) poner(kl*Math.max(.6,(borde-xg)/(r.right-xg)));
-  }
+  const kl=Math.min(1/vz,1.1);
+  lien.querySelectorAll(".pleyenda text").forEach(function(t){
+    const x=+t.dataset.x, y=+t.dataset.y;
+    t.setAttribute("transform","translate("+x+" "+y+") scale("+kl+") translate("+(-x)+" "+(-y)+")");
+  });
   plot.scrollLeft=Math.max(0, (a+b)/2*vz - plot.clientWidth/2);
   plot.scrollTop=plot.scrollHeight;
   actualizarLupas();
@@ -1250,10 +1246,16 @@ function drawPlot(items){
       : Math.max(plot.clientHeight-40-filaPeriodos, contentH);
   // la estrella del '76-'77 va entre las etiquetas de los años; si las
   // columnas son tan angostas que no entra, baja a una fila propia
-  let golpeX=null, golpeAbajo=false;
+  // líneas del golpe (24/3/1976) y de la vuelta de la democracia (10/12/1983):
+  // cada una cae adentro de la columna de su año, en el lugar de su fecha
+  const enFecha=function(y,dia,diasAnio){
+    const w=Math.max(colWY[y]||0, CELL);
+    return centerX[y]-w/2 + w*(dia/diasAnio);
+  };
+  let golpeX=null, finX=null, golpeAbajo=false;
   if(centerX[1976]!==undefined && centerX[1977]!==undefined){
-    const ancho76=Math.max(colWY[1976], CELL);
-    golpeX=centerX[1976]-ancho76/2 + ancho76*(83/366);
+    golpeX=enFecha(1976,83,366);
+    if(centerX[1983]!==undefined) finX=enFecha(1983,343,365);
   }
   const H=axisY+34+(golpeAbajo?18:0)+(golpeX!==null?22:0);
   baseY=axisY;                  // el eje es el piso del dibujo, se usa al pellizcar
@@ -1301,28 +1303,28 @@ function drawPlot(items){
   // fondos: democracia antes del 24 de marzo del '76 y Proceso después (la línea
   // pasa por adentro de la columna del '76)
   if(golpeX!==null){
-    // todo el fondo, de punta a punta: celeste antes del golpe, verde después
+    // todo el fondo, de punta a punta: celeste en democracia, verde en el Proceso
+    const fin = finX!==null ? finX : W+4000;
     const fondos=document.createElementNS(NS,"g"); fondos.setAttribute("class","periodos");
-    [[-4000,golpeX,"pdemo"],[golpeX,W+4000,"pproc"]].forEach(function(p){
+    [[-4000,golpeX,"pdemo"],[golpeX,fin,"pproc"],[fin,W+4000,"pdemo"]].forEach(function(p){
       const r=document.createElementNS(NS,"rect");
       r.setAttribute("class",p[2]); r.setAttribute("x",p[0]); r.setAttribute("y",-4000);
       r.setAttribute("width",Math.max(0,p[1]-p[0])); r.setAttribute("height",H+8000);
       fondos.appendChild(r);
     });
     svg.insertBefore(fondos, svg.firstChild);
-    // debajo, a cada lado de la estrella: de qué período es cada lado
+    // debajo de los años, cada nombre en el medio de su tramo
     const ley=document.createElementNS(NS,"g"); ley.setAttribute("class","pleyenda");
     const yl=axisY+(golpeAbajo?54:42);
-    ley.dataset.gx=golpeX; ley.dataset.gy=yl;
-    [["end",-14,["Democracia"]],["start",14,["Proceso"]]].forEach(function(p){
+    const ini=centerX[years[0]]-colWY[years[0]]/2, ult=years[years.length-1];
+    const finDibujo=centerX[ult]+colWY[ult]/2;
+    const tramos=[[(ini+golpeX)/2,"middle","Democracia"],[(golpeX+Math.min(fin,finDibujo))/2,"middle","Proceso"]];
+    if(finX!==null) tramos.push([finX+14,"start","Democracia"]);
+    tramos.forEach(function(p){
       const t=document.createElementNS(NS,"text");
-      t.setAttribute("x",golpeX+p[1]); t.setAttribute("y",yl); t.setAttribute("text-anchor",p[0]);
-      p[2].forEach(function(r,i){
-        const ts=document.createElementNS(NS,"tspan");
-        ts.setAttribute("x",golpeX+p[1]); if(i) ts.setAttribute("dy","1.25em");
-        ts.textContent=r; t.appendChild(ts);
-      });
-      ley.appendChild(t);
+      t.setAttribute("x",p[0]); t.setAttribute("y",yl); t.setAttribute("text-anchor",p[1]);
+      t.dataset.x=p[0]; t.dataset.y=yl;
+      t.textContent=p[2]; ley.appendChild(t);
     });
     svg.appendChild(ley);
   }
@@ -1433,12 +1435,13 @@ function drawPlot(items){
   });
 
   golpeXActual=golpeX;
-  if(golpeX!==null){
+  [golpeX,finX].forEach(function(x){
+    if(x===null) return;
     const l=document.createElementNS(NS,"line");
-    l.setAttribute("class","pcorte"); l.setAttribute("x1",golpeX); l.setAttribute("x2",golpeX);
+    l.setAttribute("class","pcorte"); l.setAttribute("x1",x); l.setAttribute("x2",x);
     l.setAttribute("y1",-4000); l.setAttribute("y2",H+4000);   // de arriba hasta abajo de todo
     svg.appendChild(l);
-  }
+  });
 
   if(isMobile){
     // en celular el dibujo queda congelado dentro de un lienzo y el zoom solo lo estira
@@ -2377,7 +2380,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.93";
+const VERSION="v1.94";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
