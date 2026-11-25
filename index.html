@@ -209,11 +209,14 @@
   .card .nm{font-family:var(--serif);font-size:23px;line-height:1.2;margin:0}
   /* en la ficha de un atentado el tipo es el título y la organización va debajo */
   #lienzoHechos{position:absolute;z-index:3;pointer-events:none;display:none}
+  /* los fondos de democracia y Proceso llegan hasta los bordes del recuadro */
+  #plot svg{overflow:visible}
   /* fondos de los dos períodos alrededor del golpe del '76 */
-  .periodos .pproc{fill:rgba(225,200,160,.15)}
+  .periodos .pdemo{fill:rgba(130,200,245,.11)}
+  .periodos .pproc{fill:rgba(120,205,130,.10)}
   .pcorte{stroke:#e8e0d4;stroke-width:1.2;stroke-dasharray:3 4;opacity:.7;pointer-events:none}
-  .pleyenda text{fill:#a99d8b;font-family:var(--sans);font-size:11px;font-weight:700;
-    letter-spacing:.1em;text-transform:uppercase}
+  .pleyenda text{fill:#c9bda9;font-family:var(--sans);font-size:12px;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase}
   .golpe{cursor:pointer}
   .golpe circle{fill:#1c1712;stroke:#c9bda9;stroke-width:1.1}
   .golpe path{fill:#e8e0d4}
@@ -1245,9 +1248,11 @@ function drawPlot(items){
   // en celular el alto se calcula contra el hueco real de la caja (sin el padding),
   // asi cuando el dibujo entra no queda un scroll vertical hacia arriba sobre el vacio
   const disponible=plot.clientHeight-20;
+  // lugar para la estrella y la fila de Democracia / Proceso debajo de los años
+  const filaPeriodos=(centerX[1976]!==undefined && centerX[1977]!==undefined) ? 40 : 0;
   const axisY=isMobile
-      ? Math.max(disponible-34, contentH)
-      : Math.max(plot.clientHeight-40, contentH);
+      ? Math.max(disponible-34-filaPeriodos, contentH)
+      : Math.max(plot.clientHeight-40-filaPeriodos, contentH);
   // la estrella del '76-'77 va entre las etiquetas de los años; si las
   // columnas son tan angostas que no entra, baja a una fila propia
   let golpeX=null, golpeAbajo=false;
@@ -1256,7 +1261,7 @@ function drawPlot(items){
     golpeX=centerX[1976]-ancho76/2 + ancho76*(83/366);
     golpeAbajo = true;     // la estrella va debajo del '76: la línea pasa por la columna
   }
-  const H=axisY+34+(golpeAbajo?18:0)+(golpeX!==null?(isMobile?48:34):0);
+  const H=axisY+34+(golpeAbajo?18:0)+(golpeX!==null?22:0);
   baseY=axisY;                  // el eje es el piso del dibujo, se usa al pellizcar
   centrosX=centerX;             // para centrar el encuadre en un año
   conteosY=cntY;
@@ -1299,15 +1304,15 @@ function drawPlot(items){
   base.setAttribute("stroke","#2e2822");
   g.appendChild(base); svg.appendChild(g);
 
-  // fondo del Proceso de Reorganización Nacional: desde el 24 de marzo del '76
-  // (la línea pasa por adentro de su columna) hasta el '83
-  if(golpeX!==null && centerX[1973]!==undefined && centerX[1983]!==undefined){
-    const x0=centerX[1973]-colWY[1973]/2-GAP/2, x1=centerX[1983]+colWY[1983]/2+GAP/2;
+  // fondos: democracia antes del 24 de marzo del '76 y Proceso después (la línea
+  // pasa por adentro de la columna del '76)
+  if(golpeX!==null){
+    // todo el fondo, de punta a punta: celeste antes del golpe, verde después
     const fondos=document.createElementNS(NS,"g"); fondos.setAttribute("class","periodos");
-    [[golpeX,x1,"pproc"]].forEach(function(p){
+    [[-4000,golpeX,"pdemo"],[golpeX,W+4000,"pproc"]].forEach(function(p){
       const r=document.createElementNS(NS,"rect");
-      r.setAttribute("class",p[2]); r.setAttribute("x",p[0]); r.setAttribute("y",0);
-      r.setAttribute("width",Math.max(0,p[1]-p[0])); r.setAttribute("height",axisY);
+      r.setAttribute("class",p[2]); r.setAttribute("x",p[0]); r.setAttribute("y",-4000);
+      r.setAttribute("width",Math.max(0,p[1]-p[0])); r.setAttribute("height",H+8000);
       fondos.appendChild(r);
     });
     svg.insertBefore(fondos, svg.firstChild);
@@ -1315,7 +1320,7 @@ function drawPlot(items){
     const ley=document.createElementNS(NS,"g"); ley.setAttribute("class","pleyenda");
     const yl=axisY+(golpeAbajo?54:42);
     ley.dataset.gx=golpeX; ley.dataset.gy=yl;
-    [["start",12,isMobile ? ["Proceso de","Reorganización","Nacional →"] : ["Proceso de","Reorganización Nacional →"]]].forEach(function(p){
+    [["end",-14,["Democracia"]],["start",14,["Proceso"]]].forEach(function(p){
       const t=document.createElementNS(NS,"text");
       t.setAttribute("x",golpeX+p[1]); t.setAttribute("y",yl); t.setAttribute("text-anchor",p[0]);
       p[2].forEach(function(r,i){
@@ -2416,7 +2421,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.91";
+const VERSION="v1.92";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
