@@ -217,11 +217,6 @@
   .pcorte{stroke:#e8e0d4;stroke-width:1.2;stroke-dasharray:3 4;opacity:.7;pointer-events:none}
   .pleyenda text{fill:#c9bda9;font-family:var(--sans);font-size:12px;font-weight:700;
     letter-spacing:.14em;text-transform:uppercase}
-  .golpe{cursor:pointer}
-  .golpe circle{fill:#1c1712;stroke:#c9bda9;stroke-width:1.1}
-  .golpe path{fill:#e8e0d4}
-  .golpe:hover circle,.golpe:focus circle{fill:#3a2f24}
-  .golpe:focus{outline:none}
   .card .htipotit{font-family:var(--serif);font-size:25px;line-height:1.2;margin:0 0 4px}
   .card .horgsub{font-size:14px;font-weight:600;color:#c9bda9;line-height:1.35}
   /* display:inline-block a mano: la regla general pone los svg en bloque y la
@@ -1248,8 +1243,8 @@ function drawPlot(items){
   // en celular el alto se calcula contra el hueco real de la caja (sin el padding),
   // asi cuando el dibujo entra no queda un scroll vertical hacia arriba sobre el vacio
   const disponible=plot.clientHeight-20;
-  // lugar para la estrella y la fila de Democracia / Proceso debajo de los años
-  const filaPeriodos=(centerX[1976]!==undefined && centerX[1977]!==undefined) ? 40 : 0;
+  // lugar para la fila de Democracia / Proceso debajo de los años
+  const filaPeriodos=(centerX[1976]!==undefined && centerX[1977]!==undefined) ? 22 : 0;
   const axisY=isMobile
       ? Math.max(disponible-34-filaPeriodos, contentH)
       : Math.max(plot.clientHeight-40-filaPeriodos, contentH);
@@ -1259,7 +1254,6 @@ function drawPlot(items){
   if(centerX[1976]!==undefined && centerX[1977]!==undefined){
     const ancho76=Math.max(colWY[1976], CELL);
     golpeX=centerX[1976]-ancho76/2 + ancho76*(83/366);
-    golpeAbajo = true;     // la estrella va debajo del '76: la línea pasa por la columna
   }
   const H=axisY+34+(golpeAbajo?18:0)+(golpeX!==null?22:0);
   baseY=axisY;                  // el eje es el piso del dibujo, se usa al pellizcar
@@ -1438,43 +1432,11 @@ function drawPlot(items){
     });
   });
 
-  // estrella en la fila de los años, entre el '76 y el '77 (sin pisar la línea): el gobierno militar
-  if(golpeX!==null){
-    const xg=golpeX;
-    const gf=document.createElementNS(NS,"g");
-    gf.setAttribute("class","golpe");
-    gf.setAttribute("tabindex","0");
-    // en el celular, al tocarla, dice corto: "Gobierno militar"
-    const textoGolpe = isMobile ? "Gobierno militar" :
-                       "Reducción de los "+(MODO==="hechos" ? "atentados" : "asesinatos")+
-                       " tras la llegada de los militares al gobierno";
-    gf.setAttribute("aria-label",textoGolpe);
-    gf.setAttribute("transform","translate("+xg+" "+(axisY+(golpeAbajo?37:15))+")");
-    gf.innerHTML='<circle r="6.2"/><path transform="scale(.68)" d="M0 -5.6L1.32 -1.8L5.33 -1.73L2.13 0.69L3.29 4.53L0 2.24L-3.29 4.53L-2.13 0.69L-5.33 -1.73L-1.32 -1.8Z"/>';
-    const mostrar=function(e){
-      tip.innerHTML='<span class="tnom">'+textoGolpe+'</span>';
-      tip.style.display="block"; moveTip(e);
-    };
-    gf.addEventListener("mouseenter",mostrar);
-    gf.addEventListener("mousemove",function(e){ moveTip(e); });
-    // en el celular no hay mouse: tocarla muestra el cartel un rato (el
-    // teléfono avisa enseguida que "el dedo se fue": eso no lo cierra)
-    gf.addEventListener("mouseleave",function(){ if(Date.now()-(gf._toque||0)>2500) hideTip(); });
-    gf.addEventListener("click",function(e){
-      e.stopPropagation(); mostrar(e); gf._toque=Date.now();
-      clearTimeout(gf._t); gf._t=setTimeout(hideTip,2500);
-    });
-    // va dentro de otro grupo: al pellizcar en el celular el eje usa ese
-    // de afuera para no agrandarse, y la estrella conserva su lugar
-    const caja=document.createElementNS(NS,"g");
-    caja.appendChild(gf); svg.appendChild(caja);
-    ejeFijos.push({el:caja, cx:xg});
-  }
   golpeXActual=golpeX;
   if(golpeX!==null){
     const l=document.createElementNS(NS,"line");
     l.setAttribute("class","pcorte"); l.setAttribute("x1",golpeX); l.setAttribute("x2",golpeX);
-    l.setAttribute("y1",0); l.setAttribute("y2",axisY);
+    l.setAttribute("y1",-4000); l.setAttribute("y2",H+4000);   // de arriba hasta abajo de todo
     svg.appendChild(l);
   }
 
@@ -1485,12 +1447,6 @@ function drawPlot(items){
     lien.appendChild(svg); wrap.appendChild(lien); plot.appendChild(wrap);
     lienW=W; lienH=H;
     vz=vzDefecto();          // cada vez que cambian los datos se reencuadra solo
-    // la estrella no se achica con el dibujo: se ve igual que en la PC
-    const est=svg.querySelector(".golpe");
-    if(est && vz<1){
-      const k=Math.min(1/vz,3);
-      est.setAttribute("transform", est.getAttribute("transform")+" scale("+k+")");
-    }
     aplicarVZ(); actualizarLupas();
   } else {
     plot.appendChild(svg);
@@ -2421,7 +2377,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.92";
+const VERSION="v1.93";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
