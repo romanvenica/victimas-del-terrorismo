@@ -559,10 +559,10 @@ const FILTERS = [
   // va primero y como lista desplegable: son 19 opciones y abajo de todo no se veia.
   // Ordenadas de mayor a menor cantidad de victimas, "Sin dato" siempre al final.
   {key:"p", title:"Provincia", tipo:"lista", opts:[["Buenos Aires","Buenos Aires"],["Capital Federal","Capital Federal"],["Córdoba","Córdoba"],["Tucumán","Tucumán"],["Santa Fe","Santa Fe"],["Formosa","Formosa"],["Mendoza","Mendoza"],["Jujuy","Jujuy"],["Chaco","Chaco"],["Salta","Salta"],["Corrientes","Corrientes"],["Entre Ríos","Entre Ríos"],["San Juan","San Juan"],["Chubut","Chubut"],["San Luis","San Luis"],["Catamarca","Catamarca"],["Misiones","Misiones"],["Sgo. del Estero","Sgo. del Estero"]]},
-  {key:"cat", title:"Categoría", opts:[["civil","Civiles"],["ffaa","Fuerzas Armadas"],["policia","Policía / Seguridad"]]},
+  // los niños van aparte, como en el gráfico: cada víctima está en una sola categoría
+  {key:"cat", title:"Categoría", opts:[["nino","Niños"],["civil","Civiles"],["policia","Policía / Seguridad"],["ffaa","Fuerzas Armadas"]]},
   {key:"rama", title:"Fuerza", opts:[["Ejército","Ejército"],["Armada","Armada"],["Fuerza Aérea","Fuerza Aérea"],["Gendarmería / Prefectura","Gendarmería / Prefectura"],["Policía Federal","Policía Federal"],["Policía provincial","Policía provincial"],["Servicio Penitenciario","Servicio Penitenciario"]]},
   {key:"s",  title:"Género", opts:[["M","Hombres"],["F","Mujeres"]]},
-  {key:"nino",title:"Edad", opts:[["si","Niños (menores de 18)"],["no","Adultos"]]},
   {key:"tg", title:"Tipo de hecho", opts:[["Explosivo","Explosivo / bomba"],["Arma de fuego","Arma de fuego"],["Enfrentamiento","Enfrentamiento"],["Otro","Otro"]]},
 ];
 
@@ -615,8 +615,7 @@ function iconPaths(t){
 }
 
 function matchVal(d,key,val){
-  if(key==="nino") return val==="si" ? d.nino===true : d.nino!==true;
-  if(key==="cat") return categoriaGrupo(d)===val;
+  if(key==="cat") return personType(d)===val;
   return d[key]===val;
 }
 function passes(d){
@@ -2366,7 +2365,7 @@ function openHecho(h, dejarPanel){
 }
 
 // sube de número en cada cambio: si el navegador muestra uno viejo, quedó cacheado
-const VERSION="v1.89";
+const VERSION="v1.90";
 console.log("%cVíctimas del terrorismo · "+VERSION,
             "font-size:14px;font-weight:bold;color:#e8e0d4;background:#241d16;padding:3px 8px;border-radius:3px");
 
